@@ -1,26 +1,148 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+@theme {
+  --radius: 0.6rem;
+
+  /* Typography */
+  --font-sans: var(--font-inter);
+  --font-heading: var(--font-jakarta);
+  --font-accent: var(--font-playfair);
+}
+
+/* === Bhutan-Inspired Vibrant Color Palette === */
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Primary Colors - Prayer Flag & Sunset Inspired */
+  --color-primary: #E85D04;
+  --color-primary-foreground: #FAFAF9;
+
+  /* Secondary - Deep Mountain */
+  --color-secondary: #1E3A5F;
+  --color-secondary-foreground: #FAFAF9;
+
+  /* Accent - Golden Temple */
+  --color-accent: #D4A017;
+  --color-accent-foreground: #1C1917;
+
+  /* Premium Red Palette */
+  --color-prayer-red: #C41E3A;
+  --color-prayer-red-light: #E63946;
+  --color-prayer-red-dark: #9D1B2F;
+  --color-crimson: #DC143C;
+  --color-royal-red: #B22222;
+  --color-luxury-red: #8B0000;
+  --color-monastery-red: #B91C1C;
+  --color-monastery-red-dark: #7F1D1D;
+
+  /* Prayer Flag Colors */
+  --color-prayer-blue: #2563EB;
+  --color-prayer-green: #16A34A;
+  --color-prayer-yellow: #EAB308;
+
+  /* Premium Red Gradients */
+  --gradient-premium-red: linear-gradient(135deg, #C41E3A 0%, #8B0000 50%, #B22222 100%);
+  --gradient-crimson-gold: linear-gradient(135deg, #DC143C 0%, #D4A017 100%);
+  --gradient-red-sunset: linear-gradient(135deg, #E63946 0%, #C41E3A 50%, #8B0000 100%);
+
+  /* Neutral Base */
+  --color-background: #FAFAF9;
+  --color-foreground: #1C1917;
+  --color-card: #FFFFFF;
+  --color-card-foreground: #1C1917;
+  --color-popover: #FFFFFF;
+  --color-popover-foreground: #1C1917;
+
+  /* Muted */
+  --color-muted: #F5F5F4;
+  --color-muted-foreground: #78716C;
+
+  /* Destructive */
+  --color-destructive: #DC2626;
+  --color-destructive-foreground: #FAFAF9;
+
+  /* Border & Input */
+  --color-border: #E7E5E4;
+  --color-input: #E7E5E4;
+  --color-ring: #E85D04;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+.dark {
+  /* Primary Colors - Vibrant in Dark Mode */
+  --color-primary: #F97316;
+  --color-primary-foreground: #1C1917;
+
+  --color-secondary: #334155;
+  --color-secondary-foreground: #FAFAF9;
+
+  /* Accent - Glowing Gold */
+  --color-accent: #FBBF24;
+  --color-accent-foreground: #1C1917;
+
+  /* Premium Red Palette - Enhanced for Dark */
+  --color-prayer-red: #E63946;
+  --color-prayer-red-light: #F4756A;
+  --color-prayer-red-dark: #C41E3A;
+  --color-crimson: #F0565D;
+  --color-royal-red: #DC143C;
+  --color-luxury-red: #B91C1C;
+  --color-monastery-red: #F87171;
+  --color-monastery-red-dark: #DC2626;
+
+  /* Prayer Flag Colors - Enhanced for Dark */
+  --color-prayer-blue: #3B82F6;
+  --color-prayer-green: #22C55E;
+  --color-prayer-yellow: #F59E0B;
+
+  /* Premium Red Gradients - Enhanced for Dark */
+  --gradient-premium-red: linear-gradient(135deg, #E63946 0%, #B91C1C 50%, #DC143C 100%);
+  --gradient-crimson-gold: linear-gradient(135deg, #F0565D 0%, #FBBF24 100%);
+  --gradient-red-sunset: linear-gradient(135deg, #F4756A 0%, #E63946 50%, #B91C1C 100%);
+
+  /* Neutral Base */
+  --color-background: #1C1917;
+  --color-foreground: #FAFAF9;
+  --color-card: #292524;
+  --color-card-foreground: #FAFAF9;
+  --color-popover: #292524;
+  --color-popover-foreground: #FAFAF9;
+
+  /* Muted */
+  --color-muted: #292524;
+  --color-muted-foreground: #A8A29E;
+
+  /* Destructive */
+  --color-destructive: #EF4444;
+  --color-destructive-foreground: #FAFAF9;
+
+  /* Border & Input */
+  --color-border: rgba(255, 255, 255, 0.15);
+  --color-input: rgba(255, 255, 255, 0.2);
+  --color-ring: #F97316;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
   }
-}
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  .container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
+  @media (min-width: 768px) {
+    .container {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container {
+      padding-left: 3rem;
+      padding-right: 3rem;
+    }
+  }
 }

@@ -1,0 +1,76 @@
+'use client';
+
+import { useRef, useState, useEffect } from 'react';
+import { motion, useMotionTemplate, useMotionValue, useSpring } from 'framer-motion';
+
+interface MagneticButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  children: React.ReactNode;
+  variant?: 'default' | 'outline' | 'ghost';
+  className?: string;
+}
+
+export function MagneticButton({
+  children,
+  variant = 'default',
+  className = '',
+  ...props
+}: MagneticButtonProps) {
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [isHovered, setIsHovered] = useState(false);
+
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  const springConfig = { damping: 25, stiffness: 300 };
+  const springX = useSpring(mouseX, springConfig);
+  const springY = useSpring(mouseY, springConfig);
+
+  const backgroundImage = useMotionTemplate`
+    radial-gradient(
+      ${isHovered ? '150px' : '0px'} circle at ${springX}px ${springY}px,
+      ${variant === 'outline' ? 'var(--primary)' : 'rgba(255,255,255,0.15)'},
+      transparent
+    )
+  `;
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (!buttonRef.current) return;
+
+    const rect = buttonRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    mouseX.set(x);
+    mouseY.set(y);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    mouseX.set(0);
+    mouseY.set(0);
+  };
+
+  const baseStyles = 'relative overflow-hidden rounded-lg px-8 py-4 font-medium transition-all duration-300';
+  const variantStyles = {
+    default: 'bg-primary text-primary-foreground hover:scale-105',
+    outline: 'border-2 border-primary text-primary hover:bg-primary/10',
+    ghost: 'hover:bg-muted text-foreground',
+  };
+
+  return (
+    <motion.button
+      ref={buttonRef}
+      className={`${baseStyles} ${variantStyles[variant]} ${className}`}
+      style={{ backgroundImage }}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={handleMouseLeave}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+      {...props}
+    >
+      <span className="relative z-10 inline-flex items-center gap-2 whitespace-nowrap">{children}</span>
+    </motion.button>
+  );
+}
