@@ -214,7 +214,7 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
                   <h2 className="font-heading text-2xl md:text-3xl font-bold mb-8">Tour Highlights</h2>
                   <div className="grid gap-4 sm:grid-cols-2">
                     {tour.highlights.map((highlight, i) => (
-                      <div key={i} className="flex items-start gap-4 p-4 rounded-xl shadow-lg shadow-lgorder hover:border-prayer-red transition-colors">
+                      <div key={i} className="flex items-start gap-4 p-4 rounded-xl shadow-lg shadow-lgorder hover:shadow-2xl transition-colors">
                         <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl" style={{ background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)' }}>
                           <Star className="h-4 w-4 text-white" />
                         </div>

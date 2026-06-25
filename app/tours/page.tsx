@@ -252,7 +252,7 @@ export default function ToursPage() {
                             onChange={() =>
                               toggleFilter(difficulty, setSelectedDifficulty, selectedDifficulty)
                             }
-                            className="h-5 w-5 rounded border-input accent-prayer-red"
+                            className="h-5 w-5 rounded border-transparent accent-prayer-red"
                             style={{ accentColor: 'var(--prayer-red)' }}
                           />
                           <span className="capitalize">{difficulty}</span>
@@ -282,7 +282,7 @@ export default function ToursPage() {
                                 selectedDuration
                               )
                             }
-                            className="h-5 w-5 rounded border-input"
+                            className="h-5 w-5 rounded border-transparent"
                             style={{ accentColor: 'var(--prayer-red)' }}
                           />
                           {duration.label}
@@ -312,7 +312,7 @@ export default function ToursPage() {
                                 selectedPriceRange
                               )
                             }
-                            className="h-5 w-5 rounded border-input"
+                            className="h-5 w-5 rounded border-transparent"
                             style={{ accentColor: 'var(--prayer-red)' }}
                           />
                           {range.label}

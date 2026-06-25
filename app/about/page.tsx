@@ -256,7 +256,7 @@ export default function AboutPage() {
                 {values.map((value, i) => {
                   const Icon = value.icon;
                   return (
-                    <Card key={i} className="shadow-lg hover:border-prayer-red transition-all duration-300 group hover:shadow-xl hover:-translate-y-2">
+                    <Card key={i} className="shadow-lg hover:shadow-2xl transition-all duration-300 group hover:shadow-xl hover:-translate-y-2">
                       <CardContent className="p-8 text-center">
                         <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br shadow-lg group-hover:scale-110 transition-transform duration-300" style={{ background: `linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)` }}>
                           <Icon className="h-10 w-10 text-white" />
@@ -332,7 +332,7 @@ export default function AboutPage() {
                 {whyBhutan.map((item, i) => {
                   const Icon = item.icon;
                   return (
-                    <Card key={i} className="shadow-lg hover:border-prayer-red transition-all duration-300 group hover:shadow-xl hover:-translate-y-1">
+                    <Card key={i} className="shadow-lg hover:shadow-2xl transition-all duration-300 group hover:shadow-xl hover:-translate-y-1">
                       <CardContent className="p-8">
                         <div className="flex items-start gap-6">
                           <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br shadow-lg" style={{ background: `linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)` }}>
