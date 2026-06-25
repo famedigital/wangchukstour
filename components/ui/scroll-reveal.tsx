@@ -51,7 +51,7 @@ export function ScrollReveal({
       transition={{
         duration,
         delay,
-        ease: [0.25, 0.1, 0.25, 1],
+        ease: 'easeOut',
       }}
       className={className}
     >
@@ -94,14 +94,13 @@ export function StaggerChildren({
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
+    hidden: {
+      opacity: 0,
+      y: 30
+    },
     visible: {
       opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.5,
-        ease: [0.25, 0.1, 0.25, 1],
-      },
+      y: 0
     },
   };
 
@@ -115,7 +114,11 @@ export function StaggerChildren({
     >
       {Array.isArray(children)
         ? children.map((child, index) => (
-            <motion.div key={index} variants={itemVariants}>
+            <motion.div
+              key={index}
+              variants={itemVariants}
+              transition={{ duration: 0.5, ease: 'easeOut' }}
+            >
               {child}
             </motion.div>
           ))
