@@ -1,19 +1,20 @@
 'use client';
 
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState } from 'react';
 import { motion, useMotionTemplate, useMotionValue, useSpring } from 'framer-motion';
 
-interface MagneticButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface MagneticButtonProps {
   children: React.ReactNode;
   variant?: 'default' | 'outline' | 'ghost';
   className?: string;
+  style?: React.CSSProperties;
 }
 
 export function MagneticButton({
   children,
   variant = 'default',
   className = '',
-  ...props
+  style,
 }: MagneticButtonProps) {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [isHovered, setIsHovered] = useState(false);
@@ -61,14 +62,13 @@ export function MagneticButton({
     <motion.button
       ref={buttonRef}
       className={`${baseStyles} ${variantStyles[variant]} ${className}`}
-      style={{ backgroundImage }}
+      style={{ backgroundImage, ...style }}
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={handleMouseLeave}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-      {...props}
     >
       <span className="relative z-10 inline-flex items-center gap-2 whitespace-nowrap">{children}</span>
     </motion.button>
