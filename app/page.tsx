@@ -533,8 +533,8 @@ export default function HomePage() {
                 <MagneticButton
                   variant="outline"
                   style={{
-                    borderColor: '#DC143C',
-                    color: '#DC143C',
+                    borderColor: '#FFFFFF',
+                    color: '#FFFFFF',
                     borderWidth: '2px'
                   }}
                 >
