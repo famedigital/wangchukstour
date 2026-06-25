@@ -33,7 +33,7 @@ export function Navigation() {
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
       (isHomepage && !scrolled)
         ? 'bg-transparent'
-        : 'bg-background/95 backdrop-blur-md shadow-lg border-b'
+        : 'bg-background/95 backdrop-blur-md shadow-lg'
     }`}>
       <div className="container flex h-20 items-center justify-between">
         {/* Logo */}
@@ -95,7 +95,7 @@ export function Navigation() {
           mobileMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
-        <div className="border-t bg-background/95 backdrop-blur-md">
+        <div className="bg-background/95 backdrop-blur-md shadow-lg">
           <div className="space-y-1 px-6 py-6">
             {navLinks.map((link) => (
               <Link

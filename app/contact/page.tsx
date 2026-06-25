@@ -114,14 +114,14 @@ export default function ContactPage() {
         </section>
 
         {/* Contact Info Cards */}
-        <section className="py-16 md:py-24 border-b">
+        <section className="py-16 md:py-24 shadow-lg">
           <div className="container">
             <StaggerChildren>
               <div className="grid gap-8 md:grid-cols-3 max-w-4xl mx-auto">
                 {contactInfo.map((info, i) => {
                   const Icon = info.icon;
                   return (
-                    <Card key={i} className="border-2 text-center hover:shadow-xl transition-all duration-300 group hover:-translate-y-2">
+                    <Card key={i} className="shadow-lg text-center hover:shadow-xl transition-all duration-300 group hover:-translate-y-2">
                       <CardContent className="p-8">
                         <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl shadow-lg group-hover:scale-110 transition-transform duration-300" style={{ background: info.color }}>
                           <Icon className="h-10 w-10 text-white" />
@@ -154,7 +154,7 @@ export default function ContactPage() {
               <ScrollReveal direction="right">
                 <div>
                   <h2 className="font-heading text-2xl md:text-3xl font-bold mb-8">Send Us a Message</h2>
-                  <Card className="border-2 shadow-lg">
+                  <Card className="shadow-lg shadow-lg">
                     <CardContent className="p-8">
                       <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="grid gap-6 sm:grid-cols-2">
@@ -167,7 +167,7 @@ export default function ContactPage() {
                               id="firstName"
                               name="firstName"
                               required
-                              className="w-full rounded-xl border-2 bg-background px-5 py-3 outline-none focus:border-prayer-red focus:ring-2 focus:ring-prayer-red/20 transition-all"
+                              className="w-full rounded-xl shadow-lg bg-background px-5 py-3 outline-none focus:border-prayer-red focus:ring-2 focus:ring-prayer-red/20 transition-all"
                               placeholder="Your first name"
                             />
                           </div>
@@ -180,7 +180,7 @@ export default function ContactPage() {
                               id="lastName"
                               name="lastName"
                               required
-                              className="w-full rounded-xl border-2 bg-background px-5 py-3 outline-none focus:border-prayer-red focus:ring-2 focus:ring-prayer-red/20 transition-all"
+                              className="w-full rounded-xl shadow-lg bg-background px-5 py-3 outline-none focus:border-prayer-red focus:ring-2 focus:ring-prayer-red/20 transition-all"
                               placeholder="Your last name"
                             />
                           </div>
@@ -195,7 +195,7 @@ export default function ContactPage() {
                             id="email"
                             name="email"
                             required
-                            className="w-full rounded-xl border-2 bg-background px-5 py-3 outline-none focus:border-prayer-red focus:ring-2 focus:ring-prayer-red/20 transition-all"
+                            className="w-full rounded-xl shadow-lg bg-background px-5 py-3 outline-none focus:border-prayer-red focus:ring-2 focus:ring-prayer-red/20 transition-all"
                             placeholder="your.email@example.com"
                           />
                         </div>
@@ -208,7 +208,7 @@ export default function ContactPage() {
                             type="tel"
                             id="phone"
                             name="phone"
-                            className="w-full rounded-xl border-2 bg-background px-5 py-3 outline-none focus:border-prayer-red focus:ring-2 focus:ring-prayer-red/20 transition-all"
+                            className="w-full rounded-xl shadow-lg bg-background px-5 py-3 outline-none focus:border-prayer-red focus:ring-2 focus:ring-prayer-red/20 transition-all"
                             placeholder="+1 234 567 8900"
                           />
                         </div>
@@ -221,7 +221,7 @@ export default function ContactPage() {
                             id="subject"
                             name="subject"
                             required
-                            className="w-full rounded-xl border-2 bg-background px-5 py-3 outline-none focus:border-prayer-red focus:ring-2 focus:ring-prayer-red/20 transition-all"
+                            className="w-full rounded-xl shadow-lg bg-background px-5 py-3 outline-none focus:border-prayer-red focus:ring-2 focus:ring-prayer-red/20 transition-all"
                           >
                             <option value="">Select a topic</option>
                             <option value="tour-inquiry">Tour Inquiry</option>
@@ -241,7 +241,7 @@ export default function ContactPage() {
                             name="message"
                             required
                             rows={6}
-                            className="w-full rounded-xl border-2 bg-background px-5 py-3 outline-none focus:border-prayer-red focus:ring-2 focus:ring-prayer-red/20 resize-none transition-all"
+                            className="w-full rounded-xl shadow-lg bg-background px-5 py-3 outline-none focus:border-prayer-red focus:ring-2 focus:ring-prayer-red/20 resize-none transition-all"
                             placeholder="Tell us about your travel plans, questions, or feedback..."
                           />
                         </div>
@@ -271,14 +271,14 @@ export default function ContactPage() {
                   {/* Office Hours */}
                   <div>
                     <h2 className="font-heading text-2xl md:text-3xl font-bold mb-6">Office Hours</h2>
-                    <Card className="border-2">
+                    <Card className="shadow-lg">
                       <CardContent className="p-8">
                         <div className="space-y-5">
-                          <div className="flex items-center justify-between py-2 border-b border-border/50">
+                          <div className="flex items-center justify-between py-2 shadow-lg shadow-lgorder/50">
                             <span className="font-semibold text-lg">Monday - Friday</span>
                             <span className="text-muted-foreground font-medium">9:00 AM - 6:00 PM</span>
                           </div>
-                          <div className="flex items-center justify-between py-2 border-b border-border/50">
+                          <div className="flex items-center justify-between py-2 shadow-lg shadow-lgorder/50">
                             <span className="font-semibold text-lg">Saturday</span>
                             <span className="text-muted-foreground font-medium">10:00 AM - 4:00 PM</span>
                           </div>
@@ -319,15 +319,15 @@ export default function ContactPage() {
                   <div>
                     <h2 className="font-heading text-2xl md:text-3xl font-bold mb-6">Quick Links</h2>
                     <div className="space-y-3">
-                      <Link href="/tours" className="inline-flex w-full items-center justify-between rounded-xl px-5 py-4 font-medium hover:bg-muted transition-colors border-2 border-transparent hover:border-border">
+                      <Link href="/tours" className="inline-flex w-full items-center justify-between rounded-xl px-5 py-4 font-medium hover:bg-muted transition-colors shadow-lg border-transparent hover:shadow-lgorder">
                         <span>Browse Tours</span>
                         <ArrowRight className="w-5 h-5" />
                       </Link>
-                      <Link href="/about" className="inline-flex w-full items-center justify-between rounded-xl px-5 py-4 font-medium hover:bg-muted transition-colors border-2 border-transparent hover:border-border">
+                      <Link href="/about" className="inline-flex w-full items-center justify-between rounded-xl px-5 py-4 font-medium hover:bg-muted transition-colors shadow-lg border-transparent hover:shadow-lgorder">
                         <span>Learn About Us</span>
                         <ArrowRight className="w-5 h-5" />
                       </Link>
-                      <Link href="/blog" className="inline-flex w-full items-center justify-between rounded-xl px-5 py-4 font-medium hover:bg-muted transition-colors border-2 border-transparent hover:border-border">
+                      <Link href="/blog" className="inline-flex w-full items-center justify-between rounded-xl px-5 py-4 font-medium hover:bg-muted transition-colors shadow-lg border-transparent hover:shadow-lgorder">
                         <span>Read Travel Guides</span>
                         <ArrowRight className="w-5 h-5" />
                       </Link>
@@ -370,7 +370,7 @@ export default function ContactPage() {
                 </Link>
                 <Link href="mailto:info@wangchuktour.com">
                   <MagneticButton
-                    className="rounded-xl px-10 py-6 text-lg font-semibold border-2"
+                    className="rounded-xl px-10 py-6 text-lg font-semibold shadow-lg"
                     style={{
                       background: 'transparent',
                       color: '#FFFFFF',

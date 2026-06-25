@@ -161,7 +161,7 @@ export default function AboutPage() {
         </section>
 
         {/* Stats Section */}
-        <section className="relative py-16 md:py-24 border-b">
+        <section className="relative py-16 md:py-24 shadow-lg">
           <div className="container">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
               {stats.map((stat, i) => {
@@ -217,7 +217,7 @@ export default function AboutPage() {
               <StaggerChildren>
                 <div className="grid gap-6 md:gap-8 md:grid-cols-2">
                   {storyPoints.map((point, i) => (
-                    <Card key={i} className="border-2 hover:shadow-xl transition-all duration-300 group hover:-translate-y-1" style={{ borderColor: 'var(--border)' }}>
+                    <Card key={i} className="shadow-lg hover:shadow-xl transition-all duration-300 group hover:-translate-y-1" style={{ borderColor: 'var(--border)' }}>
                       <CardContent className="p-8">
                         <Badge
                           className="mb-4 px-4 py-2 text-sm font-bold border-0"
@@ -256,7 +256,7 @@ export default function AboutPage() {
                 {values.map((value, i) => {
                   const Icon = value.icon;
                   return (
-                    <Card key={i} className="border-2 hover:border-prayer-red transition-all duration-300 group hover:shadow-xl hover:-translate-y-2">
+                    <Card key={i} className="shadow-lg hover:border-prayer-red transition-all duration-300 group hover:shadow-xl hover:-translate-y-2">
                       <CardContent className="p-8 text-center">
                         <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br shadow-lg group-hover:scale-110 transition-transform duration-300" style={{ background: `linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)` }}>
                           <Icon className="h-10 w-10 text-white" />
@@ -287,7 +287,7 @@ export default function AboutPage() {
             <StaggerChildren>
               <div className="grid gap-8 md:grid-cols-3 max-w-5xl mx-auto">
                 {team.map((member, i) => (
-                  <Card key={i} className="border-2 text-center overflow-hidden hover:shadow-xl transition-all duration-300 group hover:-translate-y-2" style={{ borderColor: 'var(--border)' }}>
+                  <Card key={i} className="shadow-lg text-center overflow-hidden hover:shadow-xl transition-all duration-300 group hover:-translate-y-2" style={{ borderColor: 'var(--border)' }}>
                     <div className="h-64 bg-gradient-to-br flex items-center justify-center relative overflow-hidden" style={{ background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)' }}>
                       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.1)_0%,_transparent_70%)]" />
                       <Users className="h-24 w-24 text-white/30 relative z-10" />
@@ -332,7 +332,7 @@ export default function AboutPage() {
                 {whyBhutan.map((item, i) => {
                   const Icon = item.icon;
                   return (
-                    <Card key={i} className="border-2 hover:border-prayer-red transition-all duration-300 group hover:shadow-xl hover:-translate-y-1">
+                    <Card key={i} className="shadow-lg hover:border-prayer-red transition-all duration-300 group hover:shadow-xl hover:-translate-y-1">
                       <CardContent className="p-8">
                         <div className="flex items-start gap-6">
                           <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br shadow-lg" style={{ background: `linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)` }}>
@@ -383,7 +383,7 @@ export default function AboutPage() {
                 </Link>
                 <Link href="/tours">
                   <MagneticButton
-                    className="rounded-xl px-10 py-6 text-lg font-semibold border-2"
+                    className="rounded-xl px-10 py-6 text-lg font-semibold shadow-lg"
                     style={{
                       background: 'transparent',
                       color: '#FFFFFF',

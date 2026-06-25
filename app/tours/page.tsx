@@ -169,7 +169,7 @@ export default function ToursPage() {
                     placeholder="Search tours by destination, activity, or keyword..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full rounded-2xl border-2 bg-background px-6 py-4 pl-14 pr-12 text-lg outline-none focus:border-prayer-red focus:ring-2 focus:ring-prayer-red/20 transition-all shadow-lg"
+                    className="w-full rounded-2xl shadow-lg bg-background px-6 py-4 pl-14 pr-12 text-lg outline-none focus:border-prayer-red focus:ring-2 focus:ring-prayer-red/20 transition-all shadow-lg"
                   />
                   <Compass className="absolute left-5 top-1/2 h-6 w-6 -translate-y-1/2 text-muted-foreground" />
                   {searchQuery && (
@@ -353,7 +353,7 @@ export default function ToursPage() {
                   <StaggerChildren>
                     <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-3">
                       {filteredTours.map((tour, index) => (
-                        <Card key={tour.id} className="group overflow-hidden border-2 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
+                        <Card key={tour.id} className="group overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
                           <div className="relative h-64 overflow-hidden">
                             <img
                               src={tour.hero_image}
@@ -506,7 +506,7 @@ export default function ToursPage() {
                   </Link>
                   <Link href="/contact">
                     <MagneticButton
-                      className="rounded-xl px-10 py-6 text-lg font-semibold border-2"
+                      className="rounded-xl px-10 py-6 text-lg font-semibold shadow-lg"
                       variant="outline"
                     >
                       Contact Us
