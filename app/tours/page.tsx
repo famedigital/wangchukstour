@@ -4,9 +4,10 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Navigation } from '@/components/public/Navigation';
 import { Footer } from '@/components/public/Footer';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { MagneticButton } from '@/components/ui/magnetic-button';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { ScrollReveal, StaggerChildren } from '@/components/ui/scroll-reveal';
 import { mockTours } from '@/lib/mock-data/tours';
 import {
   Clock,
@@ -21,6 +22,8 @@ import {
   Camera,
   Heart,
   Compass,
+  ArrowRight,
+  Mail,
 } from 'lucide-react';
 
 const categories = [
@@ -124,73 +127,92 @@ export default function ToursPage() {
   const categoryIcon = categories.find((c) => c.value === selectedCategory)?.icon || Compass;
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-background">
       <Navigation />
 
       <main className="flex-1">
-        {/* Hero Section */}
-        <section className="relative bg-gradient-to-br from-primary/10 via-background to-secondary/10 py-20">
-          <div className="container px-4">
-            <div className="mx-auto max-w-3xl text-center">
-              <Badge className="mb-4">Our Tours</Badge>
-              <h1 className="font-heading text-4xl font-bold md:text-5xl lg:text-6xl">
-                Discover Bhutan with Us
-              </h1>
-              <p className="mt-6 text-lg text-muted-foreground">
-                From cultural immersions to high-altitude adventures, find your perfect journey
-                through the Land of the Thunder Dragon.
-              </p>
+        {/* Premium Hero Section */}
+        <section className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-monastery-red/20 via-background to-prayer-red/10" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-prayer-red/10 via-transparent to-transparent" />
 
-              {/* Search Bar */}
-              <div className="mt-8 relative">
-                <input
-                  type="text"
-                  placeholder="Search tours by destination, activity, or keyword..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full rounded-lg border bg-background px-4 py-3 pl-12 pr-4 text-lg outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-                />
-                <Compass className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery('')}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
-                )}
+          <div className="relative container pt-32 pb-16 md:pt-40 md:pb-20">
+            <ScrollReveal direction="down">
+              <div className="mx-auto max-w-3xl text-center">
+                <Badge
+                  className="mb-6 px-5 py-2 text-sm font-semibold tracking-wider uppercase border-0"
+                  style={{
+                    background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)',
+                    color: '#FFFFFF'
+                  }}
+                >
+                  Our Tours
+                </Badge>
+                <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight mb-8">
+                  <span className="bg-clip-text text-transparent" style={{
+                    backgroundImage: 'linear-gradient(135deg, #DC143C 0%, #8B0000 50%, #D4A017 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent'
+                  }}>
+                    Discover Bhutan with Us
+                  </span>
+                </h1>
+                <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto mb-10">
+                  From cultural immersions to high-altitude adventures, find your perfect journey
+                  through the Land of the Thunder Dragon.
+                </p>
+
+                {/* Search Bar */}
+                <div className="max-w-xl mx-auto relative">
+                  <input
+                    type="text"
+                    placeholder="Search tours by destination, activity, or keyword..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full rounded-2xl border-2 bg-background px-6 py-4 pl-14 pr-12 text-lg outline-none focus:border-prayer-red focus:ring-2 focus:ring-prayer-red/20 transition-all shadow-lg"
+                  />
+                  <Compass className="absolute left-5 top-1/2 h-6 w-6 -translate-y-1/2 text-muted-foreground" />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
+            </ScrollReveal>
           </div>
         </section>
 
         {/* Tours Content */}
-        <section className="py-12 bg-background">
-          <div className="container px-4">
-            <div className="flex flex-col lg:flex-row gap-8">
+        <section className="py-12 md:py-16">
+          <div className="container">
+            <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
               {/* Filters Sidebar */}
-              <aside className="lg:w-64 shrink-0">
-                <div className="sticky top-24 space-y-6">
+              <aside className="lg:w-72 shrink-0">
+                <div className="sticky top-28 space-y-8">
                   <div className="flex items-center justify-between">
-                    <h2 className="font-heading text-lg font-semibold flex items-center gap-2">
-                      <Filter className="h-4 w-4" />
+                    <h2 className="font-heading text-xl font-bold flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)' }}>
+                        <Filter className="h-5 w-5 text-white" />
+                      </div>
                       Filters
                     </h2>
                     {activeFiltersCount > 0 && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
+                      <button
                         onClick={clearFilters}
-                        className="h-8 text-xs"
+                        className="text-sm font-medium hover:text-prayer-red transition-colors"
                       >
                         Clear all
-                      </Button>
+                      </button>
                     )}
                   </div>
 
                   {/* Category Filter */}
                   <div>
-                    <h3 className="mb-3 font-medium">Category</h3>
+                    <h3 className="mb-4 font-bold text-lg">Category</h3>
                     <div className="space-y-2">
                       {categories.map((category) => {
                         const Icon = category.icon;
@@ -198,13 +220,16 @@ export default function ToursPage() {
                           <button
                             key={category.value}
                             onClick={() => setSelectedCategory(category.value)}
-                            className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors ${
+                            className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium transition-all ${
                               selectedCategory === category.value
-                                ? 'bg-primary text-primary-foreground'
+                                ? 'text-white shadow-lg'
                                 : 'hover:bg-muted'
                             }`}
+                            style={selectedCategory === category.value ? {
+                              background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)'
+                            } : {}}
                           >
-                            <Icon className="h-4 w-4 shrink-0" />
+                            <Icon className="h-5 w-5 shrink-0" />
                             {category.label}
                           </button>
                         );
@@ -214,12 +239,12 @@ export default function ToursPage() {
 
                   {/* Difficulty Filter */}
                   <div>
-                    <h3 className="mb-3 font-medium">Difficulty</h3>
-                    <div className="space-y-2">
+                    <h3 className="mb-4 font-bold text-lg">Difficulty</h3>
+                    <div className="space-y-3">
                       {difficulties.map((difficulty) => (
                         <label
                           key={difficulty}
-                          className="flex cursor-pointer items-center gap-2 text-sm"
+                          className="flex cursor-pointer items-center gap-3 text-sm font-medium"
                         >
                           <input
                             type="checkbox"
@@ -227,7 +252,8 @@ export default function ToursPage() {
                             onChange={() =>
                               toggleFilter(difficulty, setSelectedDifficulty, selectedDifficulty)
                             }
-                            className="h-4 w-4 rounded border-input accent-primary"
+                            className="h-5 w-5 rounded border-input accent-prayer-red"
+                            style={{ accentColor: 'var(--prayer-red)' }}
                           />
                           <span className="capitalize">{difficulty}</span>
                         </label>
@@ -237,12 +263,12 @@ export default function ToursPage() {
 
                   {/* Duration Filter */}
                   <div>
-                    <h3 className="mb-3 font-medium">Duration</h3>
-                    <div className="space-y-2">
+                    <h3 className="mb-4 font-bold text-lg">Duration</h3>
+                    <div className="space-y-3">
                       {durations.map((duration) => (
                         <label
                           key={duration.label}
-                          className="flex cursor-pointer items-center gap-2 text-sm"
+                          className="flex cursor-pointer items-center gap-3 text-sm font-medium"
                         >
                           <input
                             type="checkbox"
@@ -256,7 +282,8 @@ export default function ToursPage() {
                                 selectedDuration
                               )
                             }
-                            className="h-4 w-4 rounded border-input accent-primary"
+                            className="h-5 w-5 rounded border-input"
+                            style={{ accentColor: 'var(--prayer-red)' }}
                           />
                           {duration.label}
                         </label>
@@ -266,12 +293,12 @@ export default function ToursPage() {
 
                   {/* Price Range Filter */}
                   <div>
-                    <h3 className="mb-3 font-medium">Price Range</h3>
-                    <div className="space-y-2">
+                    <h3 className="mb-4 font-bold text-lg">Price Range</h3>
+                    <div className="space-y-3">
                       {priceRanges.map((range) => (
                         <label
                           key={range.label}
-                          className="flex cursor-pointer items-center gap-2 text-sm"
+                          className="flex cursor-pointer items-center gap-3 text-sm font-medium"
                         >
                           <input
                             type="checkbox"
@@ -285,7 +312,8 @@ export default function ToursPage() {
                                 selectedPriceRange
                               )
                             }
-                            className="h-4 w-4 rounded border-input accent-primary"
+                            className="h-5 w-5 rounded border-input"
+                            style={{ accentColor: 'var(--prayer-red)' }}
                           />
                           {range.label}
                         </label>
@@ -298,101 +326,148 @@ export default function ToursPage() {
               {/* Tours Grid */}
               <div className="flex-1">
                 {/* Results Header */}
-                <div className="mb-6 flex items-center justify-between">
-                  <p className="text-muted-foreground">
-                    {filteredTours.length} {filteredTours.length === 1 ? 'tour' : 'tours'} found
+                <div className="mb-8 flex items-center justify-between">
+                  <p className="text-muted-foreground text-lg">
+                    <span className="font-bold" style={{ color: 'var(--prayer-red)' }}>
+                      {filteredTours.length}
+                    </span>
+                    {' '}{filteredTours.length === 1 ? 'tour' : 'tours'} found
                   </p>
                   {activeFiltersCount > 0 && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Badge variant="secondary">{activeFiltersCount} filters active</Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        className="px-4 py-2 font-semibold border-0"
+                        style={{
+                          background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)',
+                          color: '#FFFFFF'
+                        }}
+                      >
+                        {activeFiltersCount} filters active
+                      </Badge>
                     </div>
                   )}
                 </div>
 
                 {/* Tours Grid */}
                 {filteredTours.length > 0 ? (
-                  <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                    {filteredTours.map((tour) => (
-                      <Card key={tour.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                        <div className="relative h-48 bg-muted">
-                          <img
-                            src={tour.hero_image}
-                            alt={tour.title}
-                            className="h-full w-full object-cover"
-                          />
-                          <Badge className="absolute top-4 right-4 bg-primary">
-                            {tour.category}
-                          </Badge>
-                          {tour.is_featured && (
-                            <Badge className="absolute top-4 left-4 bg-accent">
-                              Featured
+                  <StaggerChildren>
+                    <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-3">
+                      {filteredTours.map((tour, index) => (
+                        <Card key={tour.id} className="group overflow-hidden border-2 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
+                          <div className="relative h-64 overflow-hidden">
+                            <img
+                              src={tour.hero_image}
+                              alt={tour.title}
+                              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                            <Badge
+                              className="absolute top-5 right-5 border-0 font-semibold"
+                              style={{
+                                background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)',
+                                color: '#FFFFFF'
+                              }}
+                            >
+                              {tour.category}
                             </Badge>
-                          )}
-                        </div>
-                        <CardHeader>
-                          <CardTitle className="font-heading line-clamp-1">{tour.title}</CardTitle>
-                          <CardDescription className="line-clamp-2">{tour.tagline}</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-4">
-                            <div className="flex items-center gap-1">
-                              <Clock className="h-4 w-4" />
-                              <span>{tour.duration} days</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <TrendingUp className="h-4 w-4" />
-                              <span className="capitalize">{tour.difficulty_level}</span>
-                            </div>
-                            {tour.tour_type === 'custom' && (
-                              <Badge variant="outline" className="text-xs">
-                                Custom
+                            {tour.is_featured && (
+                              <Badge
+                                className="absolute top-5 left-5 border-0 font-semibold"
+                                style={{
+                                  background: 'linear-gradient(135deg, #D4A017 0%, #B8860B 100%)',
+                                  color: '#FFFFFF'
+                                }}
+                              >
+                                Featured
                               </Badge>
                             )}
                           </div>
-                          <div className="flex flex-wrap gap-1 mb-4">
-                            {tour.locations.slice(0, 3).map((location) => (
-                              <Badge key={location} variant="secondary" className="text-xs">
-                                {location}
-                              </Badge>
-                            ))}
-                          </div>
-                          <p className="text-sm text-muted-foreground line-clamp-2">
-                            {tour.description}
-                          </p>
-                        </CardContent>
-                        <CardFooter className="flex justify-between items-center">
-                          <div>
-                            {tour.price > 0 ? (
-                              <>
-                                <span className="text-2xl font-bold text-primary">
-                                  ${tour.price}
-                                </span>
-                                <span className="text-sm text-muted-foreground">/person</span>
-                              </>
-                            ) : (
-                              <span className="text-sm text-muted-foreground">Custom pricing</span>
-                            )}
-                          </div>
-                          <Link
-                            href={`/tours/${tour.slug}`}
-                            className="inline-flex items-center justify-center rounded-lg border border-transparent bg-primary px-5 py-3 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/80"
-                          >
-                            View Details
-                          </Link>
-                        </CardFooter>
-                      </Card>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="py-20 text-center">
-                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-                      <Compass className="h-8 w-8 text-muted-foreground" />
+                          <CardContent className="p-6">
+                            <h3 className="font-heading font-bold text-xl mb-2 line-clamp-2 group-hover:text-prayer-red transition-colors">
+                              {tour.title}
+                            </h3>
+                            <p className="text-muted-foreground mb-4 line-clamp-2 text-sm">
+                              {tour.tagline}
+                            </p>
+
+                            <div className="flex flex-wrap items-center gap-4 text-sm mb-4">
+                              <div className="flex items-center gap-2 font-medium">
+                                <Clock className="h-4 w-4" style={{ color: 'var(--prayer-red)' }} />
+                                <span>{tour.duration} days</span>
+                              </div>
+                              <div className="flex items-center gap-2 font-medium">
+                                <TrendingUp className="h-4 w-4" style={{ color: 'var(--prayer-red)' }} />
+                                <span className="capitalize">{tour.difficulty_level}</span>
+                              </div>
+                            </div>
+
+                            <div className="flex flex-wrap gap-2 mb-5">
+                              {tour.locations.slice(0, 3).map((location) => (
+                                <Badge
+                                  key={location}
+                                  variant="secondary"
+                                  className="text-xs font-semibold"
+                                >
+                                  {location}
+                                </Badge>
+                              ))}
+                            </div>
+
+                            <div className="flex items-center justify-between pt-4 border-t">
+                              <div>
+                                {tour.price > 0 ? (
+                                  <div className="flex items-baseline gap-1">
+                                    <span className="text-2xl font-bold" style={{ color: 'var(--prayer-red)' }}>
+                                      ${tour.price}
+                                    </span>
+                                    <span className="text-sm text-muted-foreground">/person</span>
+                                  </div>
+                                ) : (
+                                  <span className="text-sm text-muted-foreground font-medium">Custom pricing</span>
+                                )}
+                              </div>
+                            </div>
+
+                            <Link
+                              href={`/tours/${tour.slug}`}
+                              className="mt-5 block w-full"
+                            >
+                              <MagneticButton
+                                className="w-full text-base font-semibold"
+                                style={{
+                                  background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)',
+                                  border: 'none',
+                                  color: '#FFFFFF'
+                                }}
+                              >
+                                View Details
+                                <ArrowRight className="w-4 h-4" />
+                              </MagneticButton>
+                            </Link>
+                          </CardContent>
+                        </Card>
+                      ))}
                     </div>
-                    <h3 className="font-heading text-xl font-semibold mb-2">No tours found</h3>
-                    <p className="text-muted-foreground mb-6">
+                  </StaggerChildren>
+                ) : (
+                  <div className="py-24 text-center">
+                    <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-muted">
+                      <Compass className="h-10 w-10 text-muted-foreground" />
+                    </div>
+                    <h3 className="font-heading text-2xl font-bold mb-3">No tours found</h3>
+                    <p className="text-muted-foreground mb-8 text-lg">
                       Try adjusting your filters to find what you're looking for.
                     </p>
-                    <Button onClick={clearFilters}>Clear Filters</Button>
+                    <button
+                      onClick={clearFilters}
+                      className="inline-flex items-center justify-center rounded-xl px-8 py-4 text-lg font-semibold text-white transition-all hover:scale-105"
+                      style={{
+                        background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)',
+                        border: 'none'
+                      }}
+                    >
+                      Clear Filters
+                    </button>
                   </div>
                 )}
               </div>
@@ -401,32 +476,46 @@ export default function ToursPage() {
         </section>
 
         {/* Custom Tour CTA */}
-        <section className="py-16 bg-muted/50">
-          <div className="container px-4">
-            <div className="mx-auto max-w-2xl text-center">
-              <Users className="mx-auto mb-4 h-12 w-12 text-primary" />
-              <h2 className="font-heading text-2xl font-bold mb-4">
-                Can't Find What You're Looking For?
-              </h2>
-              <p className="text-muted-foreground mb-6">
-                Let us craft a custom Bhutanese experience tailored to your interests, schedule, and
-                preferences.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link
-                  href="/contact"
-                  className="inline-flex items-center justify-center rounded-lg border border-transparent bg-primary px-10 py-6 text-lg font-medium text-primary-foreground transition-all hover:bg-primary/80"
-                >
-                  Request Custom Tour
-                </Link>
-                <Link
-                  href="/contact"
-                  className="inline-flex items-center justify-center rounded-lg border-2 border-border bg-background px-10 py-6 text-lg font-medium text-foreground transition-all hover:bg-muted"
-                >
-                  Contact Us
-                </Link>
+        <section className="py-20 md:py-28 bg-muted/30">
+          <div className="container">
+            <ScrollReveal>
+              <div className="mx-auto max-w-3xl text-center">
+                <div className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-2xl" style={{ background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)' }}>
+                  <Users className="h-10 w-10 text-white" />
+                </div>
+                <h2 className="font-heading text-3xl md:text-4xl font-bold mb-6">
+                  Can't Find What You're Looking For?
+                </h2>
+                <p className="text-lg md:text-xl text-muted-foreground mb-10 leading-relaxed">
+                  Let us craft a custom Bhutanese experience tailored to your interests, schedule, and
+                  preferences.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-6 justify-center">
+                  <Link href="/contact">
+                    <MagneticButton
+                      className="rounded-xl px-10 py-6 text-lg font-semibold"
+                      style={{
+                        background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)',
+                        border: 'none',
+                        color: '#FFFFFF'
+                      }}
+                    >
+                      Request Custom Tour
+                      <ArrowRight className="w-5 h-5" />
+                    </MagneticButton>
+                  </Link>
+                  <Link href="/contact">
+                    <MagneticButton
+                      className="rounded-xl px-10 py-6 text-lg font-semibold border-2"
+                      variant="outline"
+                    >
+                      Contact Us
+                      <Mail className="w-5 h-5" />
+                    </MagneticButton>
+                  </Link>
+                </div>
               </div>
-            </div>
+            </ScrollReveal>
           </div>
         </section>
       </main>
