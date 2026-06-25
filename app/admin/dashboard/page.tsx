@@ -26,6 +26,7 @@ import {
   Clock,
   MapPin,
   Star,
+  Plus,
 } from 'lucide-react';
 
 // Mock data for visualization
