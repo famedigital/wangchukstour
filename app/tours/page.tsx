@@ -353,99 +353,105 @@ export default function ToursPage() {
                   <StaggerChildren>
                     <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-3">
                       {filteredTours.map((tour, index) => (
-                        <Card key={tour.id} className="group overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
-                          <div className="relative h-64 overflow-hidden">
-                            <img
-                              src={tour.hero_image}
-                              alt={tour.title}
-                              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                            <Badge
-                              className="absolute top-5 right-5 border-0 font-semibold"
-                              style={{
-                                background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)',
-                                color: '#FFFFFF'
-                              }}
-                            >
-                              {tour.category}
-                            </Badge>
-                            {tour.is_featured && (
-                              <Badge
-                                className="absolute top-5 left-5 border-0 font-semibold"
-                                style={{
-                                  background: 'linear-gradient(135deg, #D4A017 0%, #B8860B 100%)',
-                                  color: '#FFFFFF'
-                                }}
-                              >
-                                Featured
-                              </Badge>
-                            )}
-                          </div>
-                          <CardContent className="p-6">
-                            <h3 className="font-heading font-bold text-xl mb-2 line-clamp-2 group-hover:text-prayer-red transition-colors">
-                              {tour.title}
-                            </h3>
-                            <p className="text-muted-foreground mb-4 line-clamp-2 text-sm">
-                              {tour.tagline}
-                            </p>
+                        <Link key={tour.id} href={`/tours/${tour.slug}`} className="group">
+                          <div className="bg-card rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-3">
+                            {/* Image Section */}
+                            <div className="relative h-56 overflow-hidden">
+                              <img
+                                src={tour.hero_image}
+                                alt={tour.title}
+                                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
 
-                            <div className="flex flex-wrap items-center gap-4 text-sm mb-4">
-                              <div className="flex items-center gap-2 font-medium">
-                                <Clock className="h-4 w-4" style={{ color: 'var(--prayer-red)' }} />
-                                <span>{tour.duration} days</span>
-                              </div>
-                              <div className="flex items-center gap-2 font-medium">
-                                <TrendingUp className="h-4 w-4" style={{ color: 'var(--prayer-red)' }} />
-                                <span className="capitalize">{tour.difficulty_level}</span>
-                              </div>
-                            </div>
-
-                            <div className="flex flex-wrap gap-2 mb-5">
-                              {tour.locations.slice(0, 3).map((location) => (
+                              {/* Top Badges */}
+                              <div className="absolute top-4 right-4 flex flex-col gap-2 items-end">
                                 <Badge
-                                  key={location}
-                                  variant="secondary"
-                                  className="text-xs font-semibold"
+                                  className="border-0 font-semibold shadow-lg"
+                                  style={{
+                                    background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)',
+                                    color: '#FFFFFF'
+                                  }}
                                 >
-                                  {location}
+                                  {tour.category}
                                 </Badge>
-                              ))}
-                            </div>
-
-                            <div className="flex items-center justify-between pt-4 border-t">
-                              <div>
-                                {tour.price > 0 ? (
-                                  <div className="flex items-baseline gap-1">
-                                    <span className="text-2xl font-bold" style={{ color: 'var(--prayer-red)' }}>
-                                      ${tour.price}
-                                    </span>
-                                    <span className="text-sm text-muted-foreground">/person</span>
-                                  </div>
-                                ) : (
-                                  <span className="text-sm text-muted-foreground font-medium">Custom pricing</span>
+                                {tour.is_featured && (
+                                  <Badge
+                                    className="border-0 font-semibold shadow-lg"
+                                    style={{
+                                      background: 'linear-gradient(135deg, #D4A017 0%, #B8860B 100%)',
+                                      color: '#FFFFFF'
+                                    }}
+                                  >
+                                    ⭐ Featured
+                                  </Badge>
                                 )}
                               </div>
+
+                              {/* Price Overlay */}
+                              {tour.price > 0 && (
+                                <div className="absolute bottom-4 right-4">
+                                  <div className="bg-white/95 backdrop-blur-md rounded-xl px-4 py-2 shadow-lg">
+                                    <div className="text-2xl font-bold" style={{ color: 'var(--prayer-red)' }}>
+                                      ${tour.price}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground text-center">per person</div>
+                                  </div>
+                                </div>
+                              )}
                             </div>
 
-                            <Link
-                              href={`/tours/${tour.slug}`}
-                              className="mt-5 block w-full"
-                            >
-                              <MagneticButton
-                                className="w-full text-base font-semibold"
-                                style={{
-                                  background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)',
-                                  border: 'none',
-                                  color: '#FFFFFF'
-                                }}
+                            {/* Content Section */}
+                            <div className="p-6">
+                              <h3 className="font-heading font-bold text-xl mb-2 line-clamp-2 group-hover:text-prayer-red transition-colors">
+                                {tour.title}
+                              </h3>
+
+                              {/* Quick Info */}
+                              <div className="flex items-center gap-4 text-sm mb-4">
+                                <div className="flex items-center gap-2 font-semibold">
+                                  <div className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)' }}>
+                                    <Clock className="h-4 w-4 text-white" />
+                                  </div>
+                                  <span>{tour.duration}d</span>
+                                </div>
+                                <div className="flex items-center gap-2 font-semibold">
+                                  <div className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ background: 'linear-gradient(135deg, #D4A017 0%, #B8860B 100%)' }}>
+                                    <TrendingUp className="h-4 w-4 text-white" />
+                                  </div>
+                                  <span className="capitalize">{tour.difficulty_level}</span>
+                                </div>
+                              </div>
+
+                              {/* Tagline */}
+                              <p className="text-muted-foreground mb-4 line-clamp-2 text-sm">
+                                {tour.tagline}
+                              </p>
+
+                              {/* Locations */}
+                              <div className="flex flex-wrap gap-2 mb-5">
+                                {tour.locations.slice(0, 3).map((location) => (
+                                  <Badge
+                                    key={location}
+                                    variant="secondary"
+                                    className="text-xs font-semibold"
+                                  >
+                                    📍 {location}
+                                  </Badge>
+                                ))}
+                              </div>
+
+                              {/* View Button */}
+                              <div
+                                className="inline-flex items-center gap-2 text-sm font-semibold transition-all group-hover:gap-4"
+                                style={{ color: 'var(--prayer-red)' }}
                               >
                                 View Details
-                                <ArrowRight className="w-4 h-4" />
-                              </MagneticButton>
-                            </Link>
-                          </CardContent>
-                        </Card>
+                                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                              </div>
+                            </div>
+                          </div>
+                        </Link>
                       ))}
                     </div>
                   </StaggerChildren>

@@ -274,11 +274,11 @@ export default function ContactPage() {
                     <Card className="shadow-lg">
                       <CardContent className="p-8">
                         <div className="space-y-5">
-                          <div className="flex items-center justify-between py-2 shadow-lg shadow-lgorder/50">
+                          <div className="flex items-center justify-between py-2 shadow-lg shadow-lg/50">
                             <span className="font-semibold text-lg">Monday - Friday</span>
                             <span className="text-muted-foreground font-medium">9:00 AM - 6:00 PM</span>
                           </div>
-                          <div className="flex items-center justify-between py-2 shadow-lg shadow-lgorder/50">
+                          <div className="flex items-center justify-between py-2 shadow-lg shadow-lg/50">
                             <span className="font-semibold text-lg">Saturday</span>
                             <span className="text-muted-foreground font-medium">10:00 AM - 4:00 PM</span>
                           </div>
@@ -319,15 +319,15 @@ export default function ContactPage() {
                   <div>
                     <h2 className="font-heading text-2xl md:text-3xl font-bold mb-6">Quick Links</h2>
                     <div className="space-y-3">
-                      <Link href="/tours" className="inline-flex w-full items-center justify-between rounded-xl px-5 py-4 font-medium hover:bg-muted transition-colors shadow-lg border-transparent hover:shadow-lgorder">
+                      <Link href="/tours" className="inline-flex w-full items-center justify-between rounded-xl px-5 py-4 font-medium hover:bg-muted transition-colors shadow-lg border-transparent hover:shadow-lg">
                         <span>Browse Tours</span>
                         <ArrowRight className="w-5 h-5" />
                       </Link>
-                      <Link href="/about" className="inline-flex w-full items-center justify-between rounded-xl px-5 py-4 font-medium hover:bg-muted transition-colors shadow-lg border-transparent hover:shadow-lgorder">
+                      <Link href="/about" className="inline-flex w-full items-center justify-between rounded-xl px-5 py-4 font-medium hover:bg-muted transition-colors shadow-lg border-transparent hover:shadow-lg">
                         <span>Learn About Us</span>
                         <ArrowRight className="w-5 h-5" />
                       </Link>
-                      <Link href="/blog" className="inline-flex w-full items-center justify-between rounded-xl px-5 py-4 font-medium hover:bg-muted transition-colors shadow-lg border-transparent hover:shadow-lgorder">
+                      <Link href="/blog" className="inline-flex w-full items-center justify-between rounded-xl px-5 py-4 font-medium hover:bg-muted transition-colors shadow-lg border-transparent hover:shadow-lg">
                         <span>Read Travel Guides</span>
                         <ArrowRight className="w-5 h-5" />
                       </Link>
