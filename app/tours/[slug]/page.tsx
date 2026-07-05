@@ -5,7 +5,7 @@ import { Footer } from '@/components/public/Footer';
 import { MagneticButton } from '@/components/ui/magnetic-button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { getTourBySlug, getAllTours } from '@/lib/database';
+import { getTourBySlug, getAllTours, Tour } from '@/lib/database';
 import {
   Clock,
   Calendar,
