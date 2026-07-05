@@ -92,9 +92,20 @@ export default async function HomePage() {
           </ScrollReveal>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredTours.map((tour, index) => (
-              <TourCard key={tour.id} tour={tour} index={index} />
-            ))}
+            {featuredTours.length > 0 ? (
+              featuredTours.map((tour, index) => (
+                <TourCard key={tour.id} tour={tour} index={index} />
+              ))
+            ) : (
+              <div className="col-span-3 text-center py-12">
+                <p className="text-muted-foreground text-lg">No featured tours available at the moment.</p>
+                <Link href="/tours">
+                  <MagneticButton variant="outline" className="mt-4">
+                    View All Tours
+                  </MagneticButton>
+                </Link>
+              </div>
+            )}
           </div>
 
           <ScrollReveal direction="up" className="mt-12 text-center">
