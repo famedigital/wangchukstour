@@ -39,10 +39,11 @@ export function Footer() {
   return (
     <footer className="border-t bg-secondary text-secondary-foreground">
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:grid-cols-6">
-          {/* Brand Column */}
-          <div className="col-span-1 md:col-span-2 lg:col-span-2">
-            <Link href="/" className="group flex items-center space-x-3 transition-transform hover:scale-105 mb-4 md:mb-6">
+        {/* Main Footer Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
+          {/* First Column: Logo, Description, Social Media */}
+          <div>
+            <Link href="/" className="group flex items-center space-x-3 transition-transform hover:scale-105 mb-4">
               <div className="relative h-14 w-auto transition-transform duration-300">
                 <img
                   src="https://res.cloudinary.com/hckgrdeh/image/upload/v1782962660/wangchukstlogo_usxclz.png"
@@ -58,105 +59,108 @@ export function Footer() {
                 </span>
               </div>
             </Link>
-            <p className="text-xs md:text-sm text-secondary-foreground/80 mb-4 md:mb-6">
+            <p className="text-sm text-secondary-foreground/80 mb-6">
               Experience authentic Bhutan with Wangchuks Tours & Treks. We craft personalized journeys
               through the Land of the Thunder Dragon, combining cultural immersion with
               breathtaking natural beauty.
             </p>
 
-            {/* Social Icons with Names */}
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex flex-wrap gap-3">
-                {socialLinks.map((social) => {
-                  const Icon = social.icon;
-                  return (
-                    <Link
-                      key={social.name}
-                      href={social.href}
-                      className="group flex items-center gap-2 rounded-full bg-secondary-foreground/10 px-4 py-2 text-sm text-secondary-foreground transition-all hover:scale-105 hover:bg-primary hover:text-primary-foreground"
-                    >
-                      <Icon className="h-4 w-4" />
-                      <span className="font-medium">{social.name}</span>
-                    </Link>
-                  );
-                })}
-              </div>
-              <a
-                href="https://innovates.bt"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-secondary-foreground/60 transition-all hover:translate-x-1 hover:text-primary"
-              >
-                Designed by innovates.bt
-              </a>
+            {/* Social Media Icons - Next Row */}
+            <div className="flex flex-row items-center gap-3">
+              {socialLinks.map((social) => {
+                const Icon = social.icon;
+                return (
+                  <Link
+                    key={social.name}
+                    href={social.href}
+                    className="group flex items-center gap-2 rounded-full bg-secondary-foreground/10 px-4 py-2 text-sm text-secondary-foreground transition-all hover:scale-105 hover:bg-primary hover:text-primary-foreground whitespace-nowrap"
+                  >
+                    <Icon className="h-4 w-4" />
+                    <span className="font-medium">{social.name}</span>
+                  </Link>
+                );
+              })}
             </div>
-            <div className="h-px bg-secondary-foreground/20 my-6"></div>
           </div>
 
-          {/* Link Columns - Individual columns */}
-          <div className="col-span-1 md:col-span-1 lg:col-span-1">
-            <h3 className="font-heading font-semibold mb-2 md:mb-3 text-xs md:text-sm">Explore</h3>
-            <ul className="space-y-1.5 md:space-y-2">
-              {footerLinks.explore.map((link) => (
-                <li key={link.name}>
-                  <Link
-                    href={link.href}
-                    className="text-xs md:text-sm text-secondary-foreground/80 transition-all hover:translate-x-1 hover:text-primary"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {/* Second Column: 4 Category Menu - Responsive Grid */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+            <div>
+              <h3 className="font-heading font-semibold mb-3 text-sm">Explore</h3>
+              <ul className="space-y-2">
+                {footerLinks.explore.map((link) => (
+                  <li key={link.name}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-secondary-foreground/80 transition-all hover:translate-x-1 hover:text-primary"
+                    >
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          <div className="col-span-1 md:col-span-1 lg:col-span-1">
-            <h3 className="font-heading font-semibold mb-2 md:mb-3 text-xs md:text-sm">Tours</h3>
-            <ul className="space-y-1.5 md:space-y-2">
-              {footerLinks.tours.map((link) => (
-                <li key={link.name}>
-                  <Link
-                    href={link.href}
-                    className="text-xs md:text-sm text-secondary-foreground/80 transition-all hover:translate-x-1 hover:text-primary"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+            <div>
+              <h3 className="font-heading font-semibold mb-3 text-sm">Tours</h3>
+              <ul className="space-y-2">
+                {footerLinks.tours.map((link) => (
+                  <li key={link.name}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-secondary-foreground/80 transition-all hover:translate-x-1 hover:text-primary"
+                    >
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          <div className="col-span-1 md:col-span-1 lg:col-span-1">
-            <h3 className="font-heading font-semibold mb-2 md:mb-3 text-xs md:text-sm">Company</h3>
-            <ul className="space-y-1.5 md:space-y-2">
-              {footerLinks.company.map((link) => (
-                <li key={link.name}>
-                  <Link
-                    href={link.href}
-                    className="text-xs md:text-sm text-secondary-foreground/80 transition-all hover:translate-x-1 hover:text-primary"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+            <div>
+              <h3 className="font-heading font-semibold mb-3 text-sm">Company</h3>
+              <ul className="space-y-2">
+                {footerLinks.company.map((link) => (
+                  <li key={link.name}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-secondary-foreground/80 transition-all hover:translate-x-1 hover:text-primary"
+                    >
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          <div className="col-span-1 md:col-span-1 lg:col-span-1">
-            <h3 className="font-heading font-semibold mb-2 md:mb-3 text-xs md:text-sm">Support</h3>
-            <ul className="space-y-1.5 md:space-y-2">
-              {footerLinks.support.map((link) => (
-                <li key={link.name}>
-                  <Link
-                    href={link.href}
-                    className="text-xs md:text-sm text-secondary-foreground/80 transition-all hover:translate-x-1 hover:text-primary"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            <div>
+              <h3 className="font-heading font-semibold mb-3 text-sm">Support</h3>
+              <ul className="space-y-2">
+                {footerLinks.support.map((link) => (
+                  <li key={link.name}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-secondary-foreground/80 transition-all hover:translate-x-1 hover:text-primary"
+                    >
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
+        </div>
+
+        {/* Credit */}
+        <div className="text-center">
+          <a
+            href="https://innovates.bt"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-secondary-foreground/60 transition-all hover:translate-x-1 hover:text-primary"
+          >
+            Designed by innovates.bt
+          </a>
         </div>
 
         <Separator className="my-6 bg-secondary-foreground/20" />

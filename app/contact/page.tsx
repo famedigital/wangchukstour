@@ -126,25 +126,25 @@ export default function ContactPage() {
         <section className="py-16 md:py-24 shadow-lg">
           <div className="container">
             <StaggerChildren>
-              <div className="grid gap-8 md:grid-cols-3 max-w-4xl mx-auto">
+              <div className="grid gap-4 grid-cols-3 md:grid-cols-3 max-w-4xl mx-auto">
                 {contactInfo.map((info, i) => {
                   const Icon = info.icon;
                   return (
                     <Card key={i} className="shadow-lg text-center hover:shadow-xl transition-all duration-300 group hover:-translate-y-2">
-                      <CardContent className="p-8">
-                        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl shadow-lg group-hover:scale-110 transition-transform duration-300" style={{ background: info.color }}>
-                          <Icon className="h-10 w-10 text-white" />
+                      <CardContent className="p-4 md:p-8">
+                        <div className="mx-auto mb-4 md:mb-6 flex h-16 w-16 md:h-20 md:w-20 items-center justify-center rounded-2xl shadow-lg group-hover:scale-110 transition-transform duration-300" style={{ background: info.color }}>
+                          <Icon className="h-8 w-8 md:h-10 md:w-10 text-white" />
                         </div>
-                        <h3 className="font-heading font-bold text-xl mb-3">{info.title}</h3>
+                        <h3 className="font-heading font-bold text-base md:text-xl mb-2 md:mb-3">{info.title}</h3>
                         {info.link ? (
                           <a
                             href={info.link}
-                            className="text-muted-foreground hover:text-prayer-red transition-colors font-medium text-lg"
+                            className="text-muted-foreground hover:text-prayer-red transition-colors font-medium text-sm md:text-lg"
                           >
                             {info.value}
                           </a>
                         ) : (
-                          <p className="text-muted-foreground font-medium text-lg">{info.value}</p>
+                          <p className="text-muted-foreground font-medium text-sm md:text-lg">{info.value}</p>
                         )}
                       </CardContent>
                     </Card>

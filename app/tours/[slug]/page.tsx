@@ -233,6 +233,41 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
           </div>
         </section>
 
+        {/* Mobile Booking Card - Top on mobile */}
+        <div className="lg:hidden sticky top-0 z-40 bg-white/95 backdrop-blur-md px-4 md:px-6 py-3 border-b border-gray-200 shadow-sm">
+          <div className="flex flex-row items-center justify-between gap-3">
+            {/* Price Info */}
+            <div className="flex flex-col">
+              <div className="text-xs text-gray-500">Starting from</div>
+              <div className="text-base font-bold" style={{ color: 'var(--color-crimson, #DC143C)' }}>${tour.price || 'Contact us'}</div>
+              <div className="text-xs text-gray-600">{tour.duration || 'N/A'} days • {tour.difficulty_level || 'N/A'}</div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-row gap-2">
+              <Link href="/contact">
+                <MagneticButton
+                  className="rounded-lg px-4 py-2 text-sm font-medium"
+                  style={{
+                    background: 'var(--color-crimson, #DC143C)',
+                    color: '#FFFFFF'
+                  }}
+                >
+                  Book Now
+                </MagneticButton>
+              </Link>
+              <Link href="/contact">
+                <MagneticButton
+                  className="rounded-lg px-4 py-2 text-sm font-medium"
+                  variant="outline"
+                >
+                  Ask
+                </MagneticButton>
+              </Link>
+            </div>
+          </div>
+        </div>
+
         {/* Main Content - Two Column Layout */}
         <section className="py-16 bg-gray-50">
           <div className="container mx-auto px-6 md:px-12 lg:px-16">
@@ -405,8 +440,8 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
                 )}
               </div>
 
-              {/* Right Column - Booking Card */}
-              <div className="w-full lg:w-[20%] shrink-0" style={{ width: '20%' }}>
+              {/* Right Column - Booking Card - Desktop only */}
+              <div className="hidden lg:block lg:w-[20%] shrink-0" style={{ width: '20%' }}>
                 <div className="lg:sticky lg:top-8 backdrop-blur-md bg-white/90 rounded-2xl shadow-xl p-8">
                   <h3 className="font-heading font-bold text-xl mb-1 text-gray-900">Book This Tour</h3>
                   <p className="text-sm text-gray-600 mb-6">Reserve your spot on this amazing journey</p>
