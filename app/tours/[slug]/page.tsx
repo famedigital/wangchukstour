@@ -139,7 +139,7 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
                   color: '#FFFFFF'
                 }}
               >
-                {tour.category}
+                {tour.category || 'Tour'}
               </Badge>
 
               <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-white leading-tight">
@@ -147,7 +147,7 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
               </h1>
 
               <p className="text-base md:text-lg text-white/90 leading-relaxed">
-                {tour.tagline}
+                {tour.tagline || 'Discover the beauty of Bhutan'}
               </p>
             </div>
           </div>
@@ -165,7 +165,7 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
                     Journey Overview
                   </h2>
                   <p className="text-base text-gray-700 leading-relaxed">
-                    {tour.description}
+                    {tour.description || 'Experience the magic of Bhutan with this unforgettable journey.'}
                   </p>
                 </div>
 
@@ -336,16 +336,16 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
                       <span className="text-gray-600">Price per person</span>
                       <div className="text-right">
                         <div className="text-xs text-gray-500 mb-1">Starting from</div>
-                        <span className="text-lg font-bold" style={{ color: 'var(--color-crimson, #DC143C)' }}>${tour.price}</span>
+                        <span className="text-lg font-bold" style={{ color: 'var(--color-crimson, #DC143C)' }}>${tour.price || 'Contact us'}</span>
                       </div>
                     </div>
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-gray-600">Duration</span>
-                      <span className="font-medium text-gray-900">{tour.duration} days</span>
+                      <span className="font-medium text-gray-900">{tour.duration || 'N/A'} days</span>
                     </div>
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-gray-600">Difficulty</span>
-                      <span className="font-medium capitalize text-gray-900">{tour.difficulty_level}</span>
+                      <span className="font-medium capitalize text-gray-900">{tour.difficulty_level || 'N/A'}</span>
                     </div>
                   </div>
 
