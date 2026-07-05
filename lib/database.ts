@@ -136,8 +136,23 @@ export async function getAllTours(): Promise<Tour[]> {
 
 export async function getTourBySlug(slug: string): Promise<Tour | null> {
   try {
+    console.log('[DATABASE] Starting getTourBySlug for slug:', slug);
+
+    // Check environment variables
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+
+    console.log('[DATABASE] Environment check:', {
+      hasUrl: !!supabaseUrl,
+      hasKey: !!supabaseKey,
+      urlPrefix: supabaseUrl?.substring(0, 20) + '...',
+      keyPrefix: supabaseKey?.substring(0, 10) + '...'
+    });
+
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
+
+    console.log('[DATABASE] Supabase client created successfully');
 
     const { data, error } = await supabase
       .from('tours')
@@ -146,10 +161,37 @@ export async function getTourBySlug(slug: string): Promise<Tour | null> {
       .eq('is_active', true)
       .single();
 
-    if (error) return null;
+    if (error) {
+      console.error('[DATABASE] Supabase query error:', {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+        slug: slug
+      });
+      return null;
+    }
+
+    if (!data) {
+      console.log('[DATABASE] No tour found for slug:', slug);
+      return null;
+    }
+
+    console.log('[DATABASE] Tour found successfully:', {
+      id: data.id,
+      title: data.title,
+      slug: data.slug,
+      hasHeroImage: !!data.hero_image_url,
+      hasThumbnail: !!data.thumbnail_url
+    });
+
     return data;
   } catch (error) {
-    console.error('Error fetching tour by slug:', error);
+    console.error('[DATABASE] Exception in getTourBySlug:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      slug: slug
+    });
     return null;
   }
 }

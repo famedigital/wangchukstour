@@ -33,11 +33,91 @@ export async function generateStaticParams() {
 }
 
 export default async function TourDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
-  const tour = await getTourBySlug(slug);
+  let tour: Tour | null = null;
+  let errorOccurred = false;
 
-  if (!tour) {
-    notFound();
+  try {
+    const { slug } = await params;
+    console.log('[PAGE] Starting tour detail page for slug:', slug);
+
+    tour = await getTourBySlug(slug);
+
+    if (!tour) {
+      console.log('[PAGE] Tour not found for slug:', slug);
+      notFound();
+    }
+
+    console.log('[PAGE] Tour loaded successfully:', {
+      id: tour.id,
+      title: tour.title,
+      slug: tour.slug
+    });
+  } catch (error) {
+    console.error('[PAGE] Error in tour detail page:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
+    errorOccurred = true;
+
+    // Return a custom error page instead of crashing
+    return (
+      <div className="flex min-h-screen flex-col bg-white">
+        <Navigation />
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-center px-6 py-20">
+            <div className="max-w-md mx-auto">
+              <div className="mb-8">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 mb-4">
+                  <span className="text-3xl">⚠️</span>
+                </div>
+                <h1 className="text-3xl font-bold text-gray-900 mb-4">
+                  Unable to Load Tour
+                </h1>
+                <p className="text-lg text-gray-600 mb-8">
+                  We encountered an issue while loading this tour. This might be a temporary problem.
+                </p>
+                <div className="space-y-4">
+                  <div className="bg-gray-50 rounded-lg p-4 text-left">
+                    <p className="text-sm text-gray-600 mb-2">
+                      <strong>Error details:</strong>
+                    </p>
+                    <p className="text-xs text-gray-500 font-mono">
+                      {error instanceof Error ? error.message : 'Unknown error occurred'}
+                    </p>
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    <Link href="/tours">
+                      <MagneticButton
+                        className="rounded-lg px-6 py-3 text-sm font-medium"
+                        style={{
+                          background: 'var(--color-crimson, #DC143C)',
+                          color: '#FFFFFF'
+                        }}
+                      >
+                        View All Tours
+                      </MagneticButton>
+                    </Link>
+                    <Link href="/contact">
+                      <MagneticButton
+                        className="rounded-lg px-6 py-3 text-sm font-medium"
+                        variant="outline"
+                      >
+                        Contact Support
+                      </MagneticButton>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (errorOccurred) {
+    return null; // Should not reach here due to early return
   }
 
   if (tour.tour_type === 'custom') {
