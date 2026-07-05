@@ -1,7 +1,7 @@
 import { Navigation } from '@/components/public/Navigation';
 import { Footer } from '@/components/public/Footer';
 import { MagneticButton } from '@/components/ui/magnetic-button';
-import { Plane, Train, Calendar, CreditCard, Phone, Passport } from 'lucide-react';
+import { Plane, Train, Calendar, CreditCard, Phone, FileText } from 'lucide-react';
 import Link from 'next/link';
 
 const travelInfo = [
@@ -16,7 +16,7 @@ const travelInfo = [
     ]
   },
   {
-    icon: Passport,
+    icon: FileText,
     title: "Visa & Permits",
     items: [
       "Visa required for all nationalities (we arrange for you)",
