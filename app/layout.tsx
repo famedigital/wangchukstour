@@ -27,9 +27,9 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Wangchuk Tours & Treks - Discover the Last Shangri-La",
-  description: "Experience authentic Bhutan with Wangchuk Tours & Treks. Cultural journeys, trekking adventures, and festival tours in the Land of the Thunder Dragon.",
-  keywords: ["Bhutan tour", "Bhutan travel", "Bhutan trekking", "Bhutan festival", "Wangchuk Tours & Treks", "Bhutan adventures"],
+  title: "Wangchuks Tours & Treks - Discover the Last Shangri-La",
+  description: "Experience authentic Bhutan with Wangchuks Tours & Treks. Cultural journeys, trekking adventures, and festival tours in the Land of the Thunder Dragon.",
+  keywords: ["Bhutan tour", "Bhutan travel", "Bhutan trekking", "Bhutan festival", "Wangchuks Tours & Treks", "Bhutan adventures"],
 };
 
 export default function RootLayout({

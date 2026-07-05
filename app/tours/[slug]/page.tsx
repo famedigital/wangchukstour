@@ -5,7 +5,7 @@ import { Footer } from '@/components/public/Footer';
 import { MagneticButton } from '@/components/ui/magnetic-button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { getTourBySlug, mockTours } from '@/lib/mock-data/tours';
+import { getTourBySlug, getAllTours } from '@/lib/database';
 import {
   Clock,
   Calendar,
@@ -27,14 +27,14 @@ import {
 } from 'lucide-react';
 
 export async function generateStaticParams() {
-  return mockTours.map((tour) => ({
-    slug: tour.slug,
-  }));
+  // Return empty array to disable static generation
+  // Routes will be generated on-demand
+  return [];
 }
 
 export default async function TourDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const tour = getTourBySlug(slug);
+  const tour = await getTourBySlug(slug);
 
   if (!tour) {
     notFound();
@@ -61,7 +61,7 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
                   <div className="py-6">
                     <h3 className="font-bold text-xl mb-6">What's Included:</h3>
                     <ul className="grid gap-3 text-left">
-                      {tour.inclusions.map((inclusion, i) => (
+                      {tour.inclusions?.map((inclusion, i) => (
                         <li key={i} className="flex items-start gap-3">
                           <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full" style={{ background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)' }}>
                             <Check className="h-3 w-3 text-white" />
@@ -106,380 +106,304 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex min-h-screen flex-col bg-white">
       <Navigation />
 
       <main className="flex-1">
-        {/* Hero Section */}
-        <section className="relative h-[70vh] min-h-[500px]">
+        {/* Hero Section - Modern & Minimal */}
+        <section className="relative h-[60vh] min-h-[500px] overflow-hidden">
           <div className="absolute inset-0">
             <img
-              src={tour.hero_image}
+              src={tour.hero_image_url || tour.thumbnail_url || '/placeholder.jpg'}
               alt={tour.title}
-              className="h-full w-full object-cover"
+              className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
+              style={{ objectPosition: 'center 40%' }}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
+            <div className="absolute inset-0 bg-black/50" />
           </div>
-          <div className="container relative h-full flex items-end pb-16">
-            <div className="max-w-3xl">
+
+          <div className="relative h-full flex items-center justify-center pt-32 pb-20">
+            <div className="text-center px-6 max-w-4xl">
               <Link
                 href="/tours"
-                className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors mb-6 font-medium"
+                className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-all mb-6 text-sm font-medium"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Back to Tours
               </Link>
+
               <Badge
-                className="mb-6 border-0 font-semibold"
+                className="mb-4 px-4 py-1.5 text-xs font-medium"
                 style={{
-                  background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)',
+                  background: 'var(--color-crimson, #DC143C)',
                   color: '#FFFFFF'
                 }}
               >
                 {tour.category}
               </Badge>
-              <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-white">
+
+              <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-white leading-tight">
                 {tour.title}
               </h1>
-              <p className="text-lg md:text-xl text-white/90 leading-relaxed">{tour.tagline}</p>
+
+              <p className="text-base md:text-lg text-white/90 leading-relaxed">
+                {tour.tagline}
+              </p>
             </div>
           </div>
         </section>
 
-        {/* Tour Info Bar */}
-        <section className="shadow-lg bg-background/95 backdrop-blur-md sticky top-20 z-30 shadow-lg">
-          <div className="container py-6">
-            <div className="flex flex-wrap items-center justify-between gap-6">
-              <div className="flex flex-wrap items-center gap-8 text-sm">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)' }}>
-                    <Clock className="h-5 w-5 text-white" />
-                  </div>
-                  <div>
-                    <span className="font-bold text-lg">{tour.duration} Days</span>
-                    <span className="text-muted-foreground ml-2">({tour.duration_nights} Nights)</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: 'linear-gradient(135deg, #D4A017 0%, #B8860B 100%)' }}>
-                    <TrendingUp className="h-5 w-5 text-white" />
-                  </div>
-                  <span className="capitalize font-bold text-lg">{tour.difficulty_level}</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: 'linear-gradient(135deg, #B91C1C 0%, #8B0000 100%)' }}>
-                    <MapPin className="h-5 w-5 text-white" />
-                  </div>
-                  <span className="font-medium">{tour.locations.join(', ')}</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-6">
-                <div className="text-right">
-                  <div className="text-3xl font-bold" style={{ color: 'var(--prayer-red)' }}>
-                    ${tour.price}
-                  </div>
-                  <div className="text-sm text-muted-foreground">per person</div>
-                </div>
-                <Link href="/contact">
-                  <MagneticButton
-                    className="rounded-xl px-8 py-4 text-base font-semibold"
-                    style={{
-                      background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)',
-                      border: 'none',
-                      color: '#FFFFFF'
-                    }}
-                  >
-                    Book This Tour
-                  </MagneticButton>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Content */}
-        <section className="py-16 md:py-24">
-          <div className="container">
-            <div className="grid gap-12 lg:gap-16 lg:grid-cols-3">
-              {/* Main Content */}
-              <div className="lg:col-span-2 space-y-16">
+        {/* Main Content - Two Column Layout */}
+        <section className="py-16 bg-gray-50">
+          <div className="container mx-auto px-6 md:px-12 lg:px-16">
+            <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
+              {/* Left Column - Journey Overview and Content */}
+              <div className="w-full lg:w-[80%] space-y-12" style={{ width: '80%' }}>
                 {/* Overview */}
                 <div>
-                  <h2 className="font-heading text-2xl md:text-3xl font-bold mb-6">Tour Overview</h2>
-                  <p className="text-muted-foreground text-lg leading-relaxed">{tour.description}</p>
+                  <h2 className="font-heading text-2xl md:text-3xl font-bold mb-4 text-gray-900">
+                    Journey Overview
+                  </h2>
+                  <p className="text-base text-gray-700 leading-relaxed">
+                    {tour.description}
+                  </p>
                 </div>
 
-                {/* Highlights */}
+              {/* Highlights */}
+              {tour.highlights && tour.highlights.length > 0 && (
                 <div>
-                  <h2 className="font-heading text-2xl md:text-3xl font-bold mb-8">Tour Highlights</h2>
-                  <div className="grid gap-4 sm:grid-cols-2">
+                  <h2 className="font-heading text-2xl md:text-3xl font-bold mb-6 text-gray-900">
+                    Tour Highlights
+                  </h2>
+                  <div className="grid gap-4 md:grid-cols-2">
                     {tour.highlights.map((highlight, i) => (
-                      <div key={i} className="flex items-start gap-4 p-4 rounded-xl shadow-lg shadow-lgorder hover:shadow-2xl transition-colors">
-                        <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl" style={{ background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)' }}>
+                      <div key={i} className="flex items-start gap-3">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg mt-0.5" style={{ background: 'var(--color-crimson, #DC143C)' }}>
                           <Star className="h-4 w-4 text-white" />
                         </div>
-                        <span className="text-muted-foreground font-medium">{highlight}</span>
+                        <p className="text-sm text-gray-700">{highlight}</p>
                       </div>
                     ))}
                   </div>
                 </div>
+              )}
 
-                {/* Itinerary */}
+              {/* Itinerary */}
+              {tour.itinerary && tour.itinerary.length > 0 && (
                 <div>
-                  <h2 className="font-heading text-2xl md:text-3xl font-bold mb-10">Day-by-Day Itinerary</h2>
-                  <div className="space-y-8">
-                    {tour.itinerary.map((day) => (
-                      <div key={day.day} className="relative pl-10 pb-10 border-l-4 last:pb-0 last:border-0" style={{ borderColor: 'var(--prayer-red)' }}>
-                        <div className="absolute left-0 top-0 flex h-10 w-10 -translate-x-1/2 items-center justify-center rounded-xl font-bold text-sm text-white" style={{ background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)' }}>
-                          {day.day}
-                        </div>
-                        <div className="space-y-4">
-                          <div>
-                            <h3 className="font-heading font-bold text-xl mb-2">{day.title}</h3>
-                            {day.location && (
-                              <p className="text-sm text-muted-foreground flex items-center gap-2 font-medium">
-                                <MapPin className="h-4 w-4" style={{ color: 'var(--prayer-red)' }} />
-                                {day.location}
-                              </p>
-                            )}
+                  <h2 className="font-heading text-2xl md:text-3xl font-bold mb-8 text-gray-900">
+                    Day-by-Day Itinerary
+                  </h2>
+                  <div className="space-y-10">
+                    {tour.itinerary.map((day, i) => {
+                      const itineraryLength = tour.itinerary?.length || 1;
+                      const progress = i / (itineraryLength - 1);
+                      const borderColor = progress === 0 ? '#DC143C' :
+                                        progress < 0.5 ? '#B91C1C' :
+                                        progress < 0.75 ? '#8B0000' :
+                                        '#660000';
+
+                      return (
+                        <div key={day.day} className="relative pl-10 pb-8 last:pb-0" style={{ borderLeft: i < itineraryLength - 1 ? `3px solid ${borderColor}` : 'none' }}>
+                          <div className="absolute left-0 top-0 flex h-8 w-8 -translate-x-1/2 items-center justify-center rounded-full text-sm font-bold shadow-sm" style={{ background: `linear-gradient(135deg, ${borderColor} 0%, ${borderColor}99 100%)`, color: '#FFFFFF', border: '3px solid #FFFFFF' }}>
+                            {day.day}
                           </div>
-                          <p className="text-muted-foreground text-base leading-relaxed">{day.description}</p>
+
+                          <div className="space-y-4">
+                            <div>
+                              <h3 className="font-heading font-semibold text-xl mb-2 text-gray-900">{day.title}</h3>
+                              {day.location && (
+                                <p className="text-sm text-gray-500 flex items-center gap-2">
+                                  <MapPin className="h-4 w-4" style={{ color: borderColor }} />
+                                  {day.location}
+                                </p>
+                              )}
+                            </div>
+
+                            <p className="text-base text-gray-700 leading-relaxed">{day.description}</p>
+
                           {day.activities && day.activities.length > 0 && (
                             <div className="flex flex-wrap gap-2">
                               {day.activities.map((activity, i) => (
-                                <Badge key={i} variant="secondary" className="text-xs font-semibold">
+                                <Badge key={i} className="text-xs px-3 py-1 font-medium" style={{ background: borderColor, color: '#FFFFFF', border: 'none' }}>
                                   {activity}
                                 </Badge>
                               ))}
                             </div>
                           )}
-                          <div className="flex flex-wrap gap-6 text-sm text-muted-foreground">
+
+                          <div className="flex flex-wrap gap-6 text-sm text-gray-600 pt-2">
                             {day.meals && (
                               <div className="flex items-center gap-2">
-                                <Utensils className="h-5 w-5" style={{ color: 'var(--prayer-red)' }} />
-                                <span className="font-medium">{day.meals}</span>
+                                <Utensils className="h-5 w-5" style={{ color: borderColor }} />
+                                <span>{day.meals}</span>
                               </div>
                             )}
                             {day.accommodation && (
                               <div className="flex items-center gap-2">
-                                <Bed className="h-5 w-5" style={{ color: 'var(--prayer-red)' }} />
-                                <span className="font-medium">{day.accommodation}</span>
+                                <Bed className="h-5 w-5" style={{ color: borderColor }} />
+                                <span>{day.accommodation}</span>
                               </div>
                             )}
                           </div>
                         </div>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
+              )}
 
-                {/* Inclusions & Exclusions */}
-                <div className="grid gap-8 sm:grid-cols-2">
-                  <Card className="shadow-lg">
-                    <CardContent className="p-8">
-                      <h3 className="font-heading font-bold text-xl mb-6 flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)' }}>
-                          <Check className="h-5 w-5 text-white" />
-                        </div>
+              {/* Inclusions & Exclusions */}
+              {(tour.inclusions || tour.exclusions) && (
+                <div className="grid gap-6 md:grid-cols-2">
+                  {tour.inclusions && tour.inclusions.length > 0 && (
+                    <div className="bg-gray-50 rounded-xl p-6">
+                      <h3 className="font-heading font-semibold text-lg mb-4 flex items-center gap-2 text-gray-900">
+                        <Check className="h-5 w-5" style={{ color: '#10B981' }} />
                         What's Included
                       </h3>
-                      <ul className="space-y-3">
+                      <ul className="space-y-2">
                         {tour.inclusions.map((item, i) => (
-                          <li key={i} className="flex items-start gap-3">
-                            <Check className="h-5 w-5 shrink-0 mt-0.5" style={{ color: 'var(--prayer-red)' }} />
-                            <span className="text-muted-foreground">{item}</span>
+                          <li key={i} className="flex items-start gap-2 text-sm">
+                            <Check className="h-4 w-4 shrink-0 mt-0.5" style={{ color: '#10B981' }} />
+                            <span className="text-gray-700">{item}</span>
                           </li>
                         ))}
                       </ul>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  )}
 
-                  <Card className="shadow-lg">
-                    <CardContent className="p-8">
-                      <h3 className="font-heading font-bold text-xl mb-6 flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted">
-                          <X className="h-5 w-5 text-muted-foreground" />
-                        </div>
+                  {tour.exclusions && tour.exclusions.length > 0 && (
+                    <div className="bg-gray-50 rounded-xl p-6">
+                      <h3 className="font-heading font-semibold text-lg mb-4 flex items-center gap-2 text-gray-900">
+                        <X className="h-5 w-5 text-gray-400" />
                         What's Excluded
                       </h3>
-                      <ul className="space-y-3">
+                      <ul className="space-y-2">
                         {tour.exclusions.map((item, i) => (
-                          <li key={i} className="flex items-start gap-3">
-                            <X className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
-                            <span className="text-muted-foreground">{item}</span>
+                          <li key={i} className="flex items-start gap-2 text-sm">
+                            <X className="h-4 w-4 text-gray-400 shrink-0 mt-0.5" />
+                            <span className="text-gray-700">{item}</span>
                           </li>
                         ))}
                       </ul>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  )}
                 </div>
+              )}
 
-                {/* Best Season */}
-                {tour.best_season && tour.best_season.length > 0 && (
-                  <div>
-                    <h2 className="font-heading text-2xl md:text-3xl font-bold mb-6">Best Time to Visit</h2>
-                    <div className="flex flex-wrap gap-3">
-                      {tour.best_season.map((season) => (
-                        <Badge key={season} className="capitalize px-5 py-2 font-semibold shadow-lg" style={{
-                          background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)',
-                          color: '#FFFFFF',
-                          border: 'none'
-                        }}>
-                          {season}
+              {/* Best Season */}
+              {tour.best_season && tour.best_season.length > 0 && (
+                <div>
+                  <h2 className="font-heading text-2xl md:text-3xl font-bold mb-4 text-gray-900">
+                    Best Time to Visit
+                  </h2>
+                  <div className="flex flex-wrap gap-2">
+                    {tour.best_season.map((season) => (
+                      <Badge key={season} className="capitalize px-4 py-1.5 text-sm font-medium" style={{ background: 'var(--color-crimson, #DC143C)', color: '#FFFFFF', border: 'none' }}>
+                        {season}
                         </Badge>
                       ))}
                     </div>
                   </div>
                 )}
 
-                {/* Altitude Info */}
+                {/* Altitude */}
                 {tour.altitude_range && tour.altitude_range !== 'Variable' && (
                   <div>
-                    <h2 className="font-heading text-2xl md:text-3xl font-bold mb-6">Altitude Range</h2>
-                    <div className="flex items-center gap-4 p-6 rounded-xl shadow-lg" style={{ borderColor: 'var(--prayer-red)' }}>
-                      <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)' }}>
-                        <Mountain className="h-6 w-6 text-white" />
+                    <h2 className="font-heading text-2xl md:text-3xl font-bold mb-4 text-gray-900">
+                      Altitude Range
+                    </h2>
+                    <div className="flex items-center gap-4 bg-gray-50 rounded-xl p-4">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg" style={{ background: 'var(--color-crimson, #DC143C)' }}>
+                        <Mountain className="h-5 w-5 text-white" />
                       </div>
-                      <span className="text-xl font-bold">{tour.altitude_range}</span>
+                      <span className="text-lg font-semibold text-gray-900">{tour.altitude_range}</span>
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* Sidebar */}
-              <aside className="space-y-8">
-                {/* Booking Card */}
-                <Card className="sticky top-32 shadow-lg shadow-xl">
-                  <CardContent className="p-8 space-y-6">
-                    <div>
-                      <h3 className="font-heading font-bold text-2xl mb-2">Book This Tour</h3>
-                      <p className="text-muted-foreground">Reserve your spot on this amazing journey</p>
-                    </div>
-                    <div className="flex justify-between items-baseline pb-6 shadow-lg">
-                      <span className="text-muted-foreground">Price per person</span>
-                      <span className="text-3xl font-bold" style={{ color: 'var(--prayer-red)' }}>${tour.price}</span>
-                    </div>
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <span className="text-muted-foreground">Duration</span>
-                        <span className="font-bold">{tour.duration} days</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-muted-foreground">Difficulty</span>
-                        <span className="font-bold capitalize">{tour.difficulty_level}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-muted-foreground">Tour Type</span>
-                        <span className="font-bold capitalize">{tour.tour_type}</span>
-                      </div>
-                    </div>
-                    <Link href="/contact" className="block">
-                      <MagneticButton
-                        className="w-full rounded-xl px-8 py-4 text-base font-semibold"
-                        style={{
-                          background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)',
-                          border: 'none',
-                          color: '#FFFFFF'
-                        }}
-                      >
-                        Request Booking
-                        <ArrowRight className="w-5 h-5" />
-                      </MagneticButton>
-                    </Link>
-                    <Link href="/contact" className="block">
-                      <MagneticButton
-                        className="w-full rounded-xl px-8 py-4 text-base font-semibold shadow-lg"
-                        variant="outline"
-                      >
-                        <Mail className="w-5 h-5" />
-                        Ask a Question
-                      </MagneticButton>
-                    </Link>
-                  </CardContent>
-                </Card>
+              {/* Right Column - Booking Card */}
+              <div className="w-full lg:w-[20%] shrink-0" style={{ width: '20%' }}>
+                <div className="lg:sticky lg:top-8 backdrop-blur-md bg-white/90 rounded-2xl shadow-xl p-8">
+                  <h3 className="font-heading font-bold text-xl mb-1 text-gray-900">Book This Tour</h3>
+                  <p className="text-sm text-gray-600 mb-6">Reserve your spot on this amazing journey</p>
 
-                {/* Quick Info */}
-                <Card className="shadow-lg">
-                  <CardContent className="p-8 space-y-6">
-                    <h3 className="font-heading font-bold text-xl">Quick Info</h3>
-                    <div className="space-y-5">
-                      <div className="flex items-start gap-4">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" style={{ background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)' }}>
-                          <Users className="h-5 w-5 text-white" />
-                        </div>
-                        <div>
-                          <div className="font-bold mb-1">Group Size</div>
-                          <div className="text-muted-foreground">Small groups, personalized experience</div>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-4">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" style={{ background: 'linear-gradient(135deg, #D4A017 0%, #B8860B 100%)' }}>
-                          <Car className="h-5 w-5 text-white" />
-                        </div>
-                        <div>
-                          <div className="font-bold mb-1">Transportation</div>
-                          <div className="text-muted-foreground">Private vehicle included</div>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-4">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" style={{ background: 'linear-gradient(135deg, #B91C1C 0%, #8B0000 100%)' }}>
-                          <Heart className="h-5 w-5 text-white" />
-                        </div>
-                        <div>
-                          <div className="font-bold mb-1">Guide</div>
-                          <div className="text-muted-foreground">Licensed English-speaking guide</div>
-                        </div>
+                  <div className="space-y-3 pb-6 mb-6" style={{ borderBottom: '1px solid #e5e7eb' }}>
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-gray-600">Price per person</span>
+                      <div className="text-right">
+                        <div className="text-xs text-gray-500 mb-1">Starting from</div>
+                        <span className="text-lg font-bold" style={{ color: 'var(--color-crimson, #DC143C)' }}>${tour.price}</span>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-gray-600">Duration</span>
+                      <span className="font-medium text-gray-900">{tour.duration} days</span>
+                    </div>
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-gray-600">Difficulty</span>
+                      <span className="font-medium capitalize text-gray-900">{tour.difficulty_level}</span>
+                    </div>
+                  </div>
 
-                {/* Need Help */}
-                <Card className="shadow-lg" style={{ background: 'linear-gradient(135deg, var(--prayer-red)/10 0%, var(--monastery-red)/10 100%)' }}>
-                  <CardContent className="p-8 space-y-6">
-                    <div className="text-center">
-                      <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl" style={{ background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)' }}>
-                        <Phone className="h-8 w-8 text-white" />
-                      </div>
-                      <p className="font-bold text-lg mb-2">Need help planning?</p>
-                      <p className="text-sm text-muted-foreground mb-6">
-                        Our team is here to assist you
-                      </p>
-                      <Link href="/contact" className="block">
-                        <MagneticButton
-                          className="w-full rounded-xl px-8 py-4 text-base font-semibold shadow-lg"
-                          variant="outline"
-                        >
-                          <Phone className="w-5 h-5" />
-                          Contact Us
-                        </MagneticButton>
-                      </Link>
-                    </div>
-                  </CardContent>
-                </Card>
-              </aside>
+                  <Link href="/contact" className="block mb-3">
+                    <MagneticButton
+                      className="w-full rounded-lg px-6 py-3 text-sm font-medium"
+                      style={{
+                        background: 'var(--color-crimson, #DC143C)',
+                        color: '#FFFFFF'
+                      }}
+                    >
+                      Request Booking
+                    </MagneticButton>
+                  </Link>
+
+                  <Link href="/contact" className="block">
+                    <MagneticButton
+                      className="w-full rounded-lg px-5 py-2.5 text-sm font-medium"
+                      variant="outline"
+                    >
+                      Ask a Question
+                    </MagneticButton>
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Related Tours CTA */}
-        <section className="py-20 md:py-28 bg-muted/30">
-          <div className="container text-center">
-            <h2 className="font-heading text-3xl md:text-4xl font-bold mb-6">
-              Explore More Tours
+        {/* CTA Section */}
+        <section className="py-16 md:py-20 bg-gray-900">
+          <div className="container mx-auto px-6 md:px-12 lg:px-16 text-center">
+            <h2 className="font-heading text-2xl md:text-3xl font-bold mb-3 text-white">
+              Ready to Explore Bhutan?
             </h2>
-            <p className="text-lg text-muted-foreground mb-10 max-w-2xl mx-auto">
-              Discover other amazing journeys through Bhutan
+            <p className="text-sm md:text-base text-white/80 mb-6 max-w-xl mx-auto">
+              Discover other amazing journeys through the Land of the Thunder Dragon
             </p>
-            <Link href="/tours">
-              <MagneticButton
-                className="rounded-xl px-10 py-6 text-lg font-semibold shadow-lg"
-                variant="outline"
-              >
-                View All Tours
-                <ArrowRight className="w-5 h-5" />
-              </MagneticButton>
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-3 justify-start">
+              <Link href="/tours">
+                <MagneticButton
+                  className="rounded-lg px-6 py-3 text-sm font-medium"
+                  style={{
+                    background: 'var(--color-crimson, #DC143C)',
+                    color: '#FFFFFF'
+                  }}
+                >
+                  View All Tours
+                </MagneticButton>
+              </Link>
+              <Link href="/contact">
+                <MagneticButton
+                  className="rounded-lg px-6 py-3 text-sm font-medium bg-white/10 backdrop-blur-sm border border-white/20 text-white"
+                >
+                  Plan Custom Trip
+                </MagneticButton>
+              </Link>
+            </div>
           </div>
         </section>
       </main>

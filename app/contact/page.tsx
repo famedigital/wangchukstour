@@ -19,6 +19,14 @@ import {
   ArrowRight,
 } from 'lucide-react';
 
+const optimizeImageUrl = (url: string, width: number, height: number) => {
+  if (url.includes('cloudinary')) {
+    const transformations = `q_auto,f_auto,w_${width},h_${height},c_fill`;
+    return url.replace('/image/upload/', `/image/upload/${transformations}/`);
+  }
+  return url;
+};
+
 export default function ContactPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,8 +45,8 @@ export default function ContactPage() {
     {
       icon: Phone,
       title: 'Call Us',
-      value: '+975 17 111 111',
-      link: 'tel:+97517111111',
+      value: '+975 17643416',
+      link: 'tel:+97517643416',
       color: '#D4A017',
     },
     {
@@ -80,8 +88,15 @@ export default function ContactPage() {
       <main className="flex-1">
         {/* Premium Hero Section */}
         <section className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-monastery-red/20 via-background to-prayer-red/10" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-prayer-red/10 via-transparent to-transparent" />
+          <div className="absolute inset-0">
+            <img
+              src={optimizeImageUrl('https://res.cloudinary.com/hckgrdeh/image/upload/q_auto,f_auto/v1782911338/paro-rimpungdzong_uemj9o.jpg', 1920, 1080)}
+              alt="Paro Dzong"
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/60 to-black/80" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-prayer-red/20 via-transparent to-transparent" />
+          </div>
 
           <div className="relative container pt-32 pb-20 md:pt-40 md:pb-28">
             <ScrollReveal direction="down">
@@ -95,16 +110,10 @@ export default function ContactPage() {
                 >
                   Contact Us
                 </Badge>
-                <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight mb-8">
-                  <span className="bg-clip-text text-transparent" style={{
-                    backgroundImage: 'linear-gradient(135deg, #DC143C 0%, #8B0000 50%, #D4A017 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent'
-                  }}>
-                    Get in Touch
-                  </span>
+                <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight mb-8 text-white">
+                  Get in Touch
                 </h1>
-                <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
+                <p className="text-lg md:text-xl text-white/90 leading-relaxed max-w-2xl mx-auto">
                   Have questions about traveling to Bhutan? We're here to help you plan your
                   perfect journey to the Land of the Thunder Dragon.
                 </p>
@@ -296,13 +305,13 @@ export default function ContactPage() {
 
                   {/* Benefits */}
                   <div>
-                    <h2 className="font-heading text-2xl md:text-3xl font-bold mb-6">Why Choose Wangchuk Tour?</h2>
+                    <h2 className="font-heading text-2xl md:text-3xl font-bold mb-6">Why Choose Wangchuks Tour?</h2>
                     <div className="space-y-5">
                       {benefits.map((benefit, i) => {
                         const Icon = benefit.icon;
                         return (
                           <div key={i} className="flex items-start gap-4">
-                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br shadow-lg" style={{ background: `linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)` }}>
+                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl shadow-lg" style={{ background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)' }}>
                               <Icon className="h-6 w-6 text-white" />
                             </div>
                             <div>
@@ -341,9 +350,14 @@ export default function ContactPage() {
 
         {/* Premium CTA Section */}
         <section className="py-20 md:py-28 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-monastery-red via-prayer-red to-crimson" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(255,255,255,0.1)_0%,_transparent_50%)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_rgba(212,160,23,0.2)_0%,_transparent_50%)]" />
+          <div className="absolute inset-0">
+            <img
+              src={optimizeImageUrl('https://res.cloudinary.com/hckgrdeh/image/upload/q_auto,f_auto/v1782911270/bumthang_bdxytr.jpg', 1920, 1080)}
+              alt="Bumthang"
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/75 to-black/85" />
+          </div>
 
           <div className="relative container text-center">
             <ScrollReveal>

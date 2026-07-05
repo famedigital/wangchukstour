@@ -9,6 +9,14 @@ import { getBlogBySlug, mockBlogs } from '@/lib/mock-data/blogs';
 import { Calendar, User, Clock, Tag, ArrowLeft, Mail, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
 
+const optimizeImageUrl = (url: string, width: number, height: number) => {
+  if (url.includes('cloudinary')) {
+    const transformations = `q_auto,f_auto,w_${width},h_${height},c_fill`;
+    return url.replace('/image/upload/', `/image/upload/${transformations}/`);
+  }
+  return url;
+};
+
 export async function generateStaticParams() {
   return mockBlogs.map((blog) => ({
     slug: blog.slug,
@@ -34,14 +42,20 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative overflow-hidden bg-muted/30">
-          <div className="absolute inset-0 bg-gradient-to-br from-monastery-red/20 via-background to-prayer-red/10" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-prayer-red/10 via-transparent to-transparent" />
+        <section className="relative overflow-hidden">
+          <div className="absolute inset-0">
+            <img
+              src={optimizeImageUrl(blog.featured_image, 1920, 1080)}
+              alt={blog.title}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/70 to-black/60" />
+          </div>
 
           <div className="relative container pt-32 pb-16 md:pt-40 md:pb-20">
             <Link
               href="/blog"
-              className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6 font-medium"
+              className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors mb-6 font-medium"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to Blog
@@ -56,10 +70,10 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
               >
                 {blog.category}
               </Badge>
-              <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold mb-8">
+              <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold mb-8 text-white">
                 {blog.title}
               </h1>
-              <div className="flex flex-wrap items-center gap-6 text-muted-foreground text-lg">
+              <div className="flex flex-wrap items-center gap-6 text-white/90 text-lg">
                 <div className="flex items-center gap-3 font-medium">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)' }}>
                     <User className="h-5 w-5 text-white" />
@@ -82,21 +96,6 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
             </div>
           </div>
         </section>
-
-        {/* Featured Image */}
-        {blog.featured_image && (
-          <section className="shadow-lg">
-            <div className="container">
-              <div className="mx-auto max-w-5xl">
-                <img
-                  src={blog.featured_image}
-                  alt={blog.title}
-                  className="w-full h-auto"
-                />
-              </div>
-            </div>
-          </section>
-        )}
 
         {/* Article Content */}
         <article className="py-16 md:py-24">
@@ -200,8 +199,13 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
               <Card className="shadow-lg">
                 <CardContent className="p-10">
                   <div className="flex gap-6 items-start">
-                    <div className="h-20 w-20 rounded-2xl flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)' }}>
-                      <User className="h-10 w-10 text-white" />
+                    <div className="relative h-28 w-28 overflow-hidden rounded-2xl shadow-lg shrink-0">
+                      <img
+                        src={optimizeImageUrl('https://res.cloudinary.com/hckgrdeh/image/upload/q_auto,f_auto/v1782912162/thimphu-moonsoon_dftrcz.jpg', 200, 200)}
+                        alt={blog.author}
+                        className="h-full w-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-br from-prayer-red/20 to-monastery-red/20" />
                     </div>
                     <div>
                       <p className="font-bold text-xl mb-2">Written by {blog.author}</p>
@@ -223,14 +227,14 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
                 <div className="grid gap-8 md:grid-cols-3">
                   {relatedPosts.map((post) => (
                     <Link key={post.id} href={`/blog/${post.slug}`} className="group">
-                      <Card className="overflow-hidden hover:shadow-2xl transition-all duration-300 group-hover:-translate-y-2 h-full">
+                      <Card className="overflow-hidden hover:shadow-2xl transition-all duration-300 group-hover:-translate-y-3 h-full">
                         <div className="relative h-48 overflow-hidden">
                           <img
-                            src={post.featured_image}
+                            src={optimizeImageUrl(post.featured_image, 600, 400)}
                             alt={post.title}
-                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
                           <Badge
                             className="absolute top-5 right-5 border-0 font-semibold"
                             style={{
@@ -260,9 +264,14 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
 
         {/* CTA Section */}
         <section className="py-20 md:py-28 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-monastery-red via-prayer-red to-crimson" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(255,255,255,0.1)_0%,_transparent_50%)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_rgba(212,160,23,0.2)_0%,_transparent_50%)]" />
+          <div className="absolute inset-0">
+            <img
+              src={optimizeImageUrl('https://res.cloudinary.com/hckgrdeh/image/upload/q_auto,f_auto/v1782911256/buddhapoint_z2kucc.jpg', 1920, 1080)}
+              alt="Buddha Point"
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/75 to-black/85" />
+          </div>
 
           <div className="relative container text-center">
             <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">

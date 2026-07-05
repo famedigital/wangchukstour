@@ -21,6 +21,14 @@ import {
 } from 'lucide-react';
 
 export default function AboutPage() {
+  const optimizeImageUrl = (url: string, width: number, height: number) => {
+    if (url.includes('cloudinary')) {
+      const transformations = `q_auto,f_auto,w_${width},h_${height},c_fill`;
+      return url.replace('/image/upload/', `/image/upload/${transformations}/`);
+    }
+    return url;
+  };
+
   const values = [
     {
       icon: Heart,
@@ -52,7 +60,7 @@ export default function AboutPage() {
     {
       year: '2008',
       title: 'Our Beginning',
-      description: 'Wangchuk Tour was founded with a simple mission: share the magic of Bhutan with the world while preserving its sacred traditions.',
+      description: 'Wangchuks Tour was founded with a simple mission: share the magic of Bhutan with the world while preserving its sacred traditions.',
     },
     {
       year: '2012',
@@ -127,8 +135,15 @@ export default function AboutPage() {
         {/* Premium Hero Section */}
         <section className="relative overflow-hidden">
           {/* Background with gradient */}
-          <div className="absolute inset-0 bg-gradient-to-br from-monastery-red/20 via-background to-prayer-red/10" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-prayer-red/10 via-transparent to-transparent" />
+          <div className="absolute inset-0">
+            <img
+              src={optimizeImageUrl('https://res.cloudinary.com/hckgrdeh/image/upload/q_auto,f_auto/v1782911267/tigernest_paro_wdenqu.jpg', 1920, 1080)}
+              alt="Tiger's Nest Monastery"
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/50 to-black/70" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-prayer-red/20 via-transparent to-transparent" />
+          </div>
 
           <div className="relative container pt-32 pb-20 md:pt-40 md:pb-28">
             <ScrollReveal direction="down">
@@ -142,16 +157,10 @@ export default function AboutPage() {
                 >
                   About Us
                 </Badge>
-                <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight mb-8">
-                  <span className="bg-clip-text text-transparent" style={{
-                    backgroundImage: 'linear-gradient(135deg, #DC143C 0%, #8B0000 50%, #D4A017 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent'
-                  }}>
-                    Discover the Wangchuk Tour Story
-                  </span>
+                <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight mb-8 text-white">
+                  Discover the Wangchuks Tour Story
                 </h1>
-                <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
+                <p className="text-lg md:text-xl text-white/90 leading-relaxed max-w-2xl mx-auto">
                   We\'re more than a tour company—we\'re your bridge to authentic Bhutanese
                   experiences, culture, and spiritual journeys.
                 </p>
@@ -200,7 +209,7 @@ export default function AboutPage() {
               <ScrollReveal direction="up" delay={0.1}>
                 <div className="mb-16 text-center max-w-3xl mx-auto">
                   <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-6">
-                    Wangchuk Tour was born from a deep love for Bhutan and a desire to share its
+                    Wangchuks Tour was born from a deep love for Bhutan and a desire to share its
                     magic with the world. Founded by Wangchuk Dorji, a native Bhutanese with over
                     15 years of experience in tourism, we\'ve grown from a small family operation
                     to a trusted name that travelers worldwide recommend.
@@ -255,11 +264,17 @@ export default function AboutPage() {
               <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
                 {values.map((value, i) => {
                   const Icon = value.icon;
+                  const premiumGradients = [
+                    'linear-gradient(135deg, #D4A017 0%, #B8860B 100%)', // Gold
+                    'linear-gradient(135deg, #4169E1 0%, #1E40AF 100%)', // Blue
+                    'linear-gradient(135deg, #10B981 0%, #059669 100%)', // Green
+                    'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)', // Purple
+                  ];
                   return (
                     <Card key={i} className="shadow-lg hover:shadow-2xl transition-all duration-300 group hover:shadow-xl hover:-translate-y-2">
                       <CardContent className="p-8 text-center">
-                        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br shadow-lg group-hover:scale-110 transition-transform duration-300" style={{ background: `linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)` }}>
-                          <Icon className="h-10 w-10 text-white" />
+                        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl shadow-lg transition-all duration-300 group-hover:scale-110 animate-bounce" style={{ background: premiumGradients[i], animationDuration: '3s' }}>
+                          <Icon className="h-10 w-10 text-white" style={{ color: '#FFFFFF' }} />
                         </div>
                         <h3 className="font-heading font-bold text-xl mb-4">{value.title}</h3>
                         <p className="text-muted-foreground leading-relaxed text-sm">{value.description}</p>
@@ -279,7 +294,7 @@ export default function AboutPage() {
               <div className="max-w-3xl mx-auto text-center mb-16">
                 <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl font-bold mb-6">Meet Our Team</h2>
                 <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
-                  The passionate people behind every Wangchuk Tour journey
+                  The passionate people behind every Wangchuks Tour journey
                 </p>
               </div>
             </ScrollReveal>
@@ -288,9 +303,16 @@ export default function AboutPage() {
               <div className="grid gap-8 md:grid-cols-3 max-w-5xl mx-auto">
                 {team.map((member, i) => (
                   <Card key={i} className="shadow-lg text-center overflow-hidden hover:shadow-xl transition-all duration-300 group hover:-translate-y-2" style={{ borderColor: 'var(--border)' }}>
-                    <div className="h-64 bg-gradient-to-br flex items-center justify-center relative overflow-hidden" style={{ background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)' }}>
-                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.1)_0%,_transparent_70%)]" />
-                      <Users className="h-24 w-24 text-white/30 relative z-10" />
+                    <div className="h-64 relative flex items-center justify-center bg-gradient-to-br" style={{
+                      background: i === 0 ? 'linear-gradient(135deg, #D4A017 0%, #B8860B 100%)' :
+                                 i === 1 ? 'linear-gradient(135deg, #4169E1 0%, #1E40AF 100%)' :
+                                           'linear-gradient(135deg, #10B981 0%, #059669 100%)'
+                    }}>
+                      <div className="relative">
+                        <div className="h-24 w-24 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mb-4 mx-auto border-4 border-white/30">
+                          <Users className="h-12 w-12 text-white" />
+                        </div>
+                      </div>
                     </div>
                     <CardContent className="p-8">
                       <h3 className="font-heading font-bold text-2xl mb-2">{member.name}</h3>
@@ -331,12 +353,18 @@ export default function AboutPage() {
               <div className="max-w-5xl mx-auto grid gap-6 md:grid-cols-2">
                 {whyBhutan.map((item, i) => {
                   const Icon = item.icon;
+                  const premiumGradients = [
+                    'linear-gradient(135deg, #D4A017 0%, #B8860B 100%)', // Gold
+                    'linear-gradient(135deg, #4169E1 0%, #1E40AF 100%)', // Blue
+                    'linear-gradient(135deg, #10B981 0%, #059669 100%)', // Green
+                    'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)', // Purple
+                  ];
                   return (
                     <Card key={i} className="shadow-lg hover:shadow-2xl transition-all duration-300 group hover:shadow-xl hover:-translate-y-1">
                       <CardContent className="p-8">
                         <div className="flex items-start gap-6">
-                          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br shadow-lg" style={{ background: `linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)` }}>
-                            <Icon className="h-8 w-8 text-white" />
+                          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br shadow-lg animate-bounce" style={{ background: premiumGradients[i], animationDuration: '3s' }}>
+                            <Icon className="h-8 w-8 text-white" style={{ color: '#FFFFFF' }} />
                           </div>
                           <div className="flex-1">
                             <h3 className="font-heading font-bold text-xl mb-3">{item.title}</h3>
@@ -354,9 +382,16 @@ export default function AboutPage() {
 
         {/* Premium CTA Section */}
         <section className="py-20 md:py-28 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-monastery-red via-prayer-red to-crimson" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(255,255,255,0.1)_0%,_transparent_50%)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_rgba(212,160,23,0.2)_0%,_transparent_50%)]" />
+          <div className="absolute inset-0">
+            <img
+              src={optimizeImageUrl('https://res.cloudinary.com/hckgrdeh/image/upload/q_auto,f_auto/v1782911256/buddhapoint_z2kucc.jpg', 1920, 1080)}
+              alt="Buddha Point"
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/75 to-black/80" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(255,255,255,0.1)_0%,_transparent_50%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_rgba(212,160,23,0.2)_0%,_transparent_50%)]" />
+          </div>
 
           <div className="relative container text-center">
             <ScrollReveal>
@@ -364,7 +399,7 @@ export default function AboutPage() {
                 Start Your Bhutan Journey With Us
               </h2>
               <p className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto mb-12 leading-relaxed">
-                Let Wangchuk Tour be your guide to the magic of Bhutan. Get in touch today to
+                Let Wangchuks Tour be your guide to the magic of Bhutan. Get in touch today to
                 start planning your transformative journey.
               </p>
               <div className="flex flex-col sm:flex-row gap-6 justify-center">
@@ -396,54 +431,6 @@ export default function AboutPage() {
                 </Link>
               </div>
             </ScrollReveal>
-          </div>
-        </section>
-
-        {/* Contact Info Section */}
-        <section className="py-20 bg-background border-t">
-          <div className="container">
-            <div className="max-w-md mx-auto text-center">
-              <h3 className="font-heading text-2xl md:text-3xl font-bold mb-12">Get in Touch</h3>
-              <div className="space-y-8">
-                <div className="flex items-start gap-5">
-                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br shadow-lg" style={{ background: `linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)` }}>
-                    <MapPin className="h-7 w-7 text-white" />
-                  </div>
-                  <div className="text-left flex-1">
-                    <p className="font-semibold mb-1 text-lg">Address</p>
-                    <p className="text-muted-foreground">Thimphu, Bhutan</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-5">
-                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br shadow-lg" style={{ background: `linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)` }}>
-                    <Mail className="h-7 w-7 text-white" />
-                  </div>
-                  <div className="text-left flex-1">
-                    <p className="font-semibold mb-1 text-lg">Email</p>
-                    <a
-                      href="mailto:info@wangchuktour.com"
-                      className="text-muted-foreground hover:text-prayer-red transition-colors"
-                    >
-                      info@wangchuktour.com
-                    </a>
-                  </div>
-                </div>
-                <div className="flex items-start gap-5">
-                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br shadow-lg" style={{ background: `linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)` }}>
-                    <Phone className="h-7 w-7 text-white" />
-                  </div>
-                  <div className="text-left flex-1">
-                    <p className="font-semibold mb-1 text-lg">Phone</p>
-                    <a
-                      href="tel:+97517111111"
-                      className="text-muted-foreground hover:text-prayer-red transition-colors"
-                    >
-                      +975 17 111 111
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </section>
       </main>

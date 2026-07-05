@@ -71,10 +71,10 @@ The best views are from the opposite cliff face. Morning light offers dramatic i
 - Dress modestly
 
 Whether you're seeking spiritual connection or simply one of the world's most stunning vistas, Tiger's Nest is an experience that will stay with you long after you've left Bhutan.`,
-    featured_image: 'https://images.unsplash.com/photo-1629196914371-f43e0ff70bb5?w=1200&h=800&fit=crop',
+    featured_image: 'https://res.cloudinary.com/hckgrdeh/image/upload/q_auto,f_auto/v1782911267/tigernest_paro_wdenqu.jpg',
     gallery_images: [
-      'https://images.unsplash.com/photo-1629196914371-f43e0ff70bb5?w=800',
-      'https://images.unsplash.com/photo-1609138138345-27f310103c61?w=800',
+      'https://res.cloudinary.com/hckgrdeh/image/upload/q_auto,f_auto/v1782911267/tigernest_paro_wdenqu.jpg',
+      'https://res.cloudinary.com/hckgrdeh/image/upload/q_auto,f_auto/v1782911338/paro-rimpungdzong_uemj9o.jpg',
     ],
     category: 'Travel Guide',
     tags: ['tigers-nest', 'monastery', 'paro', 'spiritual', 'hiking', 'bhutan-culture'],
@@ -137,9 +137,9 @@ Layers are essential. Days can be warm, but nights remain cool, especially at hi
 - Sun protection
 
 Spring in Bhutan isn't just a season - it's a celebration of life, culture, and natural beauty that will leave you transformed.`,
-    featured_image: 'https://images.unsplash.com/photo-1617801443561-8f0d0343b9d9?w=1200&h=800&fit=crop',
+    featured_image: 'https://res.cloudinary.com/hckgrdeh/image/upload/q_auto,f_auto/v1782911323/phobjikha1_ddflbj.jpg',
     gallery_images: [
-      'https://images.unsplash.com/photo-1617801443561-8f0d0343b9d9?w=800',
+      'https://res.cloudinary.com/hckgrdeh/image/upload/q_auto,f_auto/v1782912162/thimphu-moonsoon_dftrcz.jpg',
     ],
     category: 'Seasonal',
     tags: ['spring', 'festivals', 'rhododendrons', 'best-time-to-visit'],
@@ -227,8 +227,10 @@ As a visitor to Bhutan, you'll encounter GNH through:
 - The balance of tradition and modernity
 
 Gross National Happiness isn't just a policy - it's a lived philosophy that permeates every aspect of life in Bhutan, offering valuable lessons for our world.`,
-    featured_image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&h=800&fit=crop',
-    gallery_images: [],
+    featured_image: 'https://res.cloudinary.com/hckgrdeh/image/upload/q_auto,f_auto/v1782911256/buddhapoint_z2kucc.jpg',
+    gallery_images: [
+      'https://res.cloudinary.com/hckgrdeh/image/upload/q_auto,f_auto/v1782912162/thimphu-moonsoon_dftrcz.jpg',
+    ],
     category: 'Culture',
     tags: ['gnh', 'bhutan-philosophy', 'culture', 'sustainability'],
     author: 'Wangchuk Dorji',
@@ -338,7 +340,7 @@ Most dishes can be adjusted:
 - "Local style" for authentic spice level
 
 Bhutanese cuisine is more than just food - it's a window into the culture, reflecting the country's mountainous terrain, Buddhist values, and communal spirit. Approach with an open mind and adventurous palate!`,
-    featured_image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1200&h=800&fit=crop',
+    featured_image: 'https://res.cloudinary.com/hckgrdeh/image/upload/q_auto,f_auto/v1782912157/dochula-tshechu_d3d6dg.jpg',
     gallery_images: [],
     category: 'Food & Culture',
     tags: ['food', 'cuisine', 'ema-datshi', 'bhutanese-culture'],

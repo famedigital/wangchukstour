@@ -12,6 +12,14 @@ import { getPublishedBlogs, getFeaturedBlogs, mockBlogs } from '@/lib/mock-data/
 import { Calendar, User, Clock, Tag, Search, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
 
+const optimizeImageUrl = (url: string, width: number, height: number) => {
+  if (url.includes('cloudinary')) {
+    const transformations = `q_auto,f_auto,w_${width},h_${height},c_fill`;
+    return url.replace('/image/upload/', `/image/upload/${transformations}/`);
+  }
+  return url;
+};
+
 const categories = [
   { value: 'all', label: 'All Posts' },
   { value: 'Travel Guide', label: 'Travel Guides' },
@@ -53,8 +61,15 @@ export default function BlogPage() {
       <main className="flex-1">
         {/* Premium Hero Section */}
         <section className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-monastery-red/20 via-background to-prayer-red/10" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-prayer-red/10 via-transparent to-transparent" />
+          <div className="absolute inset-0">
+            <img
+              src={optimizeImageUrl('https://res.cloudinary.com/hckgrdeh/image/upload/q_auto,f_auto/v1782911267/tigernest_paro_wdenqu.jpg', 1920, 1080)}
+              alt="Tiger's Nest Monastery"
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/60 to-black/80" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-prayer-red/20 via-transparent to-transparent" />
+          </div>
 
           <div className="relative container pt-32 pb-16 md:pt-40 md:pb-20">
             <ScrollReveal direction="down">
@@ -68,16 +83,10 @@ export default function BlogPage() {
                 >
                   Blog
                 </Badge>
-                <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight mb-8">
-                  <span className="bg-clip-text text-transparent" style={{
-                    backgroundImage: 'linear-gradient(135deg, #DC143C 0%, #8B0000 50%, #D4A017 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent'
-                  }}>
-                    Stories from the Land of the Thunder Dragon
-                  </span>
+                <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight mb-8 text-white">
+                  Stories from the Land of the Thunder Dragon
                 </h1>
-                <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto mb-10">
+                <p className="text-lg md:text-xl text-white/90 leading-relaxed max-w-2xl mx-auto mb-10">
                   Discover Bhutan through our travel guides, cultural insights, and stories from the
                   Himalayan kingdom.
                 </p>
@@ -128,14 +137,14 @@ export default function BlogPage() {
                 <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                   {featuredPosts.map((post) => (
                     <Link key={post.id} href={`/blog/${post.slug}`} className="group">
-                      <Card className="overflow-hidden h-full hover:shadow-2xl transition-all duration-300 group-hover:-translate-y-2">
-                        <div className="relative h-64 overflow-hidden">
+                      <Card className="overflow-hidden h-full hover:shadow-2xl transition-all duration-300 group-hover:-translate-y-3">
+                        <div className="relative h-72 overflow-hidden">
                           <img
-                            src={post.featured_image}
+                            src={optimizeImageUrl(post.featured_image, 600, 400)}
                             alt={post.title}
-                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
                           <Badge
                             className="absolute top-5 right-5 border-0 font-semibold"
                             style={{
@@ -181,21 +190,22 @@ export default function BlogPage() {
         )}
 
         {/* Category Filter */}
-        <section className="py-8 bg-muted/30 backdrop-blur-md sticky top-20 z-30 shadow-lg">
+        <section className="py-3 bg-muted/30 backdrop-blur-md sticky top-20 z-30 shadow-lg">
           <div className="container">
-            <div className="flex items-center gap-6 overflow-x-auto">
-              <div className="flex gap-3">
+            <div className="flex items-center gap-4 overflow-x-auto">
+              <div className="flex gap-2">
                 {categories.map((category) => (
                   <button
                     key={category.value}
                     onClick={() => setSelectedCategory(category.value)}
-                    className={`whitespace-nowrap px-6 py-3 rounded-xl text-sm font-semibold transition-all ${
+                    className={`whitespace-nowrap px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm ${
                       selectedCategory === category.value
-                        ? 'text-white shadow-lg'
+                        ? 'bg-white'
                         : 'bg-muted hover:bg-muted/80'
                     }`}
                     style={selectedCategory === category.value ? {
-                      background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)'
+                      color: '#DC143C',
+                      border: '2px solid #DC143C'
                     } : {}}
                   >
                     {category.label}
@@ -226,14 +236,14 @@ export default function BlogPage() {
                 <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                   {filteredPosts.map((post) => (
                     <Link key={post.id} href={`/blog/${post.slug}`} className="group">
-                      <Card className="overflow-hidden h-full hover:shadow-2xl transition-all duration-300 group-hover:-translate-y-2">
+                      <Card className="overflow-hidden h-full hover:shadow-2xl transition-all duration-300 group-hover:-translate-y-3">
                         <div className="relative h-56 overflow-hidden">
                           <img
-                            src={post.featured_image}
+                            src={optimizeImageUrl(post.featured_image, 600, 400)}
                             alt={post.title}
-                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
                           <Badge
                             className="absolute top-5 right-5 border-0 font-semibold"
                             style={{
@@ -327,9 +337,15 @@ export default function BlogPage() {
 
         {/* Newsletter CTA */}
         <section className="py-20 md:py-28 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-monastery-red via-prayer-red to-crimson" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(255,255,255,0.1)_0%,_transparent_50%)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_rgba(212,160,23,0.2)_0%,_transparent_50%)]" />
+          <div className="absolute inset-0">
+            <img
+              src={optimizeImageUrl('https://res.cloudinary.com/hckgrdeh/image/upload/v1782965945/punakhadzong_xkcrcu.jpg', 1920, 1080)}
+              alt="Punakha Dzong"
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/75 to-black/85" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(255,255,255,0.1)_0%,_transparent_50%)]" />
+          </div>
 
           <div className="relative container text-center">
             <ScrollReveal>

@@ -54,7 +54,7 @@ export function MagneticButton({
   const baseStyles = 'relative overflow-hidden rounded-lg px-8 py-4 font-medium transition-all duration-300';
   const variantStyles = {
     default: 'bg-primary text-primary-foreground hover:scale-105',
-    outline: 'border-2 border-primary text-primary hover:bg-primary/10',
+    outline: 'border-2 border-gray-800 text-gray-900 dark:border-gray-200 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800',
     ghost: 'hover:bg-muted text-foreground',
   };
 

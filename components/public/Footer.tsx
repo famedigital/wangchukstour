@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Separator } from '@/components/ui/separator';
-import { Mountain, Mail, Phone, MapPin, MessageCircle, Camera, Video } from 'lucide-react';
+import { Mail, Phone, MapPin, MessageCircle, Camera, Video } from 'lucide-react';
 
 const footerLinks = {
   explore: [
@@ -39,50 +39,69 @@ export function Footer() {
   return (
     <footer className="border-t bg-secondary text-secondary-foreground">
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:grid-cols-6">
           {/* Brand Column */}
-          <div className="lg:col-span-2">
-            <Link href="/" className="flex items-center space-x-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-                <Mountain className="h-6 w-6 text-primary-foreground" />
+          <div className="col-span-1 md:col-span-2 lg:col-span-2">
+            <Link href="/" className="group flex items-center space-x-3 transition-transform hover:scale-105 mb-4 md:mb-6">
+              <div className="relative h-14 w-auto transition-transform duration-300">
+                <img
+                  src="https://res.cloudinary.com/hckgrdeh/image/upload/v1782962660/wangchukstlogo_usxclz.png"
+                  alt="Wangchuks Tours & Treks"
+                  className="h-full w-auto object-contain"
+                  style={{ maxHeight: '56px' }}
+                />
               </div>
               <div className="flex flex-col">
-                <span className="text-lg font-heading font-bold">Wangchuk Tours & Treks</span>
+                <span className="text-lg font-heading font-bold">Wangchuks Tours & Treks</span>
                 <span className="text-xs text-secondary-foreground/70">
                   Discover the Last Shangri-La
                 </span>
               </div>
             </Link>
-            <p className="mt-4 text-sm text-secondary-foreground/80">
-              Experience authentic Bhutan with Wangchuk Tours & Treks. We craft personalized journeys
+            <p className="text-xs md:text-sm text-secondary-foreground/80 mb-4 md:mb-6">
+              Experience authentic Bhutan with Wangchuks Tours & Treks. We craft personalized journeys
               through the Land of the Thunder Dragon, combining cultural immersion with
               breathtaking natural beauty.
             </p>
-            <div className="mt-6 flex space-x-4">
-              {socialLinks.map((social) => {
-                const Icon = social.icon;
-                return (
-                  <Link
-                    key={social.name}
-                    href={social.href}
-                    className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary-foreground/10 text-secondary-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
-                  >
-                    <Icon className="h-4 w-4" />
-                  </Link>
-                );
-              })}
+
+            {/* Social Icons with Names */}
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap gap-3">
+                {socialLinks.map((social) => {
+                  const Icon = social.icon;
+                  return (
+                    <Link
+                      key={social.name}
+                      href={social.href}
+                      className="group flex items-center gap-2 rounded-full bg-secondary-foreground/10 px-4 py-2 text-sm text-secondary-foreground transition-all hover:scale-105 hover:bg-primary hover:text-primary-foreground"
+                    >
+                      <Icon className="h-4 w-4" />
+                      <span className="font-medium">{social.name}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+              <a
+                href="https://innovates.bt"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-secondary-foreground/60 transition-all hover:translate-x-1 hover:text-primary"
+              >
+                Designed by innovates.bt
+              </a>
             </div>
+            <div className="h-px bg-secondary-foreground/20 my-6"></div>
           </div>
 
-          {/* Link Columns */}
-          <div>
-            <h3 className="font-heading font-semibold mb-4">Explore</h3>
-            <ul className="space-y-3">
+          {/* Link Columns - Individual columns */}
+          <div className="col-span-1 md:col-span-1 lg:col-span-1">
+            <h3 className="font-heading font-semibold mb-2 md:mb-3 text-xs md:text-sm">Explore</h3>
+            <ul className="space-y-1.5 md:space-y-2">
               {footerLinks.explore.map((link) => (
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-sm text-secondary-foreground/80 transition-colors hover:text-primary"
+                    className="text-xs md:text-sm text-secondary-foreground/80 transition-all hover:translate-x-1 hover:text-primary"
                   >
                     {link.name}
                   </Link>
@@ -91,14 +110,14 @@ export function Footer() {
             </ul>
           </div>
 
-          <div>
-            <h3 className="font-heading font-semibold mb-4">Tours</h3>
-            <ul className="space-y-3">
+          <div className="col-span-1 md:col-span-1 lg:col-span-1">
+            <h3 className="font-heading font-semibold mb-2 md:mb-3 text-xs md:text-sm">Tours</h3>
+            <ul className="space-y-1.5 md:space-y-2">
               {footerLinks.tours.map((link) => (
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-sm text-secondary-foreground/80 transition-colors hover:text-primary"
+                    className="text-xs md:text-sm text-secondary-foreground/80 transition-all hover:translate-x-1 hover:text-primary"
                   >
                     {link.name}
                   </Link>
@@ -107,14 +126,14 @@ export function Footer() {
             </ul>
           </div>
 
-          <div>
-            <h3 className="font-heading font-semibold mb-4">Company</h3>
-            <ul className="space-y-3">
+          <div className="col-span-1 md:col-span-1 lg:col-span-1">
+            <h3 className="font-heading font-semibold mb-2 md:mb-3 text-xs md:text-sm">Company</h3>
+            <ul className="space-y-1.5 md:space-y-2">
               {footerLinks.company.map((link) => (
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-sm text-secondary-foreground/80 transition-colors hover:text-primary"
+                    className="text-xs md:text-sm text-secondary-foreground/80 transition-all hover:translate-x-1 hover:text-primary"
                   >
                     {link.name}
                   </Link>
@@ -123,14 +142,14 @@ export function Footer() {
             </ul>
           </div>
 
-          <div>
-            <h3 className="font-heading font-semibold mb-4">Support</h3>
-            <ul className="space-y-3">
+          <div className="col-span-1 md:col-span-1 lg:col-span-1">
+            <h3 className="font-heading font-semibold mb-2 md:mb-3 text-xs md:text-sm">Support</h3>
+            <ul className="space-y-1.5 md:space-y-2">
               {footerLinks.support.map((link) => (
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-sm text-secondary-foreground/80 transition-colors hover:text-primary"
+                    className="text-xs md:text-sm text-secondary-foreground/80 transition-all hover:translate-x-1 hover:text-primary"
                   >
                     {link.name}
                   </Link>
@@ -140,62 +159,51 @@ export function Footer() {
           </div>
         </div>
 
-        <Separator className="my-8 bg-secondary-foreground/20" />
+        <Separator className="my-6 bg-secondary-foreground/20" />
 
-        {/* Contact Info */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <div className="flex items-start space-x-3">
-            <MapPin className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-            <div>
-              <p className="font-medium">Address</p>
-              <p className="text-sm text-secondary-foreground/80">
-                Thimphu, Bhutan
-              </p>
-            </div>
-          </div>
-          <div className="flex items-start space-x-3">
-            <Mail className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-            <div>
-              <p className="font-medium">Email</p>
+        {/* Copyright with Email, Phone, and Address - Desktop optimized */}
+        <div className="flex flex-col items-center justify-between gap-4 lg:flex-row">
+          <div className="flex flex-wrap items-center justify-center gap-6 text-xs md:text-sm">
+            <p className="text-secondary-foreground/60">
+              © {new Date().getFullYear()} Wangchuks Tours & Treks. All rights reserved.
+            </p>
+            <div className="flex items-center gap-4">
               <a
                 href="mailto:info@wangchuktour.com"
-                className="text-sm text-secondary-foreground/80 hover:text-primary"
+                className="flex items-center gap-2 text-secondary-foreground/60 transition-all hover:translate-x-1 hover:text-primary"
               >
+                <Mail className="h-4 w-4" />
                 info@wangchuktour.com
               </a>
-            </div>
-          </div>
-          <div className="flex items-start space-x-3">
-            <Phone className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-            <div>
-              <p className="font-medium">Phone</p>
               <a
-                href="tel:+97517111111"
-                className="text-sm text-secondary-foreground/80 hover:text-primary"
+                href="tel:+97517643416"
+                className="flex items-center gap-2 text-secondary-foreground/60 transition-all hover:translate-x-1 hover:text-primary"
               >
-                +975 17 111 111
+                <Phone className="h-4 w-4" />
+                +975 17643416
+              </a>
+              <a
+                href="https://maps.google.com/?q=Thimphu,Bhutan"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-secondary-foreground/60 transition-all hover:translate-x-1 hover:text-primary"
+              >
+                <MapPin className="h-4 w-4" />
+                Thimphu, Bhutan
               </a>
             </div>
           </div>
-        </div>
 
-        <Separator className="my-8 bg-secondary-foreground/20" />
-
-        {/* Copyright */}
-        <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-          <p className="text-sm text-secondary-foreground/60">
-            © {new Date().getFullYear()} Wangchuk Tours & Treks. All rights reserved.
-          </p>
-          <div className="flex gap-6 text-sm">
+          <div className="flex gap-6 text-xs md:text-sm">
             <Link
               href="/privacy"
-              className="text-secondary-foreground/60 transition-colors hover:text-primary"
+              className="text-secondary-foreground/60 transition-all hover:translate-x-1 hover:text-primary"
             >
               Privacy Policy
             </Link>
             <Link
               href="/terms"
-              className="text-secondary-foreground/60 transition-colors hover:text-primary"
+              className="text-secondary-foreground/60 transition-all hover:translate-x-1 hover:text-primary"
             >
               Terms of Service
             </Link>
