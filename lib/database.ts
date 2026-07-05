@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 
 // Database types
 export interface Tour {
@@ -95,10 +96,21 @@ export interface Testimonial {
 // Server-side database operations only
 // This file should only be imported in Server Components
 
+// Helper function to create Supabase client for read operations (works in Vercel serverless)
+const createReadClient = () => {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error('Missing Supabase environment variables');
+  }
+
+  return createSupabaseClient(supabaseUrl, supabaseKey);
+};
+
 export async function getFeaturedTours(limit: number = 6): Promise<Tour[]> {
   try {
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = createReadClient();
 
     const { data, error } = await supabase
       .from('tours')
@@ -117,8 +129,7 @@ export async function getFeaturedTours(limit: number = 6): Promise<Tour[]> {
 
 export async function getAllTours(): Promise<Tour[]> {
   try {
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = createReadClient();
 
     const { data, error } = await supabase
       .from('tours')
@@ -138,21 +149,9 @@ export async function getTourBySlug(slug: string): Promise<Tour | null> {
   try {
     console.log('[DATABASE] Starting getTourBySlug for slug:', slug);
 
-    // Check environment variables
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+    const supabase = createReadClient();
 
-    console.log('[DATABASE] Environment check:', {
-      hasUrl: !!supabaseUrl,
-      hasKey: !!supabaseKey,
-      urlPrefix: supabaseUrl?.substring(0, 20) + '...',
-      keyPrefix: supabaseKey?.substring(0, 10) + '...'
-    });
-
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
-
-    console.log('[DATABASE] Supabase client created successfully');
+    console.log('[DATABASE] Supabase client created successfully (read-only)');
 
     const { data, error } = await supabase
       .from('tours')
