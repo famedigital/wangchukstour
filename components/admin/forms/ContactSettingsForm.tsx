@@ -491,7 +491,7 @@ export function ContactSettingsForm() {
                 </div>
                 <Switch
                   checked={content.autoReply.enabled}
-                  onCheckedChange={(checked) => updateSection('autoReply', {
+                  onCheckedChange={(checked: boolean) => updateSection('autoReply', {
                     ...content.autoReply,
                     enabled: checked
                   })}
