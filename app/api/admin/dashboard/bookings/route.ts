@@ -4,12 +4,12 @@ import { getCurrentUser } from '@/lib/auth/jwt';
 
 export async function GET(request: NextRequest) {
   try {
-    // Check authentication
-    // TEMPORARY: Disabled authentication
-  // const currentUser = await getCurrentUser();
+    // TEMPORARY: Disabled authentication for development
+    // TODO: Re-enable when authentication is properly configured
+    // const currentUser = await getCurrentUser();
     // if (!currentUser) {
-      // return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // }
 
     const supabase = await createClient();
 
