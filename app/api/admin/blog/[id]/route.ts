@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
 import { getCurrentUser } from '@/lib/auth/jwt';
-import { cookies } from 'next/headers';
 
 // GET /api/admin/blog/[id] - Get single blog post
 export async function GET(
@@ -15,8 +14,7 @@ export async function GET(
     }
 
     const { id } = await params;
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await createClient();
 
     const { data: post, error } = await supabase
       .from('blog_posts')
@@ -60,8 +58,7 @@ export async function PATCH(
     }
 
     const { id } = await params;
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await createClient();
 
     // Get current post
     const { data: currentPost, error: fetchError } = await supabase
@@ -122,8 +119,7 @@ export async function DELETE(
     }
 
     const { id } = await params;
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await createClient();
 
     // Get post before deletion
     const { data: post, error: fetchError } = await supabase

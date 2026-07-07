@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
 import { getCurrentUser } from '@/lib/auth/jwt';
-import { cookies } from 'next/headers';
 
 // GET /api/admin/settings - Get all settings
 export async function GET(request: NextRequest) {
@@ -14,8 +13,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
 
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await createClient();
 
     let query = supabase
       .from('site_settings')
@@ -64,8 +62,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await createClient();
 
     // Check if setting exists
     const { data: existing } = await supabase
@@ -164,8 +161,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await createClient();
 
     const results = await Promise.all(
       settings.map(async (setting) => {

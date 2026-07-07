@@ -1,0 +1,69 @@
+
+> wangchuk-tour@0.1.0 build
+> next build
+
+▲ Next.js 16.2.9 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 23.1s
+  Running TypeScript ...
+  Finished TypeScript in 23.8s ...
+  Collecting page data using 3 workers ...
+  Generating static pages using 3 workers (0/39) ...
+  Generating static pages using 3 workers (9/39) 
+  Generating static pages using 3 workers (19/39) 
+  Generating static pages using 3 workers (29/39) 
+✓ Generating static pages using 3 workers (39/39) in 1731ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ƒ /
+├ ○ /_not-found
+├ ○ /about
+├ ○ /admin/dashboard
+├ ○ /admin/login
+├ ƒ /api/admin/blog
+├ ƒ /api/admin/blog/[id]
+├ ƒ /api/admin/bookings
+├ ƒ /api/admin/content
+├ ƒ /api/admin/content/faqs
+├ ƒ /api/admin/dashboard/bookings
+├ ƒ /api/admin/dashboard/inquiries
+├ ƒ /api/admin/dashboard/stats
+├ ƒ /api/admin/dashboard/tours
+├ ƒ /api/admin/media
+├ ƒ /api/admin/media/[id]
+├ ƒ /api/admin/media/bulk
+├ ƒ /api/admin/settings
+├ ƒ /api/admin/tours
+├ ƒ /api/admin/tours/[id]
+├ ƒ /api/admin/users
+├ ƒ /api/auth/login
+├ ƒ /api/auth/logout
+├ ƒ /api/auth/me
+├ ƒ /api/auth/refresh
+├ ƒ /api/blog
+├ ƒ /api/content
+├ ƒ /api/diagnostics/database
+├ ƒ /api/upload
+├ ○ /blog
+├ ● /blog/[slug]
+│ ├ /blog/ultimate-guide-tigers-nest-monastery
+│ ├ /blog/bhutan-spring-season-guide
+│ ├ /blog/understanding-gross-national-happiness-bhutan
+│ └ /blog/beginners-guide-bhutanese-cuisine
+├ ○ /contact
+├ ○ /faq
+├ ○ /policy
+├ ○ /privacy
+├ ○ /terms
+├ ○ /tours
+├ ● /tours/[slug]
+└ ○ /travel-info
+
+
+○  (Static)   prerendered as static content
+●  (SSG)      prerendered as static HTML (uses generateStaticParams)
+ƒ  (Dynamic)  server-rendered on demand
+

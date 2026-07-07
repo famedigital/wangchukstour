@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
 import { getCurrentUser } from '@/lib/auth/jwt';
-import { cookies } from 'next/headers';
 
 // GET /api/admin/bookings - List all bookings
 export async function GET(request: NextRequest) {
@@ -20,8 +19,7 @@ export async function GET(request: NextRequest) {
     const dateTo = searchParams.get('date_to');
     const offset = (page - 1) * limit;
 
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await createClient();
 
     let query = supabase
       .from('bookings')
@@ -77,8 +75,7 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Booking ID is required' }, { status: 400 });
     }
 
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await createClient();
 
     // Get current booking
     const { data: currentBooking, error: fetchError } = await supabase

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { createClient } from '@/utils/supabase/server';
 import { comparePassword, generateAuthTokens, setAuthCookies } from '@/lib/auth/jwt';
 import { z } from 'zod';
@@ -26,8 +25,7 @@ export async function POST(request: NextRequest) {
     const { email, password } = validation.data;
 
     // Get Supabase client
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await createClient();
 
     // Find user by email
     const { data: user, error: userError } = await supabase

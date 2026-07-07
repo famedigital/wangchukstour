@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
 import { deleteImage, getImageMetadata } from '@/utils/cloudinary/upload';
 import { getCurrentUser } from '@/lib/auth/jwt';
-import { cookies } from 'next/headers';
 
 // GET /api/admin/media/[id] - Get single media item
 export async function GET(
@@ -17,8 +16,7 @@ export async function GET(
     }
 
     const { id } = await params;
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await createClient();
 
     const { data: media, error } = await supabase
       .from('media_library')
@@ -54,8 +52,7 @@ export async function PATCH(
     const { title, alt_text, caption, tags, folder } = body;
 
     const { id } = await params;
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await createClient();
 
     // Get current media record
     const { data: currentMedia, error: fetchError } = await supabase
@@ -120,8 +117,7 @@ export async function DELETE(
     }
 
     const { id } = await params;
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await createClient();
 
     // Get media record before deletion
     const { data: media, error: fetchError } = await supabase

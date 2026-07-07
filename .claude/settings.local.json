@@ -10,7 +10,15 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git push:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(node generate-admin.js:*)",
+      "Bash(timeout:*)",
+      "Bash(powershell -Command \"Start-Sleep -Seconds 10\")",
+      "Bash(powershell -Command:*)",
+      "Bash(node check-cloudinary.js:*)",
+      "Bash(node:*)",
+      "Bash(cmd:*)",
+      "Bash(cat:*)"
     ]
   }
 }

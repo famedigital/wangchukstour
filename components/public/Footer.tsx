@@ -187,7 +187,7 @@ export function Footer() {
                 +975 17643416
               </a>
               <a
-                href="https://maps.google.com/?q=Thimphu,Bhutan"
+                href="https://maps.app.goo.gl/augGCB49iedQwe398"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 text-secondary-foreground/60 transition-all hover:translate-x-1 hover:text-primary"

@@ -1,151 +1,54 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/utils/supabase/server';
-import { uploadImage, deleteImage } from '@/utils/cloudinary/upload';
 import { getCurrentUser } from '@/lib/auth/jwt';
-import { cookies } from 'next/headers';
+import { getCloudinaryImages } from '@/lib/cloudinary';
 
-// GET /api/admin/media - List all media with filters
+// GET /api/admin/media - Get all images from Cloudinary
 export async function GET(request: NextRequest) {
   try {
-    // Check authentication
     const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '20');
-    const folder = searchParams.get('folder');
-    const resourceType = searchParams.get('resource_type');
-    const search = searchParams.get('search');
-    const offset = (page - 1) * limit;
+    const folder = searchParams.get('folder') || undefined;
+    const tags = searchParams.get('tags')?.split(',').filter(Boolean);
+    const maxResults = parseInt(searchParams.get('maxResults') || '100');
+    const resourceType = searchParams.get('resource_type') || 'image';
 
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const images = await getCloudinaryImages({
+      folder,
+      tags,
+      maxResults,
+      resource_type: resourceType,
+    });
 
-    // Build query
-    let query = supabase
-      .from('media_library')
-      .select('*', { count: 'exact' })
-      .eq('is_active', true)
-      .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1);
-
-    // Apply filters
-    if (folder) {
-      query = query.eq('folder', folder);
-    }
-    if (resourceType) {
-      query = query.eq('resource_type', resourceType);
-    }
-    if (search) {
-      query = query.or(`title.ilike.%${search}%,alt_text.ilike.%${search}%,tags.cs.{${search}}`);
-    }
-
-    const { data: media, error, count } = await query;
-
-    if (error) throw error;
+    // Transform images to match the expected MediaPicker format
+    const transformedImages = images.map((img) => ({
+      id: img.public_id,
+      public_id: img.public_id,
+      url: img.secure_url,
+      thumbnail_url: `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/c_fill,w_200,h_200,q_auto/${img.public_id}`,
+      name: img.public_id.split('/').pop(),
+      type: img.resource_type,
+      format: img.format,
+      created_at: img.created_at,
+      width: img.width,
+      height: img.height,
+      bytes: img.bytes,
+      tags: img.tags || [],
+    }));
 
     return NextResponse.json({
-      media,
-      pagination: {
-        page,
-        limit,
-        total: count || 0,
-        totalPages: Math.ceil((count || 0) / limit),
-      },
+      images: transformedImages,
+      total: transformedImages.length,
+      folder: folder || 'wangchuk-tour',
     });
   } catch (error) {
-    console.error('Media list error:', error);
-    return NextResponse.json({ error: 'Failed to fetch media' }, { status: 500 });
-  }
-}
-
-// POST /api/admin/media - Upload new media
-export async function POST(request: NextRequest) {
-  try {
-    // Check authentication
-    const user = await getCurrentUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const formData = await request.formData();
-    const file = formData.get('file') as File;
-    const folder = formData.get('folder') as string || 'wangchuk-tour';
-    const title = formData.get('title') as string;
-    const altText = formData.get('alt_text') as string;
-    const caption = formData.get('caption') as string;
-    const tags = formData.get('tags') as string;
-
-    if (!file) {
-      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
-    }
-
-    // Convert file to base64
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    const base64 = `data:${file.type};base64,${buffer.toString('base64')}`;
-
-    // Upload to Cloudinary
-    const uploadResult = await uploadImage(base64, {
-      folder,
-      publicId: title?.toLowerCase().replace(/\s+/g, '-'),
-    });
-
-    // Save to database
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
-
-    const { data: mediaRecord, error } = await supabase
-      .from('media_library')
-      .insert({
-        public_id: uploadResult.publicId,
-        url: uploadResult.url,
-        secure_url: uploadResult.secureUrl,
-        format: uploadResult.format,
-        width: uploadResult.width,
-        height: uploadResult.height,
-        resource_type: uploadResult.resourceType,
-        folder: uploadResult.url.split('/').slice(-2, -1)[0], // Extract folder from URL
-        title: title || file.name,
-        alt_text: altText,
-        caption: caption,
-        tags: tags ? tags.split(',').map(t => t.trim()) : [],
-        file_size: file.size,
-        uploaded_by: user.userId,
-        metadata: {
-          original_filename: file.name,
-          mime_type: file.type,
-        },
-      })
-      .select()
-      .single();
-
-    if (error) {
-      // Rollback: delete from Cloudinary
-      await deleteImage(uploadResult.publicId);
-      throw error;
-    }
-
-    // Log the upload
-    await supabase.from('audit_logs').insert({
-      user_id: user.userId,
-      user_name: user.name,
-      user_email: user.email,
-      action: 'create',
-      entity_type: 'media',
-      entity_id: mediaRecord.id,
-      entity_title: mediaRecord.title,
-      new_values: mediaRecord,
-      ip_address: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || null,
-      user_agent: request.headers.get('user-agent') || null,
-    });
-
-    return NextResponse.json(mediaRecord, { status: 201 });
-  } catch (error) {
-    console.error('Media upload error:', error);
-    return NextResponse.json({ error: 'Failed to upload media' }, { status: 500 });
+    console.error('Media fetch error:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch media from Cloudinary', details: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    );
   }
 }

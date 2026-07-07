@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Home, Compass, Users, Book, Mail, Mountain } from 'lucide-react';
+import { Home, Compass, Users, Book, Mail, Mountain, MessageCircle } from 'lucide-react';
 
 const navLinks = [
   { name: 'Home', href: '/', icon: Home },
@@ -113,25 +113,9 @@ export function Navigation() {
       </nav>
 
       {/* Mobile Bottom Navigation */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md shadow-2xl border-t border-gray-200">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md shadow-2xl border-t border-gray-200">
         <div className="flex flex-row">
-          {/* Logo */}
-          <Link
-            href="/"
-            className="flex-1 flex flex-col items-center justify-center py-3 px-2 transition-all duration-300 relative group"
-          >
-            <div className="h-8 w-8 mb-1 transition-transform duration-300 group-hover:scale-105">
-              <img
-                src="https://res.cloudinary.com/hckgrdeh/image/upload/v1782962660/wangchukstlogo_usxclz.png"
-                alt="Wangchuks Tours & Treks"
-                className="h-full w-auto object-contain"
-              />
-            </div>
-            <span className="text-xs font-medium" style={{ color: '#D4A017' }}>
-              Wangchuks
-            </span>
-          </Link>
-
+          {/* Navigation Links */}
           {navLinks.map((link) => {
             const Icon = link.icon;
             const isActive = pathname === link.href;
@@ -139,33 +123,63 @@ export function Navigation() {
               <Link
                 key={link.name}
                 href={link.href}
-                className="flex-1 flex flex-col items-center justify-center py-3 px-2 transition-all duration-300 relative group"
+                className="flex flex-col items-center justify-center py-2.5 px-1 transition-all duration-300 relative group"
                 style={{
-                  backgroundColor: isActive ? 'rgba(212, 160, 23, 0.1)' : 'transparent'
+                  flex: '1',
+                  backgroundColor: isActive ? 'rgba(212, 160, 23, 0.08)' : 'transparent'
                 }}
               >
-                <Icon
-                  className="h-6 w-6 mb-1 transition-all duration-300"
-                  style={{
-                    color: isActive ? '#D4A017' : '#6B7280',
-                    transform: isActive ? 'scale(1.1)' : 'scale(1)'
-                  }}
-                />
+                <div className="relative mb-0.5">
+                  <Icon
+                    className="h-6 w-6 transition-all duration-300"
+                    style={{
+                      color: isActive ? '#D4A017' : '#8E8E93',
+                      strokeWidth: '1.5',
+                      fill: isActive ? '#D4A017' : 'none',
+                      fillOpacity: isActive ? '0.15' : '0'
+                    }}
+                  />
+                </div>
                 <span
-                  className="text-xs font-medium transition-all duration-300"
+                  className="text-[9px] font-medium transition-all duration-300 leading-none"
                   style={{
-                    color: isActive ? '#D4A017' : '#6B7280'
+                    color: isActive ? '#D4A017' : '#8E8E93'
                   }}
                 >
                   {link.name}
                 </span>
-                {isActive && (
-                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-8 h-1 rounded-t-full"
-                       style={{ backgroundColor: '#D4A017' }} />
-                )}
               </Link>
             );
           })}
+
+          {/* WhatsApp CTA */}
+          <a
+            href="https://wa.me/97517643416"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex flex-col items-center justify-center py-2.5 px-1 transition-all duration-300 relative group"
+            style={{ flex: '1' }}
+          >
+            <div className="relative mb-0.5">
+              <MessageCircle
+                className="h-6 w-6 transition-all duration-300"
+                style={{
+                  color: '#25D366',
+                  strokeWidth: '1.5',
+                  fill: '#25D366',
+                  fillOpacity: '0.15'
+                }}
+              />
+            </div>
+            <span
+              className="text-[9px] font-medium transition-all duration-300 leading-none"
+              style={{
+                color: '#25D366'
+              }}
+            >
+              WhatsApp
+            </span>
+          </a>
         </div>
       </div>
     </>

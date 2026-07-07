@@ -198,8 +198,7 @@ export async function getTourBySlug(slug: string): Promise<Tour | null> {
 
 export async function getPublishedBlogPosts(limit?: number): Promise<BlogPost[]> {
   try {
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await createClient();
 
     let query = supabase
       .from('blog_posts')
@@ -223,8 +222,7 @@ export async function getPublishedBlogPosts(limit?: number): Promise<BlogPost[]>
 
 export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> {
   try {
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await createClient();
 
     const { data, error } = await supabase
       .from('blog_posts')
@@ -243,8 +241,7 @@ export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> 
 
 export async function getActiveHeroSlides(): Promise<HeroSlide[]> {
   try {
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await createClient();
 
     const { data, error } = await supabase
       .from('hero_slides')
@@ -262,8 +259,7 @@ export async function getActiveHeroSlides(): Promise<HeroSlide[]> {
 
 export async function getFeaturedTestimonials(): Promise<Testimonial[]> {
   try {
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await createClient();
 
     const { data, error } = await supabase
       .from('testimonials')

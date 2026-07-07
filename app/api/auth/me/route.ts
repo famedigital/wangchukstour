@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/jwt';
 import { createClient } from '@/utils/supabase/server';
-import { cookies } from 'next/headers';
 
 export async function GET() {
   try {
@@ -15,8 +14,7 @@ export async function GET() {
     }
 
     // Get full user data from database
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await createClient();
 
     const { data: user, error } = await supabase
       .from('admin_users')

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
 import { getCurrentUser } from '@/lib/auth/jwt';
-import { cookies } from 'next/headers';
 
 // GET /api/admin/blog - List all blog posts
 export async function GET(request: NextRequest) {
@@ -19,8 +18,7 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search');
     const offset = (page - 1) * limit;
 
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await createClient();
 
     let query = supabase
       .from('blog_posts')
@@ -85,8 +83,7 @@ export async function POST(request: NextRequest) {
       body.read_time = Math.ceil(wordCount / 200);
     }
 
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await createClient();
 
     // Set published_at if publishing
     if (body.is_published && !body.published_at) {

@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
-import { cookies } from 'next/headers';
 
 export async function GET(request: Request) {
   const diagnostics = {
@@ -29,8 +28,7 @@ export async function GET(request: Request) {
 
     // Check 2: Supabase Client Creation
     try {
-      const cookieStore = await cookies();
-      const supabase = createClient(cookieStore);
+      const supabase = await createClient();
       diagnostics.checks.supabaseClient = {
         status: 'success',
         message: 'Supabase client created successfully'
@@ -45,8 +43,7 @@ export async function GET(request: Request) {
 
     // Check 3: Database Connection (Test Query)
     try {
-      const cookieStore = await cookies();
-      const supabase = createClient(cookieStore);
+      const supabase = await createClient();
 
       const { data, error } = await supabase
         .from('tours')
@@ -81,8 +78,7 @@ export async function GET(request: Request) {
 
     // Check 4: Specific Tour Query (Taktsang)
     try {
-      const cookieStore = await cookies();
-      const supabase = createClient(cookieStore);
+      const supabase = await createClient();
 
       const { data, error } = await supabase
         .from('tours')
@@ -122,8 +118,7 @@ export async function GET(request: Request) {
 
     // Check 5: Test All Active Tours
     try {
-      const cookieStore = await cookies();
-      const supabase = createClient(cookieStore);
+      const supabase = await createClient();
 
       const { data, error } = await supabase
         .from('tours')

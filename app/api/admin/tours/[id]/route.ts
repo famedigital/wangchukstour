@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
 import { getCurrentUser } from '@/lib/auth/jwt';
-import { cookies } from 'next/headers';
 
 // GET /api/admin/tours/[id] - Get single tour
 export async function GET(
@@ -15,8 +14,7 @@ export async function GET(
     }
 
     const { id } = await params;
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await createClient();
 
     const { data: tour, error } = await supabase
       .from('tours')
@@ -49,8 +47,7 @@ export async function PATCH(
     const body = await request.json();
 
     const { id } = await params;
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await createClient();
 
     // Get current tour
     const { data: currentTour, error: fetchError } = await supabase
@@ -112,8 +109,7 @@ export async function DELETE(
     }
 
     const { id } = await params;
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await createClient();
 
     // Get tour before deletion
     const { data: tour, error: fetchError } = await supabase
