@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Navigation } from '@/components/public/Navigation';
 import { Footer } from '@/components/public/Footer';
@@ -8,7 +8,7 @@ import { MagneticButton } from '@/components/ui/magnetic-button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollReveal, StaggerChildren } from '@/components/ui/scroll-reveal';
-import { getPublishedBlogs, getFeaturedBlogs, mockBlogs } from '@/lib/mock-data/blogs';
+import { Loader2 } from 'lucide-react';
 import { Calendar, User, Clock, Tag, Search, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -26,33 +26,126 @@ const categories = [
   { value: 'Culture', label: 'Culture' },
   { value: 'Seasonal', label: 'Seasonal' },
   { value: 'Food & Culture', label: 'Food & Culture' },
+  { value: 'Festival', label: 'Festival' },
+  { value: 'Trekking', label: 'Trekking' },
+  { value: 'Adventure', label: 'Adventure' },
+  { value: 'Spiritual', label: 'Spiritual' },
 ];
 
 export default function BlogPage() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [posts, setPosts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const featuredPosts = getFeaturedBlogs();
+  // Fetch blog posts from database
+  useEffect(() => {
+    fetchBlogPosts();
+  }, [selectedCategory, searchQuery]);
 
-  const filteredPosts = mockBlogs.filter((blog) => {
-    if (!blog.is_published) return false;
+  const fetchBlogPosts = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-    if (selectedCategory !== 'all' && blog.category !== selectedCategory) {
-      return false;
-    }
-
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      const searchableText = `${blog.title} ${blog.excerpt} ${blog.tags.join(' ')}`.toLowerCase();
-      if (!searchableText.includes(query)) {
-        return false;
+      const params = new URLSearchParams();
+      if (selectedCategory !== 'all') {
+        params.append('category', selectedCategory);
       }
+      if (searchQuery) {
+        params.append('search', searchQuery);
+      }
+
+      const response = await fetch(`/api/blog?${params.toString()}`);
+      const data = await response.json();
+
+      if (response.ok) {
+        setPosts(data.posts || []);
+      } else {
+        setError('Failed to load blog posts');
+      }
+    } catch (err) {
+      console.error('Error fetching blog posts:', err);
+      setError('An error occurred while loading blog posts');
+    } finally {
+      setLoading(false);
     }
+  };
 
-    return true;
-  });
+  // Get featured posts
+  const featuredPosts = posts.filter(post => post.is_featured);
 
-  const allTags = Array.from(new Set(mockBlogs.flatMap(b => b.tags)));
+  // Get all unique tags
+  const allTags = Array.from(new Set(posts.flatMap(post => post.tags || [])));
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="flex min-h-screen flex-col bg-background">
+        <Navigation />
+        <main className="flex-1 flex items-center justify-center relative overflow-hidden">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 opacity-5">
+            <div className="absolute inset-0" style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23DC143C' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            }} />
+          </div>
+
+          <div className="relative text-center">
+            {/* Animated Lotus Pattern */}
+            <div className="relative w-32 h-32 mx-auto mb-8">
+              <div className="absolute inset-0 rounded-full"
+                   style={{
+                     background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)',
+                     animation: 'pulse 2s ease-in-out infinite'
+                   }}
+              />
+              <div className="absolute inset-2 rounded-full bg-white flex items-center justify-center">
+                <Loader2 className="h-16 w-16 text-red-600 animate-spin" style={{ color: '#DC143C' }} />
+              </div>
+            </div>
+
+            {/* Loading Text with Animation */}
+            <div className="space-y-3">
+              <h2 className="text-2xl font-bold text-gray-800">Loading Stories</h2>
+              <p className="text-gray-500">Preparing your journey through Bhutan...</p>
+
+              {/* Animated Dots */}
+              <div className="flex items-center justify-center gap-2 mt-4">
+                <span className="w-2 h-2 rounded-full bg-red-600 animate-bounce" style={{ animationDelay: '0ms' }} />
+                <span className="w-2 h-2 rounded-full bg-red-600 animate-bounce" style={{ animationDelay: '150ms' }} />
+                <span className="w-2 h-2 rounded-full bg-red-600 animate-bounce" style={{ animationDelay: '300ms' }} />
+              </div>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="flex min-h-screen flex-col bg-background">
+        <Navigation />
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-red-600 mb-4">{error}</p>
+            <button
+              onClick={fetchBlogPosts}
+              className="inline-flex items-center justify-center rounded-xl px-6 py-3 text-lg font-semibold text-white transition-all hover:scale-105"
+              style={{ background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)' }}
+            >
+              Try Again
+            </button>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -173,7 +266,7 @@ export default function BlogPage() {
                             {post.excerpt}
                           </p>
                           <div className="flex flex-wrap gap-2">
-                            {post.tags.slice(0, 3).map((tag) => (
+                            {post.tags.slice(0, 3).map((tag: string) => (
                               <Badge key={tag} variant="secondary" className="text-xs font-semibold">
                                 {tag}
                               </Badge>
@@ -190,7 +283,7 @@ export default function BlogPage() {
         )}
 
         {/* Category Filter */}
-        <section className="py-3 bg-muted/30 backdrop-blur-md sticky top-20 z-30 shadow-lg">
+        <section className="py-3 bg-muted/30 backdrop-blur-md sticky top-20 z-30 shadow-premium-sm">
           <div className="container">
             <div className="flex items-center gap-4 overflow-x-auto">
               <div className="flex gap-2">
@@ -198,7 +291,7 @@ export default function BlogPage() {
                   <button
                     key={category.value}
                     onClick={() => setSelectedCategory(category.value)}
-                    className={`whitespace-nowrap px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm ${
+                    className={`whitespace-nowrap px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-premium-sm ${
                       selectedCategory === category.value
                         ? 'bg-white'
                         : 'bg-muted hover:bg-muted/80'
@@ -225,21 +318,21 @@ export default function BlogPage() {
               </h2>
               <p className="text-muted-foreground text-lg">
                 <span className="font-bold" style={{ color: 'var(--prayer-red)' }}>
-                  {filteredPosts.length}
+                  {posts.length}
                 </span>
-                {' '}{filteredPosts.length === 1 ? 'article' : 'articles'}
+                {' '}{posts.length === 1 ? 'article' : 'articles'}
               </p>
             </div>
 
-            {filteredPosts.length > 0 ? (
+            {posts.length > 0 ? (
               <StaggerChildren>
                 <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                  {filteredPosts.map((post) => (
+                  {posts.map((post) => (
                     <Link key={post.id} href={`/blog/${post.slug}`} className="group">
                       <Card className="overflow-hidden h-full hover:shadow-2xl transition-all duration-300 group-hover:-translate-y-3">
                         <div className="relative h-56 overflow-hidden">
                           <img
-                            src={optimizeImageUrl(post.featured_image, 600, 400)}
+                            src={optimizeImageUrl(post.featured_image_url || post.featured_image || 'https://via.placeholder.com/600x400', 600, 400)}
                             alt={post.title}
                             className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                           />
@@ -258,11 +351,11 @@ export default function BlogPage() {
                           <div className="mb-4 flex flex-wrap gap-4 text-sm text-muted-foreground">
                             <span className="flex items-center gap-2 font-medium">
                               <Calendar className="h-4 w-4" style={{ color: 'var(--prayer-red)' }} />
-                              {format(new Date(post.published_at), 'MMM d, yyyy')}
+                              {format(new Date(post.published_at || post.created_at), 'MMM d, yyyy')}
                             </span>
                             <span className="flex items-center gap-2 font-medium">
                               <User className="h-4 w-4" style={{ color: 'var(--prayer-red)' }} />
-                              {post.author}
+                              {post.author_name || 'Admin'}
                             </span>
                           </div>
                           <h3 className="font-heading font-bold text-xl mb-3 line-clamp-2 group-hover:text-prayer-red transition-colors">
@@ -272,7 +365,7 @@ export default function BlogPage() {
                             {post.excerpt}
                           </p>
                           <div className="flex flex-wrap gap-2">
-                            {post.tags.slice(0, 3).map((tag) => (
+                            {(post.tags || []).slice(0, 3).map((tag: string) => (
                               <Badge key={tag} variant="secondary" className="text-xs font-semibold">
                                 {tag}
                               </Badge>
@@ -291,18 +384,22 @@ export default function BlogPage() {
                 </div>
                 <h3 className="font-heading text-2xl font-bold mb-3">No articles found</h3>
                 <p className="text-muted-foreground mb-8 text-lg">
-                  Try adjusting your filters or search query.
+                  {searchQuery || selectedCategory !== 'all'
+                    ? 'Try adjusting your filters or search query.'
+                    : 'Be the first to write a blog post!'}
                 </p>
-                <button
-                  onClick={() => { setSelectedCategory('all'); setSearchQuery(''); }}
-                  className="inline-flex items-center justify-center rounded-xl px-8 py-4 text-lg font-semibold text-white transition-all hover:scale-105"
-                  style={{
-                    background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)',
-                    border: 'none'
-                  }}
-                >
-                  Clear Filters
-                </button>
+                {(searchQuery || selectedCategory !== 'all') && (
+                  <button
+                    onClick={() => { setSelectedCategory('all'); setSearchQuery(''); }}
+                    className="inline-flex items-center justify-center rounded-xl px-8 py-4 text-lg font-semibold text-white transition-all hover:scale-105"
+                    style={{
+                      background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)',
+                      border: 'none'
+                    }}
+                  >
+                    Clear Filters
+                  </button>
+                )}
               </div>
             )}
           </div>

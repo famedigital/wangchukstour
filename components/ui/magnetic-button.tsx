@@ -8,6 +8,12 @@ interface MagneticButtonProps {
   variant?: 'default' | 'outline' | 'ghost';
   className?: string;
   style?: React.CSSProperties;
+  disabled?: boolean;
+  type?: 'button' | 'submit' | 'reset';
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  id?: string;
+  'aria-label'?: string;
+  'aria-disabled'?: boolean;
 }
 
 export function MagneticButton({
@@ -15,6 +21,9 @@ export function MagneticButton({
   variant = 'default',
   className = '',
   style,
+  disabled = false,
+  type = 'button',
+  ...props
 }: MagneticButtonProps) {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [isHovered, setIsHovered] = useState(false);
@@ -61,6 +70,8 @@ export function MagneticButton({
   return (
     <motion.button
       ref={buttonRef}
+      type={type}
+      disabled={disabled}
       className={`${baseStyles} ${variantStyles[variant]} ${className}`}
       style={{ backgroundImage, ...style }}
       onMouseMove={handleMouseMove}
@@ -69,6 +80,7 @@ export function MagneticButton({
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+      {...props}
     >
       <span className="relative z-10 inline-flex items-center gap-2 whitespace-nowrap">{children}</span>
     </motion.button>

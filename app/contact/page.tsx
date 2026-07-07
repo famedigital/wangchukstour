@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Navigation } from '@/components/public/Navigation';
 import { Footer } from '@/components/public/Footer';
@@ -7,6 +8,7 @@ import { MagneticButton } from '@/components/ui/magnetic-button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollReveal, StaggerChildren } from '@/components/ui/scroll-reveal';
+import { PremiumInput, PremiumTextarea } from '@/components/ui/premium-input';
 import {
   Mail,
   Phone,
@@ -17,52 +19,185 @@ import {
   Mountain,
   Check,
   ArrowRight,
+  MessageCircle,
+  Compass,
+  Book,
+  Loader2,
 } from 'lucide-react';
-
-const optimizeImageUrl = (url: string, width: number, height: number) => {
-  if (url.includes('cloudinary')) {
-    const transformations = `q_auto,f_auto,w_${width},h_${height},c_fill`;
-    return url.replace('/image/upload/', `/image/upload/${transformations}/`);
-  }
-  return url;
-};
+import Image from 'next/image';
 
 export default function ContactPage() {
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Form submission would be handled here
-    alert('Thank you for your message! We will get back to you soon.');
+  const [content, setContent] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [formState, setFormState] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    travelDates: '',
+    groupSize: '',
+    message: ''
+  });
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    fetchContactContent();
+  }, []);
+
+  const fetchContactContent = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/content?type=contact');
+      const data = await response.json();
+
+      if (response.ok) {
+        setContent(data.content);
+      } else {
+        throw new Error('Failed to load content');
+      }
+    } catch (err) {
+      console.error('Error fetching Contact content:', err);
+      setError('Failed to load Contact page content');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const contactInfo = [
-    {
-      icon: Mail,
-      title: 'Email Us',
-      value: 'info@wangchuktour.com',
-      link: 'mailto:info@wangchuktour.com',
-      color: '#DC143C',
-    },
-    {
-      icon: Phone,
-      title: 'Call Us',
-      value: '+975 17643416',
-      link: 'tel:+97517643416',
-      color: '#D4A017',
-    },
-    {
-      icon: MapPin,
-      title: 'Visit Us',
-      value: 'Thimphu, Bhutan',
-      link: null,
-      color: '#B91C1C',
-    },
-  ];
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Validate required fields
+    const requiredFields = content?.formFields?.requiredFields || ['name', 'email', 'message'];
+    const errors: Record<string, string> = {};
+
+    requiredFields.forEach((field: string) => {
+      if (!formState[field as keyof typeof formState]) {
+        errors[field] = `${field.charAt(0).toUpperCase() + field.slice(1)} is required`;
+      }
+    });
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formState)
+      });
+
+      if (response.ok) {
+        setSubmitted(true);
+        setFormState({
+          name: '',
+          email: '',
+          phone: '',
+          travelDates: '',
+          groupSize: '',
+          message: ''
+        });
+
+        // Reset success message after 5 seconds
+        setTimeout(() => setSubmitted(false), 5000);
+      } else {
+        throw new Error('Failed to submit form');
+      }
+    } catch (err) {
+      console.error('Error submitting form:', err);
+      alert('Failed to submit form. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const optimizeImageUrl = (url: string, width: number, height: number) => {
+    if (!url) return '';
+    if (url.includes('cloudinary')) {
+      const transformations = `q_auto,f_auto,w_${width},h_${height},c_fill`;
+      return url.replace('/image/upload/', `/image/upload/${transformations}/`);
+    }
+    return url;
+  };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen flex-col bg-background">
+        <Navigation />
+        <main className="flex-1 flex items-center justify-center relative overflow-hidden">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 opacity-5">
+            <div className="absolute inset-0" style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23DC143C' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            }} />
+          </div>
+
+          <div className="relative text-center">
+            {/* Animated Compass/Cardinal Points */}
+            <div className="relative w-32 h-32 mx-auto mb-8">
+              <div className="absolute inset-0 rounded-full"
+                   style={{
+                     background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)',
+                     animation: 'pulse 2s ease-in-out infinite'
+                   }}
+              />
+              <div className="absolute inset-2 rounded-full bg-white flex items-center justify-center">
+                <Loader2 className="h-16 w-16 animate-spin" style={{ color: '#DC143C' }} />
+              </div>
+            </div>
+
+            {/* Loading Text with Animation */}
+            <div className="space-y-3">
+              <h2 className="text-2xl font-bold text-gray-800">Connecting With Us</h2>
+              <p className="text-gray-500">Opening channels of communication...</p>
+
+              {/* Animated Dots */}
+              <div className="flex items-center justify-center gap-2 mt-4">
+                <span className="w-2 h-2 rounded-full bg-red-600 animate-bounce" style={{ animationDelay: '0ms' }} />
+                <span className="w-2 h-2 rounded-full bg-red-600 animate-bounce" style={{ animationDelay: '150ms' }} />
+                <span className="w-2 h-2 rounded-full bg-red-600 animate-bounce" style={{ animationDelay: '300ms' }} />
+              </div>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error || !content) {
+    return (
+      <div className="flex min-h-screen flex-col bg-background">
+        <Navigation />
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-red-600 mb-4">{error || 'Failed to load content'}</p>
+            <button
+              onClick={fetchContactContent}
+              className="inline-flex items-center justify-center rounded-xl px-6 py-3 text-lg font-semibold text-white transition-all hover:scale-105"
+              style={{ background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)' }}
+            >
+              Try Again
+            </button>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  const { hero, contactInfo, officeHours, socialMedia, formFields } = content;
 
   const benefits = [
     {
       icon: Users,
       title: 'Local Expertise',
-      description: 'Bhutanese-owned and operated since 2008',
+      description: 'Bhutanese-owned and operated since 2010',
     },
     {
       icon: Mountain,
@@ -89,16 +224,17 @@ export default function ContactPage() {
         {/* Premium Hero Section */}
         <section className="relative overflow-hidden">
           <div className="absolute inset-0">
-            <img
-              src={optimizeImageUrl('https://res.cloudinary.com/hckgrdeh/image/upload/q_auto,f_auto/v1782911338/paro-rimpungdzong_uemj9o.jpg', 1920, 1080)}
-              alt="Paro Dzong"
-              className="w-full h-full object-cover"
+            <Image
+              src={optimizeImageUrl(hero?.backgroundImage || 'https://res.cloudinary.com/hckgrdeh/image/upload/v1782911338/paro-rimpungdzong_uemj9o.jpg', 1920, 1080)}
+              alt={hero?.title || 'Contact Us'}
+              fill
+              className="object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/60 to-black/80" />
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-prayer-red/20 via-transparent to-transparent" />
           </div>
 
-          <div className="relative container pt-32 pb-20 md:pt-40 md:pb-28">
+          <div className="relative container pt-32 pb-16 md:pt-40 md:pb-20">
             <ScrollReveal direction="down">
               <div className="mx-auto max-w-3xl text-center">
                 <Badge
@@ -108,46 +244,42 @@ export default function ContactPage() {
                     color: '#FFFFFF'
                   }}
                 >
-                  Contact Us
+                  Contact
                 </Badge>
                 <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight mb-8 text-white">
-                  Get in Touch
+                  {hero?.title || 'Get in Touch'}
                 </h1>
                 <p className="text-lg md:text-xl text-white/90 leading-relaxed max-w-2xl mx-auto">
-                  Have questions about traveling to Bhutan? We're here to help you plan your
-                  perfect journey to the Land of the Thunder Dragon.
+                  {hero?.subtitle || "We're here to help you plan your perfect Bhutanese adventure"}
                 </p>
               </div>
             </ScrollReveal>
           </div>
         </section>
 
-        {/* Contact Info Cards */}
-        <section className="py-16 md:py-24 shadow-lg">
+        {/* Benefits Bar */}
+        <section className="py-8 bg-muted/30 border-b">
           <div className="container">
             <StaggerChildren>
-              <div className="grid gap-4 grid-cols-3 md:grid-cols-3 max-w-4xl mx-auto">
-                {contactInfo.map((info, i) => {
-                  const Icon = info.icon;
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                {benefits.map((benefit, index) => {
+                  const Icon = benefit.icon;
                   return (
-                    <Card key={i} className="shadow-lg text-center hover:shadow-xl transition-all duration-300 group hover:-translate-y-2">
-                      <CardContent className="p-4 md:p-8">
-                        <div className="mx-auto mb-4 md:mb-6 flex h-16 w-16 md:h-20 md:w-20 items-center justify-center rounded-2xl shadow-lg group-hover:scale-110 transition-transform duration-300" style={{ background: info.color }}>
-                          <Icon className="h-8 w-8 md:h-10 md:w-10 text-white" />
+                    <ScrollReveal key={index} delay={index * 100}>
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg"
+                          style={{
+                            background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)'
+                          }}
+                        >
+                          <Icon className="h-5 w-5 text-white" />
                         </div>
-                        <h3 className="font-heading font-bold text-base md:text-xl mb-2 md:mb-3">{info.title}</h3>
-                        {info.link ? (
-                          <a
-                            href={info.link}
-                            className="text-muted-foreground hover:text-prayer-red transition-colors font-medium text-sm md:text-lg"
-                          >
-                            {info.value}
-                          </a>
-                        ) : (
-                          <p className="text-muted-foreground font-medium text-sm md:text-lg">{info.value}</p>
-                        )}
-                      </CardContent>
-                    </Card>
+                        <div>
+                          <h4 className="font-semibold text-sm">{benefit.title}</h4>
+                          <p className="text-xs text-muted-foreground">{benefit.description}</p>
+                        </div>
+                      </div>
+                    </ScrollReveal>
                   );
                 })}
               </div>
@@ -155,248 +287,349 @@ export default function ContactPage() {
           </div>
         </section>
 
-        {/* Contact Form & Info */}
-        <section className="py-20 md:py-28 bg-muted/30">
+        {/* Contact Content */}
+        <section className="py-16 md:py-20">
           <div className="container">
-            <div className="grid gap-12 lg:grid-cols-2 max-w-6xl mx-auto">
+            <div className="grid gap-12 lg:grid-cols-2">
               {/* Contact Form */}
-              <ScrollReveal direction="right">
-                <div>
-                  <h2 className="font-heading text-2xl md:text-3xl font-bold mb-8">Send Us a Message</h2>
-                  <Card className="shadow-lg shadow-lg">
+              <div>
+                <ScrollReveal>
+                  <div className="mb-8">
+                    <h2 className="font-heading text-2xl md:text-3xl font-bold mb-4">
+                      Send Us a Message
+                    </h2>
+                    <p className="text-muted-foreground text-lg">
+                      Fill out the form below and we'll get back to you within 24 hours.
+                    </p>
+                  </div>
+                </ScrollReveal>
+
+                {submitted ? (
+                  <Card className="shadow-premium-md">
+                    <CardContent className="p-8 text-center">
+                      <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+                        <Check className="h-8 w-8 text-green-600" />
+                      </div>
+                      <h3 className="font-heading text-xl font-bold mb-2">Message Sent!</h3>
+                      <p className="text-muted-foreground">
+                        Thank you for contacting us. We'll get back to you within 24 hours.
+                      </p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <Card className="shadow-premium-md">
                     <CardContent className="p-8">
                       <form onSubmit={handleSubmit} className="space-y-6">
-                        <div className="grid gap-6 sm:grid-cols-2">
-                          <div>
-                            <label htmlFor="firstName" className="block text-sm font-semibold mb-3">
-                              First Name
-                            </label>
-                            <input
-                              type="text"
-                              id="firstName"
-                              name="firstName"
-                              required
-                              className="w-full rounded-xl shadow-lg bg-background px-5 py-3 outline-none focus:border-prayer-red focus:ring-2 focus:ring-prayer-red/20 transition-all"
-                              placeholder="Your first name"
-                            />
-                          </div>
-                          <div>
-                            <label htmlFor="lastName" className="block text-sm font-semibold mb-3">
-                              Last Name
-                            </label>
-                            <input
-                              type="text"
-                              id="lastName"
-                              name="lastName"
-                              required
-                              className="w-full rounded-xl shadow-lg bg-background px-5 py-3 outline-none focus:border-prayer-red focus:ring-2 focus:ring-prayer-red/20 transition-all"
-                              placeholder="Your last name"
-                            />
-                          </div>
-                        </div>
+                        {formFields?.showName !== false && (
+                          <PremiumInput
+                            label="Name"
+                            value={formState.name}
+                            onChange={(e) => {
+                              setFormState({ ...formState, name: e.target.value });
+                              setFormErrors({ ...formErrors, name: '' });
+                            }}
+                            placeholder="Your full name"
+                            required={formFields?.requiredFields?.includes('name')}
+                            error={formErrors.name}
+                          />
+                        )}
 
-                        <div>
-                          <label htmlFor="email" className="block text-sm font-semibold mb-3">
-                            Email Address
-                          </label>
-                          <input
+                        {formFields?.showEmail !== false && (
+                          <PremiumInput
+                            label="Email"
                             type="email"
-                            id="email"
-                            name="email"
-                            required
-                            className="w-full rounded-xl shadow-lg bg-background px-5 py-3 outline-none focus:border-prayer-red focus:ring-2 focus:ring-prayer-red/20 transition-all"
-                            placeholder="your.email@example.com"
+                            value={formState.email}
+                            onChange={(e) => {
+                              setFormState({ ...formState, email: e.target.value });
+                              setFormErrors({ ...formErrors, email: '' });
+                            }}
+                            placeholder="your@email.com"
+                            required={formFields?.requiredFields?.includes('email')}
+                            error={formErrors.email}
                           />
-                        </div>
+                        )}
 
-                        <div>
-                          <label htmlFor="phone" className="block text-sm font-semibold mb-3">
-                            Phone Number (Optional)
-                          </label>
-                          <input
+                        {formFields?.showPhone !== false && (
+                          <PremiumInput
+                            label="Phone"
                             type="tel"
-                            id="phone"
-                            name="phone"
-                            className="w-full rounded-xl shadow-lg bg-background px-5 py-3 outline-none focus:border-prayer-red focus:ring-2 focus:ring-prayer-red/20 transition-all"
-                            placeholder="+1 234 567 8900"
+                            value={formState.phone}
+                            onChange={(e) => setFormState({ ...formState, phone: e.target.value })}
+                            placeholder="+975 2 327654"
+                            required={formFields?.requiredFields?.includes('phone')}
                           />
-                        </div>
+                        )}
 
-                        <div>
-                          <label htmlFor="subject" className="block text-sm font-semibold mb-3">
-                            Subject
-                          </label>
-                          <select
-                            id="subject"
-                            name="subject"
-                            required
-                            className="w-full rounded-xl shadow-lg bg-background px-5 py-3 outline-none focus:border-prayer-red focus:ring-2 focus:ring-prayer-red/20 transition-all"
-                          >
-                            <option value="">Select a topic</option>
-                            <option value="tour-inquiry">Tour Inquiry</option>
-                            <option value="custom-tour">Custom Tour Request</option>
-                            <option value="booking">Booking Question</option>
-                            <option value="general">General Inquiry</option>
-                            <option value="other">Other</option>
-                          </select>
-                        </div>
-
-                        <div>
-                          <label htmlFor="message" className="block text-sm font-semibold mb-3">
-                            Message
-                          </label>
-                          <textarea
-                            id="message"
-                            name="message"
-                            required
-                            rows={6}
-                            className="w-full rounded-xl shadow-lg bg-background px-5 py-3 outline-none focus:border-prayer-red focus:ring-2 focus:ring-prayer-red/20 resize-none transition-all"
-                            placeholder="Tell us about your travel plans, questions, or feedback..."
+                        {formFields?.showTravelDates !== false && (
+                          <PremiumInput
+                            label="Preferred Travel Dates"
+                            value={formState.travelDates}
+                            onChange={(e) => setFormState({ ...formState, travelDates: e.target.value })}
+                            placeholder="e.g., March 15-25, 2024"
                           />
-                        </div>
+                        )}
 
-                        <button
+                        {formFields?.showGroupSize !== false && (
+                          <PremiumInput
+                            label="Group Size"
+                            value={formState.groupSize}
+                            onChange={(e) => setFormState({ ...formState, groupSize: e.target.value })}
+                            placeholder="Number of travelers"
+                          />
+                        )}
+
+                        {formFields?.showMessage !== false && (
+                          <PremiumTextarea
+                            label="Message"
+                            value={formState.message}
+                            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+                              setFormState({ ...formState, message: e.target.value });
+                              setFormErrors({ ...formErrors, message: '' });
+                            }}
+                            placeholder="Tell us about your travel plans..."
+                            rows={4}
+                            required={formFields?.requiredFields?.includes('message')}
+                            error={formErrors.message}
+                          />
+                        )}
+
+                        <MagneticButton
                           type="submit"
-                          className="w-full rounded-xl px-8 py-4 text-lg font-semibold text-white transition-all hover:scale-105 hover:shadow-lg"
+                          disabled={submitting}
+                          className="w-full rounded-xl px-8 py-4 text-lg font-semibold"
                           style={{
                             background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)',
+                            color: '#FFFFFF',
                             border: 'none'
                           }}
                         >
-                          <span className="inline-flex items-center justify-center gap-2">
-                            Send Message
-                            <Send className="w-5 h-5" />
-                          </span>
-                        </button>
+                          {submitting ? (
+                            <>
+                              <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                              Sending...
+                            </>
+                          ) : (
+                            <>
+                              <Send className="h-5 w-5 mr-2" />
+                              Send Message
+                            </>
+                          )}
+                        </MagneticButton>
                       </form>
                     </CardContent>
                   </Card>
-                </div>
-              </ScrollReveal>
+                )}
+              </div>
 
-              {/* Info */}
-              <ScrollReveal direction="left" delay={0.2}>
-                <div className="space-y-10">
+              {/* Contact Information */}
+              <div>
+                <ScrollReveal>
+                  <div className="mb-8">
+                    <h2 className="font-heading text-2xl md:text-3xl font-bold mb-4">
+                      Contact Information
+                    </h2>
+                    <p className="text-muted-foreground text-lg">
+                      Reach out to us directly through any of these channels
+                    </p>
+                  </div>
+                </ScrollReveal>
+
+                <div className="space-y-6">
+                  {/* Phone */}
+                  {contactInfo?.phone && (
+                    <ScrollReveal>
+                      <Card className="hover:shadow-premium-md transition-all duration-300">
+                        <CardContent className="p-6">
+                          <div className="flex items-start gap-4">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-xl"
+                              style={{
+                                background: 'linear-gradient(135deg, #D4A017 0%, #B8860B 100%)'
+                              }}
+                            >
+                              <Phone className="h-6 w-6 text-white" />
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-lg mb-1">Call Us</h3>
+                              <Link href={`tel:${contactInfo.phone}`} className="text-muted-foreground hover:text-prayer-red transition-colors">
+                                {contactInfo.phone}
+                              </Link>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </ScrollReveal>
+                  )}
+
+                  {/* WhatsApp */}
+                  {contactInfo?.whatsapp && (
+                    <ScrollReveal>
+                      <Card className="hover:shadow-premium-md transition-all duration-300">
+                        <CardContent className="p-6">
+                          <div className="flex items-start gap-4">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-xl"
+                              style={{ background: '#25D366' }}
+                            >
+                              <MessageCircle className="h-6 w-6 text-white" />
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-lg mb-1">WhatsApp</h3>
+                              <Link href={`https://wa.me/${contactInfo.whatsapp.replace(/\D/g, '')}`} className="text-muted-foreground hover:text-prayer-red transition-colors">
+                                Chat Now
+                              </Link>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </ScrollReveal>
+                  )}
+
+                  {/* Email */}
+                  {contactInfo?.email && (
+                    <ScrollReveal>
+                      <Card className="hover:shadow-premium-md transition-all duration-300">
+                        <CardContent className="p-6">
+                          <div className="flex items-start gap-4">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-xl"
+                              style={{
+                                background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)'
+                              }}
+                            >
+                              <Mail className="h-6 w-6 text-white" />
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-lg mb-1">Email Us</h3>
+                              <Link href={`mailto:${contactInfo.email}`} className="text-muted-foreground hover:text-prayer-red transition-colors">
+                                {contactInfo.email}
+                              </Link>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </ScrollReveal>
+                  )}
+
+                  {/* Address */}
+                  {contactInfo?.address && (
+                    <ScrollReveal>
+                      <Card className="hover:shadow-premium-md transition-all duration-300">
+                        <CardContent className="p-6">
+                          <div className="flex items-start gap-4">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-xl"
+                              style={{
+                                background: 'linear-gradient(135deg, #4A90E2 0%, #357ABD 100%)'
+                              }}
+                            >
+                              <MapPin className="h-6 w-6 text-white" />
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-lg mb-1">Visit Us</h3>
+                              <p className="text-muted-foreground mb-3">
+                                {contactInfo.address}
+                              </p>
+                              <Link
+                                href="https://maps.app.goo.gl/augGCB49iedQwe398"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 text-sm font-medium text-prayer-red hover:text-monastery-red transition-colors"
+                              >
+                                <Compass className="h-4 w-4" />
+                                Open in Google Maps
+                                <ArrowRight className="h-4 w-4" />
+                              </Link>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </ScrollReveal>
+                  )}
+
                   {/* Office Hours */}
-                  <div>
-                    <h2 className="font-heading text-2xl md:text-3xl font-bold mb-6">Office Hours</h2>
-                    <Card className="shadow-lg">
-                      <CardContent className="p-8">
-                        <div className="space-y-5">
-                          <div className="flex items-center justify-between py-2 shadow-lg shadow-lg/50">
-                            <span className="font-semibold text-lg">Monday - Friday</span>
-                            <span className="text-muted-foreground font-medium">9:00 AM - 6:00 PM</span>
+                  {officeHours && (
+                    <ScrollReveal>
+                      <Card className="hover:shadow-premium-md transition-all duration-300">
+                        <CardContent className="p-6">
+                          <div className="flex items-start gap-4">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted">
+                              <Clock className="h-6 w-6 text-foreground" />
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-lg mb-3">Office Hours</h3>
+                              <div className="space-y-2 text-sm">
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Weekdays</span>
+                                  <span className="font-medium">{officeHours.weekdays}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Saturdays</span>
+                                  <span className="font-medium">{officeHours.saturdays}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Sundays</span>
+                                  <span className="font-medium">{officeHours.sundays}</span>
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                          <div className="flex items-center justify-between py-2 shadow-lg shadow-lg/50">
-                            <span className="font-semibold text-lg">Saturday</span>
-                            <span className="text-muted-foreground font-medium">10:00 AM - 4:00 PM</span>
-                          </div>
-                          <div className="flex items-center justify-between py-2">
-                            <span className="font-semibold text-lg">Sunday</span>
-                            <span className="text-muted-foreground font-medium">Closed</span>
-                          </div>
-                          <p className="text-sm text-muted-foreground pt-4">
-                            All times are Bhutan Standard Time (BST)
-                          </p>
+                        </CardContent>
+                      </Card>
+                    </ScrollReveal>
+                  )}
+                </div>
+
+                {/* Social Media */}
+                {socialMedia && (
+                  <ScrollReveal>
+                    <Card className="mt-8 shadow-premium-md">
+                      <CardContent className="p-6">
+                        <h3 className="font-semibold text-lg mb-4">Follow Us</h3>
+                        <div className="flex gap-4">
+                          {socialMedia.facebook && (
+                            <Link
+                              href={socialMedia.facebook}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted hover:bg-blue-100 transition-colors"
+                            >
+                              <span className="text-blue-600 font-bold text-sm">f</span>
+                            </Link>
+                          )}
+                          {socialMedia.instagram && (
+                            <Link
+                              href={socialMedia.instagram}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted hover:bg-pink-100 transition-colors"
+                            >
+                              <span className="text-pink-600 font-bold text-sm">ig</span>
+                            </Link>
+                          )}
+                          {socialMedia.twitter && (
+                            <Link
+                              href={socialMedia.twitter}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted hover:bg-blue-100 transition-colors"
+                            >
+                              <span className="text-blue-400 font-bold text-sm">tw</span>
+                            </Link>
+                          )}
+                          {socialMedia.youtube && (
+                            <Link
+                              href={socialMedia.youtube}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted hover:bg-red-100 transition-colors"
+                            >
+                              <span className="text-red-600 font-bold text-sm">yt</span>
+                            </Link>
+                          )}
                         </div>
                       </CardContent>
                     </Card>
-                  </div>
-
-                  {/* Benefits */}
-                  <div>
-                    <h2 className="font-heading text-2xl md:text-3xl font-bold mb-6">Why Choose Wangchuks Tour?</h2>
-                    <div className="space-y-5">
-                      {benefits.map((benefit, i) => {
-                        const Icon = benefit.icon;
-                        return (
-                          <div key={i} className="flex items-start gap-4">
-                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl shadow-lg" style={{ background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)' }}>
-                              <Icon className="h-6 w-6 text-white" />
-                            </div>
-                            <div>
-                              <p className="font-bold text-lg mb-1">{benefit.title}</p>
-                              <p className="text-muted-foreground">{benefit.description}</p>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Quick Links */}
-                  <div>
-                    <h2 className="font-heading text-2xl md:text-3xl font-bold mb-6">Quick Links</h2>
-                    <div className="space-y-3">
-                      <Link href="/tours" className="inline-flex w-full items-center justify-between rounded-xl px-5 py-4 font-medium hover:bg-muted transition-colors shadow-lg border-transparent hover:shadow-lg">
-                        <span>Browse Tours</span>
-                        <ArrowRight className="w-5 h-5" />
-                      </Link>
-                      <Link href="/about" className="inline-flex w-full items-center justify-between rounded-xl px-5 py-4 font-medium hover:bg-muted transition-colors shadow-lg border-transparent hover:shadow-lg">
-                        <span>Learn About Us</span>
-                        <ArrowRight className="w-5 h-5" />
-                      </Link>
-                      <Link href="/blog" className="inline-flex w-full items-center justify-between rounded-xl px-5 py-4 font-medium hover:bg-muted transition-colors shadow-lg border-transparent hover:shadow-lg">
-                        <span>Read Travel Guides</span>
-                        <ArrowRight className="w-5 h-5" />
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              </ScrollReveal>
-            </div>
-          </div>
-        </section>
-
-        {/* Premium CTA Section */}
-        <section className="py-20 md:py-28 relative overflow-hidden">
-          <div className="absolute inset-0">
-            <img
-              src={optimizeImageUrl('https://res.cloudinary.com/hckgrdeh/image/upload/q_auto,f_auto/v1782911270/bumthang_bdxytr.jpg', 1920, 1080)}
-              alt="Bumthang"
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/75 to-black/85" />
-          </div>
-
-          <div className="relative container text-center">
-            <ScrollReveal>
-              <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
-                Ready to Start Your Bhutan Adventure?
-              </h2>
-              <p className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto mb-12 leading-relaxed">
-                Browse our collection of carefully crafted tours or reach out to create your custom
-                journey through the Last Shangri-La.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-6 justify-center">
-                <Link href="/tours">
-                  <MagneticButton
-                    className="rounded-xl px-10 py-6 text-lg font-semibold"
-                    style={{
-                      background: '#FFFFFF',
-                      color: 'var(--prayer-red)',
-                      border: 'none'
-                    }}
-                  >
-                    Explore Tours
-                    <ArrowRight className="w-5 h-5" />
-                  </MagneticButton>
-                </Link>
-                <Link href="mailto:info@wangchuktour.com">
-                  <MagneticButton
-                    className="rounded-xl px-10 py-6 text-lg font-semibold shadow-lg"
-                    style={{
-                      background: 'transparent',
-                      color: '#FFFFFF',
-                      borderColor: '#FFFFFF'
-                    }}
-                  >
-                    Email Us Directly
-                    <Mail className="w-5 h-5" />
-                  </MagneticButton>
-                </Link>
+                  </ScrollReveal>
+                )}
               </div>
-            </ScrollReveal>
+            </div>
           </div>
         </section>
       </main>
