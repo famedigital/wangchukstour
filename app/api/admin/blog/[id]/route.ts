@@ -76,8 +76,6 @@ export async function PATCH(
       .from('blog_posts')
       .update({
         ...body,
-        updated_by: user.userId,
-        updated_at: new Date().toISOString(),
       })
       .eq('id', id)
       .select()
@@ -137,8 +135,6 @@ export async function DELETE(
       .from('blog_posts')
       .update({
         is_published: false,
-        updated_by: user.userId,
-        updated_at: new Date().toISOString(),
       })
       .eq('id', id);
 

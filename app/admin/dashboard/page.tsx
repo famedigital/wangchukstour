@@ -93,6 +93,12 @@ export default function AdminDashboardPage() {
 
   // Fetch real data on component mount
   useEffect(() => {
+    // Redirect blog tab to actual blog management page
+    if (activeTab === 'blog') {
+      router.push('/admin/blog');
+      return;
+    }
+
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
@@ -132,7 +138,7 @@ export default function AdminDashboardPage() {
     };
 
     fetchDashboardData();
-  }, []);
+  }, [activeTab, router]);
 
   const handleLogout = async () => {
     try {
@@ -579,32 +585,12 @@ export default function AdminDashboardPage() {
         )}
 
         {activeTab === 'blog' && (
-          <Card className="shadow-premium-md hover:shadow-premium-lg transition-shadow duration-300">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold">Blog Management</h2>
-                <Link
-                  href="/admin/blog/new"
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-white"
-                  style={{ background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)' }}
-                >
-                  <Plus className="h-4 w-4" />
-                  New Post
-                </Link>
-              </div>
-
-              <div className="text-center py-12 text-gray-500">
-                <FileText className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                <p>Manage your blog posts, create content, and publish articles.</p>
-                <Link
-                  href="/admin/blog"
-                  className="inline-block mt-4 text-prayer-red hover:underline font-medium"
-                >
-                  Go to Blog Manager →
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="text-center py-12">
+            <div className="inline-block">
+              <Loader2 className="h-8 w-8 animate-spin text-red-600 mb-4" />
+              <p className="text-gray-600">Redirecting to Blog Manager...</p>
+            </div>
+          </div>
         )}
 
         {activeTab === 'about-page' && (

@@ -92,7 +92,24 @@ export function AboutPageForm() {
       const data = await response.json();
 
       if (response.ok && data.content) {
-        setContent(data.content);
+        // Ensure the content has all required properties
+        const safeContent = {
+          ...defaultContent,
+          ...data.content,
+          hero: {
+            ...defaultContent.hero,
+            ...data.content.hero,
+            cta: {
+              ...defaultContent.hero.cta,
+              ...(data.content.hero?.cta || {})
+            }
+          },
+          story: {
+            ...defaultContent.story,
+            ...data.content.story
+          }
+        };
+        setContent(safeContent);
       }
     } catch (error) {
       console.error('Error fetching About content:', error);

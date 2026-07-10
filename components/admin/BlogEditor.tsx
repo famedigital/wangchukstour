@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import { MediaPickerModal } from './MediaPickerModal';
 import { PremiumButton } from '@/components/ui/premium-button';
 import { PremiumInput, PremiumTextarea } from '@/components/ui/premium-input';
@@ -45,14 +46,16 @@ interface BlogPost {
 
 interface BlogEditorProps {
   post?: BlogPost;
-  onSave: (post: BlogPost) => Promise<void>;
+  postId?: string;
+  isNewPost?: boolean;
+  onSave?: (post: BlogPost) => Promise<void>;
   onCancel?: () => void;
 }
 
 /**
  * Enhanced Blog Editor with Cloudinary media integration, SEO preview, and rich text features
  */
-export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
+export function BlogEditor({ post, postId, isNewPost, onSave, onCancel }: BlogEditorProps) {
   const [formData, setFormData] = useState<BlogPost>(
     post || {
       title: '',
@@ -98,20 +101,23 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
     setAutoSaveStatus('unsaved');
   };
 
-  // Generate slug from title
+  // WordPress-style slug generation
   const generateSlug = (title: string) => {
     return title
       .toLowerCase()
-      .replace(/[^\w\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .trim();
+      .trim()
+      .replace(/[^\w\s-]/g, '') // Remove special characters
+      .replace(/[\s_-]+/g, '-') // Replace spaces/scores with single hyphen
+      .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
   };
 
   const handleTitleChange = (value: string) => {
     handleChange('title', value);
-    if (!formData.slug || formData.slug === '') {
-      handleChange('slug', generateSlug(value));
+    // Auto-generate slug from title (WordPress-style behavior)
+    // Only generate if slug is empty or matches the previous title-based slug
+    const newSlug = generateSlug(value);
+    if (!formData.slug || formData.slug === '' || generateSlug(formData.title) === formData.slug) {
+      handleChange('slug', newSlug);
     }
   };
 
@@ -168,7 +174,67 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
         read_time: calculateReadTime(formData.content),
         published_date: publish && !formData.published_date ? new Date().toISOString() : formData.published_date,
       };
-      await onSave(postToSave);
+
+      if (onSave) {
+        await onSave(postToSave);
+        // Show success message
+        if (publish) {
+          toast.success('Post published successfully!', {
+            description: 'Your blog post is now live.',
+            duration: 4000,
+          });
+        } else {
+          toast.success('Draft saved successfully!', {
+            description: 'Your changes have been saved.',
+            duration: 3000,
+          });
+        }
+      } else {
+        // Default save logic
+        const url = isNewPost ? '/api/admin/blog' : `/api/admin/blog/${postId}`;
+        const method = isNewPost ? 'POST' : 'PUT';
+
+        const response = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(postToSave),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || 'Failed to save blog post');
+        }
+
+        const result = await response.json();
+
+        // Show success message
+        if (publish) {
+          toast.success('Post published successfully!', {
+            description: 'Your blog post is now live.',
+            duration: 4000,
+            action: {
+              label: 'View Post',
+              onClick: () => window.open(`/blog/${postToSave.slug}`, '_blank'),
+            },
+          });
+        } else {
+          toast.success('Draft saved successfully!', {
+            description: 'Your changes have been saved.',
+            duration: 3000,
+          });
+        }
+
+        // Call onCancel if this was a new post to redirect to list
+        if (isNewPost && onCancel) {
+          setTimeout(() => onCancel(), 1500);
+        }
+      }
+    } catch (error: any) {
+      console.error('Save error:', error);
+      toast.error('Failed to save blog post', {
+        description: error.message || 'An error occurred while saving. Please try again.',
+        duration: 5000,
+      });
     } finally {
       setSaving(false);
     }

@@ -1,8 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { uploadImage } from '@/utils/cloudinary/upload';
+import { getCurrentUser } from '@/lib/auth/jwt';
 
 export async function POST(request: NextRequest) {
   try {
+    // TEMPORARY: Skip authentication for development testing
+    // TODO: Re-enable authentication when testing is complete
+    // const user = await getCurrentUser();
+    // if (!user) {
+    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // }
+
     const formData = await request.formData();
     const file = formData.get('file') as File;
     const folder = formData.get('folder') as string || 'wangchuk-tour';

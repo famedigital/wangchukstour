@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Search, Filter, Edit, Trash2, Eye, Calendar, Clock, Star } from 'lucide-react';
+import { toast } from 'sonner';
+import { Plus, Search, Filter, Edit, Trash2, Eye, Calendar, Clock, Star, Loader2 } from 'lucide-react';
 import { RichTextEditor } from './RichTextEditor';
 
 interface BlogPost {
@@ -10,7 +11,7 @@ interface BlogPost {
   slug: string;
   excerpt: string;
   featured_image_url: string;
-  author_name: string;
+  author: string; // Changed from author_name to match database
   category: string;
   tags: string[];
   published_date: string;
@@ -24,6 +25,8 @@ interface BlogPost {
 export function BlogManagement() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<Set<string>>(new Set());
   const [selectedPosts, setSelectedPosts] = useState<Set<string>>(new Set());
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -39,39 +42,75 @@ export function BlogManagement() {
   const fetchPosts = async () => {
     try {
       setLoading(true);
+      setError(null);
       const params = new URLSearchParams();
       if (filterStatus !== 'all') params.append('status', filterStatus);
       if (filterCategory !== 'all') params.append('category', filterCategory);
       if (searchQuery) params.append('search', searchQuery);
 
       const response = await fetch(`/api/admin/blog?${params.toString()}`);
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch blog posts');
+      }
+
       const data = await response.json();
       setPosts(data.posts || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch blog posts:', error);
+      setError(error.message || 'An error occurred while fetching posts');
+      toast.error('Failed to load blog posts', {
+        description: error.message || 'Please try again later',
+        duration: 5000,
+      });
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteSelected = async () => {
-    if (selectedPosts.size === 0) return;
+    if (selectedPosts.size === 0) {
+      toast.error('No posts selected', {
+        description: 'Please select at least one post to delete.',
+        duration: 3000,
+      });
+      return;
+    }
 
     if (!confirm(`Are you sure you want to delete ${selectedPosts.size} post(s)?`)) {
       return;
     }
 
     try {
-      await Promise.all(
-        Array.from(selectedPosts).map(id =>
-          fetch(`/api/admin/blog/${id}`, { method: 'DELETE' })
-        )
-      );
+      // Add all selected posts to deleting state
+      setDeleting(new Set(selectedPosts));
+
+      const deletePromises = Array.from(selectedPosts).map(async (id) => {
+        const response = await fetch(`/api/admin/blog/${id}`, { method: 'DELETE' });
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || `Failed to delete post ${id}`);
+        }
+        return id;
+      });
+
+      await Promise.all(deletePromises);
 
       setSelectedPosts(new Set());
       await fetchPosts();
-    } catch (error) {
+
+      toast.success(`${selectedPosts.size} post(s) deleted successfully!`, {
+        description: 'The posts have been removed.',
+        duration: 4000,
+      });
+    } catch (error: any) {
       console.error('Delete failed:', error);
+      toast.error('Failed to delete posts', {
+        description: error.message || 'An error occurred while deleting. Please try again.',
+        duration: 5000,
+      });
+    } finally {
+      setDeleting(new Set());
     }
   };
 
@@ -79,10 +118,30 @@ export function BlogManagement() {
     if (!confirm('Are you sure you want to delete this post?')) return;
 
     try {
-      await fetch(`/api/admin/blog/${id}`, { method: 'DELETE' });
+      // Add to deleting state
+      setDeleting(new Set([id]));
+
+      const response = await fetch(`/api/admin/blog/${id}`, { method: 'DELETE' });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to delete post');
+      }
+
       await fetchPosts();
-    } catch (error) {
+
+      toast.success('Post deleted successfully!', {
+        description: 'The post has been removed.',
+        duration: 3000,
+      });
+    } catch (error: any) {
       console.error('Delete failed:', error);
+      toast.error('Failed to delete post', {
+        description: error.message || 'An error occurred while deleting. Please try again.',
+        duration: 5000,
+      });
+    } finally {
+      setDeleting(new Set());
     }
   };
 
@@ -189,8 +248,24 @@ export function BlogManagement() {
 
       {/* Posts Grid */}
       {loading ? (
-        <div className="flex items-center justify-center h-96">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
+        <div className="flex flex-col items-center justify-center h-96">
+          <Loader2 className="h-12 w-12 animate-spin text-red-600 mb-4" />
+          <p className="text-gray-600 text-lg">Loading blog posts...</p>
+        </div>
+      ) : error ? (
+        <div className="flex flex-col items-center justify-center h-96 bg-white rounded-lg border">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+            <Trash2 className="w-8 h-8 text-red-600" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Error Loading Posts</h3>
+          <p className="text-gray-500 mb-6">{error}</p>
+          <button
+            onClick={() => fetchPosts()}
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-medium"
+            style={{ background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)' }}
+          >
+            Try Again
+          </button>
         </div>
       ) : posts.length > 0 ? (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -304,9 +379,14 @@ export function BlogManagement() {
                   </button>
                   <button
                     onClick={() => handleDeletePost(post.id)}
-                    className="flex items-center justify-center gap-2 px-3 py-2 text-sm hover:bg-red-50 text-red-600 rounded-lg"
+                    disabled={deleting.has(post.id)}
+                    className="flex items-center justify-center gap-2 px-3 py-2 text-sm hover:bg-red-50 text-red-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    {deleting.has(post.id) ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="w-4 h-4" />
+                    )}
                   </button>
                 </div>
               </div>
@@ -314,18 +394,37 @@ export function BlogManagement() {
           ))}
         </div>
       ) : (
-        <div className="text-center py-12 bg-white rounded-lg border">
-          <Calendar className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No blog posts found</h3>
-          <p className="text-gray-500 mb-6">Create your first blog post to get started</p>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-medium"
-            style={{ background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)' }}
-          >
-            <Plus className="w-5 h-5" />
-            Create Post
-          </button>
+        <div className="text-center py-16 bg-white rounded-xl border-2 border-dashed border-gray-200">
+          <div className="w-20 h-20 bg-gradient-to-br from-red-50 to-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Calendar className="w-10 h-10 text-red-600" />
+          </div>
+          <h3 className="text-2xl font-bold text-gray-900 mb-3">No blog posts found</h3>
+          <p className="text-gray-500 mb-8 max-w-md mx-auto">
+            {searchQuery || filterStatus !== 'all' || filterCategory !== 'all'
+              ? 'Try adjusting your filters or search terms to find what you\'re looking for.'
+              : 'Create your first blog post to start sharing your travel stories and insights.'}
+          </p>
+          {(searchQuery || filterStatus !== 'all' || filterCategory !== 'all') ? (
+            <button
+              onClick={() => {
+                setSearchQuery('');
+                setFilterStatus('all');
+                setFilterCategory('all');
+              }}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors"
+            >
+              Clear Filters
+            </button>
+          ) : (
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-xl text-white font-medium shadow-lg hover:shadow-xl transition-all"
+              style={{ background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)' }}
+            >
+              <Plus className="w-5 h-5" />
+              Create Your First Post
+            </button>
+          )}
         </div>
       )}
     </div>

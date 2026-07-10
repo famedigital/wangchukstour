@@ -5,11 +5,11 @@ import { Footer } from '@/components/public/Footer';
 import { MagneticButton } from '@/components/ui/magnetic-button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { getBlogBySlug, mockBlogs } from '@/lib/mock-data/blogs';
 import { Calendar, User, Clock, Tag, ArrowLeft, Mail, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
 
-const optimizeImageUrl = (url: string, width: number, height: number) => {
+const optimizeImageUrl = (url: string | undefined, width: number, height: number) => {
+  if (!url) return '/placeholder.jpg';
   if (url.includes('cloudinary')) {
     const transformations = `q_auto,f_auto,w_${width},h_${height},c_fill`;
     return url.replace('/image/upload/', `/image/upload/${transformations}/`);
@@ -17,24 +17,35 @@ const optimizeImageUrl = (url: string, width: number, height: number) => {
   return url;
 };
 
-export async function generateStaticParams() {
-  return mockBlogs.map((blog) => ({
-    slug: blog.slug,
-  }));
-}
-
 export default async function BlogDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const blog = getBlogBySlug(slug);
 
-  if (!blog || !blog.is_published) {
+  // Fetch blog post from database
+  const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'}/api/blog?slug=${slug}`, {
+    cache: 'no-store'
+  });
+
+  if (!response.ok) {
     notFound();
   }
 
-  // Get related posts by category (excluding current post)
-  const relatedPosts = mockBlogs
-    .filter(b => b.is_published && b.category === blog.category && b.id !== blog.id)
-    .slice(0, 3);
+  const data = await response.json();
+  const blog = data.post;
+
+  if (!blog) {
+    notFound();
+  }
+
+  // Fetch related posts by category
+  const relatedResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'}/api/blog?category=${blog.category}&limit=3`, {
+    cache: 'no-store'
+  });
+
+  let relatedPosts = [];
+  if (relatedResponse.ok) {
+    const relatedData = await relatedResponse.json();
+    relatedPosts = (relatedData.posts || []).filter((post: any) => post.id !== blog.id).slice(0, 3);
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -45,7 +56,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
         <section className="relative overflow-hidden">
           <div className="absolute inset-0">
             <img
-              src={optimizeImageUrl(blog.featured_image, 1920, 1080)}
+              src={optimizeImageUrl(blog.featured_image_url, 1920, 1080)}
               alt={blog.title}
               className="w-full h-full object-cover"
             />
@@ -230,7 +241,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
                       <Card className="overflow-hidden hover:shadow-2xl transition-all duration-300 group-hover:-translate-y-3 h-full">
                         <div className="relative h-48 overflow-hidden">
                           <img
-                            src={optimizeImageUrl(post.featured_image, 600, 400)}
+                            src={optimizeImageUrl(post.featured_image_url, 600, 400)}
                             alt={post.title}
                             className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                           />

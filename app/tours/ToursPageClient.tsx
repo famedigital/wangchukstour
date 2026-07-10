@@ -128,7 +128,7 @@ export function ToursPageClient({ tours }: { tours: any[] }) {
 
       <main className="flex-1">
         {/* Tours Content */}
-        <section className="pt-32 pb-16 md:pt-40 md:pb-24 bg-gradient-to-b from-black via-gray-800 via-gray-700 to-gray-200">
+        <section className="pt-32 pb-16 md:pt-40 md:pb-24 bg-gradient-to-b from-gray-200 via-gray-100 to-white">
           <div className="container">
             {/* Search Bar */}
             <div className="mb-16 max-w-3xl mx-auto">

@@ -94,8 +94,6 @@ export async function POST(request: NextRequest) {
       .from('blog_posts')
       .insert({
         ...body,
-        created_by: user.userId,
-        updated_by: user.userId,
       })
       .select()
       .single();

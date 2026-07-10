@@ -108,10 +108,14 @@ export async function getCloudinaryImages(options?: {
   try {
     const params: any = {
       type: 'upload',
-      prefix: options?.folder || 'wangchuk-tour',
       max_results: options?.maxResults || 100,
       resource_type: options?.resource_type || 'image',
     };
+
+    // Only add prefix if folder is specified
+    if (options?.folder) {
+      params.prefix = options.folder;
+    }
 
     if (options?.tags && options.tags.length > 0) {
       params.tags = options.tags.join(',');

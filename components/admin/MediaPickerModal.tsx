@@ -10,6 +10,7 @@ interface MediaItem {
   public_id: string;
   url: string;
   secure_url: string;
+  thumbnail_url?: string; // Optimized thumbnail URL
   format: string;
   width: number;
   height: number;
@@ -48,8 +49,8 @@ export function MediaPickerModal({
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [folders, setFolders] = useState<string[]>(['/', '/tours/', '/blog/', '/about/', '/hero/']);
-  const [currentFolderFilter, setCurrentFolderFilter] = useState(currentFolder);
+  const [folders, setFolders] = useState<string[]>(['All Images', 'tours', 'blog', 'about', 'hero']);
+  const [currentFolderFilter, setCurrentFolderFilter] = useState('All Images');
 
   // Fetch media from API
   useEffect(() => {
@@ -62,27 +63,57 @@ export function MediaPickerModal({
   const fetchMedia = async () => {
     try {
       setLoading(true);
+      console.log('🔍 Fetching media from Cloudinary...');
+
       const response = await fetch('/api/admin/media');
-      const data = await response.json();
 
-      let fetchedMedia = data || [];
+      console.log('📡 API Response status:', response.status);
 
-      // Filter by folder if specified
-      if (currentFolderFilter && currentFolderFilter !== '/') {
-        fetchedMedia = fetchedMedia.filter((item: MediaItem) =>
-          item.folder === currentFolderFilter
-        );
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('❌ API Error:', errorData);
+        throw new Error(`HTTP error! status: ${response.status}, error: ${errorData.error || 'Unknown'}`);
       }
 
-      // Filter by allowed types
-      fetchedMedia = fetchedMedia.filter((item: MediaItem) =>
-        allowedTypes.includes(item.resource_type as any)
-      );
+      const data = await response.json();
+      console.log('📦 API Response data:', data);
+
+      // Handle different response formats
+      let fetchedMedia = data.images || data || [];
+      console.log(`🖼️ Found ${fetchedMedia.length} images`);
+
+      // Filter by folder if specified
+      if (currentFolderFilter && currentFolderFilter !== 'All Images') {
+        const beforeFilter = fetchedMedia.length;
+        const folderName = currentFolderFilter.toLowerCase();
+        fetchedMedia = fetchedMedia.filter((item: MediaItem) => {
+          // Check if image starts with folder name followed by /
+          const pathParts = item.public_id.split('/');
+          const imageFolder = pathParts.length > 1 ? pathParts[0] : null;
+          return imageFolder === folderName;
+        });
+        console.log(`🔍 Filtered to ${fetchedMedia.length} images (from ${beforeFilter}) for folder: ${currentFolderFilter}`);
+      }
+
+      // Filter by allowed types (skip type filtering since Cloudinary returns different types)
+      // Most Cloudinary images are 'image' type but the filtering might be too strict
+      const beforeTypeFilter = fetchedMedia.length;
+      // fetchedMedia = fetchedMedia.filter((item: MediaItem) =>
+      //   allowedTypes.includes(item.resource_type as any)
+      // );
+      console.log(`🎯 Skipped type filtering to show all ${fetchedMedia.length} images`);
 
       setMedia(fetchedMedia);
       setFilteredMedia(fetchedMedia);
+
+      if (fetchedMedia.length === 0) {
+        console.warn('⚠️ No images found after filtering');
+      }
     } catch (error) {
-      console.error('Error fetching media:', error);
+      console.error('❌ Error fetching media:', error);
+      // Set empty arrays on error to prevent crashes
+      setMedia([]);
+      setFilteredMedia([]);
     } finally {
       setLoading(false);
     }
@@ -127,7 +158,7 @@ export function MediaPickerModal({
         formData.append('folder', currentFolderFilter);
         formData.append('upload_preset', 'ml_default'); // Cloudinary upload preset
 
-        const response = await fetch('/api/admin/media/upload', {
+        const response = await fetch('/api/upload', {
           method: 'POST',
           body: formData,
         });
@@ -321,7 +352,7 @@ export function MediaPickerModal({
                   {viewMode === 'grid' ? (
                     <>
                       <img
-                        src={item.secure_url}
+                        src={item.thumbnail_url || item.secure_url}
                         alt={item.alt_text || item.public_id}
                         className="w-full h-32 object-cover"
                       />
