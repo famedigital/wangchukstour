@@ -300,7 +300,7 @@ export function BlogManagement() {
                   <div className="font-bold text-sm sm:text-base truncate">{post.title}</div>
                   <div className="text-xs sm:text-sm text-gray-500 truncate">{post.excerpt}</div>
                   <div className="flex items-center gap-2 mt-1 flex-wrap">
-                    <Badge className={getStatusColor(post.is_published)} className="text-xs">
+                    <Badge className={`${getStatusColor(post.is_published)} text-xs`}>
                       {post.is_published ? 'Published' : 'Draft'}
                     </Badge>
                     <Badge variant="secondary" className="text-xs">{post.category}</Badge>
