@@ -61,7 +61,7 @@ export default async function HomePage() {
   ]);
 
   return (
-    <div className="flex min-h-screen flex-col bg-background pb-16 lg:pb-0">
+    <div className="flex min-h-screen flex-col bg-background safe-bottom-padding lg:pb-0">
       <Navigation />
 
       {/* === IMMERSIVE HERO SECTION WITH SLIDESHOW === */}

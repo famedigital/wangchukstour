@@ -113,8 +113,8 @@ export function Navigation() {
       </nav>
 
       {/* Mobile Bottom Navigation */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white backdrop-blur-lg shadow-2xl border-t-2 border-gray-200">
-        <div className="flex flex-row">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white backdrop-blur-lg shadow-2xl border-t-2 border-gray-200 safe-area-inset-bottom">
+        <div className="flex flex-row max-w-screen-lg mx-auto">
           {/* Navigation Links */}
           {navLinks.map((link) => {
             const Icon = link.icon;
@@ -123,9 +123,8 @@ export function Navigation() {
               <Link
                 key={link.name}
                 href={link.href}
-                className="flex flex-col items-center justify-center py-3 px-1 transition-all duration-300 relative group"
+                className="flex flex-col items-center justify-center py-3 px-2 transition-all duration-300 relative group min-w-0 flex-1"
                 style={{
-                  flex: '1',
                   backgroundColor: isActive ? 'rgba(220, 20, 60, 0.1)' : 'transparent'
                 }}
               >
@@ -141,7 +140,7 @@ export function Navigation() {
                   />
                 </div>
                 <span
-                  className="text-[10px] font-semibold transition-all duration-300 leading-none"
+                  className="text-[10px] font-semibold transition-all duration-300 leading-none whitespace-nowrap overflow-hidden text-ellipsis"
                   style={{
                     color: isActive ? '#DC143C' : '#374151'
                   }}
@@ -157,8 +156,7 @@ export function Navigation() {
             href="https://wa.me/97517643416"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex flex-col items-center justify-center py-3 px-1 transition-all duration-300 relative group"
-            style={{ flex: '1' }}
+            className="flex flex-col items-center justify-center py-3 px-2 transition-all duration-300 relative group min-w-0 flex-1"
           >
             <div className="relative mb-1">
               <MessageCircle
@@ -172,7 +170,7 @@ export function Navigation() {
               />
             </div>
             <span
-              className="text-[10px] font-semibold transition-all duration-300 leading-none"
+              className="text-[10px] font-semibold transition-all duration-300 leading-none whitespace-nowrap overflow-hidden text-ellipsis"
               style={{
                 color: '#059669'
               }}

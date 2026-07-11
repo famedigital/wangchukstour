@@ -291,9 +291,9 @@ export function BlogEditor({ post, postId, isNewPost, onSave, onCancel }: BlogEd
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header Actions */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-2">
           <span className={`text-sm flex items-center gap-1 ${
             autoSaveStatus === 'saved' ? 'text-green-600' :
@@ -303,23 +303,26 @@ export function BlogEditor({ post, postId, isNewPost, onSave, onCancel }: BlogEd
             {autoSaveStatus === 'saved' && <CheckCircle className="h-4 w-4" />}
             {autoSaveStatus === 'saving' && <Loader2 className="h-4 w-4 animate-spin" />}
             {autoSaveStatus === 'unsaved' && <XCircle className="h-4 w-4" />}
-            {autoSaveStatus === 'saved' ? 'All changes saved' :
-             autoSaveStatus === 'saving' ? 'Saving...' :
-             'Unsaved changes'}
+            <span className="hidden xs:inline">
+              {autoSaveStatus === 'saved' ? 'All changes saved' :
+               autoSaveStatus === 'saving' ? 'Saving...' :
+               'Unsaved changes'}
+            </span>
           </span>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <PremiumButton
             variant="secondary"
             onClick={() => setPreviewMode(!previewMode)}
             icon={<Eye className="h-4 w-4" />}
+            className="flex-1 sm:flex-none text-xs sm:text-sm"
           >
             {previewMode ? 'Edit' : 'Preview'}
           </PremiumButton>
 
           {onCancel && (
-            <PremiumButton variant="secondary" onClick={onCancel}>
+            <PremiumButton variant="secondary" onClick={onCancel} className="flex-1 sm:flex-none text-xs sm:text-sm">
               Cancel
             </PremiumButton>
           )}
@@ -329,14 +332,17 @@ export function BlogEditor({ post, postId, isNewPost, onSave, onCancel }: BlogEd
             onClick={() => handleSave(false)}
             loading={saving}
             icon={<Save className="h-4 w-4" />}
+            className="flex-1 sm:flex-none text-xs sm:text-sm"
           >
-            Save Draft
+            <span className="hidden sm:inline">Save Draft</span>
+            <span className="sm:hidden">Draft</span>
           </PremiumButton>
 
           <PremiumButton
             variant="primary"
             onClick={() => handleSave(true)}
             loading={saving}
+            className="flex-1 sm:flex-none text-xs sm:text-sm"
           >
             {formData.is_published ? 'Update' : 'Publish'}
           </PremiumButton>
@@ -344,9 +350,9 @@ export function BlogEditor({ post, postId, isNewPost, onSave, onCancel }: BlogEd
       </div>
 
       {!previewMode ? (
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Main Editor */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Title & Slug */}
             <div className="space-y-4">
               <PremiumInput

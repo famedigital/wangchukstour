@@ -127,6 +127,23 @@
     color: var(--color-foreground);
   }
 
+  /* Mobile bottom navigation safe area */
+  html {
+    height: 100%;
+    position: relative;
+  }
+
+  body {
+    min-height: 100%;
+    position: relative;
+  }
+
+  @supports (padding-bottom: env(safe-area-inset-bottom)) {
+    .safe-bottom-padding {
+      padding-bottom: calc(4rem + env(safe-area-inset-bottom));
+    }
+  }
+
   .container {
     width: 100%;
     max-width: 1400px;
