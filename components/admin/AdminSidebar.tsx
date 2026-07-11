@@ -180,8 +180,12 @@ export function AdminSidebar({
         <div className="flex items-center justify-between h-20 px-6 shrink-0">
           {!isCollapsed ? (
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)' }}>
-                <LayoutDashboard className="h-5 w-5 text-white" />
+              <div className="flex h-12 w-auto items-center justify-center">
+                <img
+                  src="https://res.cloudinary.com/hckgrdeh/image/upload/v1782962660/wangchukstlogo_usxclz.png"
+                  alt="Wangchuk Tours & Treks"
+                  className="h-full w-auto object-contain"
+                />
               </div>
               <div>
                 <div className="font-bold text-lg">Admin Panel</div>
@@ -189,8 +193,12 @@ export function AdminSidebar({
               </div>
             </div>
           ) : (
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl mx-auto" style={{ background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)' }}>
-              <LayoutDashboard className="h-5 w-5 text-white" />
+            <div className="flex h-10 w-auto items-center justify-center mx-auto">
+              <img
+                src="https://res.cloudinary.com/hckgrdeh/image/upload/v1782962660/wangchukstlogo_usxclz.png"
+                alt="Wangchuk Tours & Treks"
+                className="h-full w-auto object-contain"
+              />
             </div>
           )}
 

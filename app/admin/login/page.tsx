@@ -51,8 +51,12 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-md">
         {/* Logo and Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4" style={{ background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)' }}>
-            <LayoutDashboard className="w-8 h-8 text-white" />
+          <div className="inline-flex items-center justify-center mb-4">
+            <img
+              src="https://res.cloudinary.com/hckgrdeh/image/upload/v1782962660/wangchukstlogo_usxclz.png"
+              alt="Wangchuk Tours & Treks"
+              className="h-20 w-auto object-contain"
+            />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Login</h1>
           <p className="text-gray-600">Wangchuk Tours & Treks</p>

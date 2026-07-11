@@ -193,33 +193,34 @@ export function BlogManagement() {
 
   return (
     <Card className="shadow-premium-md hover:shadow-premium-lg transition-shadow duration-300">
-      <CardContent className="p-6">
+      <CardContent className="p-4 md:p-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div>
             <h2 className="text-xl font-bold">Blog Posts</h2>
             <p className="text-gray-500 mt-1">{posts.length} posts</p>
           </div>
-          <div className="flex items-center gap-3">
-            <button className="flex items-center gap-2 px-4 py-2 rounded-lg shadow-premium-sm hover:shadow-premium-md transition-shadow duration-300 bg-white">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <button className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg shadow-premium-sm hover:shadow-premium-md transition-shadow duration-300 bg-white">
               <Filter className="h-4 w-4" />
               Filter
             </button>
             <button
               onClick={() => router.push('/admin/blog/new')}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg text-white"
+              className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-white text-sm sm:text-base"
               style={{ background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)' }}
             >
               <Plus className="h-4 w-4" />
-              New Post
+              <span className="hidden sm:inline">New Post</span>
+              <span className="sm:hidden">New</span>
             </button>
           </div>
         </div>
 
         {/* Toolbar */}
-        <div className="flex items-center gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-6">
           {/* Search */}
-          <div className="relative flex-1">
+          <div className="relative flex-1 w-full">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
@@ -234,7 +235,7 @@ export function BlogManagement() {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-4 py-2 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-100 transition-all duration-200"
+            className="px-3 sm:px-4 py-2 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-100 transition-all duration-200 text-sm"
           >
             <option value="all">All Status</option>
             <option value="published">Published</option>
@@ -245,7 +246,7 @@ export function BlogManagement() {
           <select
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}
-            className="px-4 py-2 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-100 transition-all duration-200"
+            className="px-3 sm:px-4 py-2 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-100 transition-all duration-200 text-sm"
           >
             <option value="all">All Categories</option>
             <option value="travel">Travel</option>
@@ -258,10 +259,11 @@ export function BlogManagement() {
           {selectedPosts.size > 0 && (
             <button
               onClick={handleDeleteSelected}
-              className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
+              className="flex items-center gap-2 px-3 sm:px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200 text-sm"
             >
-              <Trash2 className="w-5 h-5" />
-              Delete ({selectedPosts.size})
+              <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="hidden sm:inline">Delete ({selectedPosts.size})</span>
+              <span className="sm:hidden">Del ({selectedPosts.size})</span>
             </button>
           )}
         </div>
@@ -283,46 +285,47 @@ export function BlogManagement() {
             </button>
           </div>
       ) : posts.length > 0 ? (
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {posts.map((post) => (
             <div
               key={post.id}
-              className="flex items-center justify-between p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer"
+              className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer gap-3 sm:gap-4"
               onClick={() => window.location.href = `/admin/blog/${post.id}`}
             >
-              <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)' }}>
-                  <FileText className="h-6 w-6 text-white" />
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-xl flex-shrink-0" style={{ background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)' }}>
+                  <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                 </div>
-                <div>
-                  <div className="font-bold">{post.title}</div>
-                  <div className="text-sm text-gray-500">{post.excerpt}</div>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Badge className={getStatusColor(post.is_published)}>
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold text-sm sm:text-base truncate">{post.title}</div>
+                  <div className="text-xs sm:text-sm text-gray-500 truncate">{post.excerpt}</div>
+                  <div className="flex items-center gap-2 mt-1 flex-wrap">
+                    <Badge className={getStatusColor(post.is_published)} className="text-xs">
                       {post.is_published ? 'Published' : 'Draft'}
                     </Badge>
-                    <Badge variant="secondary">{post.category}</Badge>
+                    <Badge variant="secondary" className="text-xs">{post.category}</Badge>
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-4">
-                <div className="text-sm text-gray-500">
+              <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4">
+                <div className="text-xs sm:text-sm text-gray-500">
                   <div className="flex items-center gap-1">
-                    <Calendar className="h-4 w-4" />
-                    {formatDate(post.published_date || post.created_at || 'No date')}
+                    <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="hidden xs:inline">{formatDate(post.published_date || post.created_at || 'No date')}</span>
+                    <span className="xs:hidden">{new Date(post.published_date || post.created_at || 'No date').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
                   </div>
                   <div className="flex items-center gap-1 mt-1">
-                    <Eye className="h-4 w-4" />
+                    <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
                     {post.views} views
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 sm:gap-2">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       window.location.href = `/admin/blog/${post.id}`;
                     }}
-                    className="p-2 hover:bg-gray-200 rounded-lg"
+                    className="p-1.5 sm:p-2 hover:bg-gray-200 rounded-lg"
                     title="View"
                   >
                     <Eye className="h-4 w-4" />
@@ -332,7 +335,7 @@ export function BlogManagement() {
                       e.stopPropagation();
                       window.location.href = `/admin/blog/${post.id}`;
                     }}
-                    className="p-2 hover:bg-gray-200 rounded-lg"
+                    className="p-1.5 sm:p-2 hover:bg-gray-200 rounded-lg"
                     title="Edit"
                   >
                     <Edit className="h-4 w-4" />

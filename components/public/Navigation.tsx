@@ -113,7 +113,7 @@ export function Navigation() {
       </nav>
 
       {/* Mobile Bottom Navigation */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md shadow-2xl border-t border-gray-200">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white backdrop-blur-lg shadow-2xl border-t-2 border-gray-200">
         <div className="flex flex-row">
           {/* Navigation Links */}
           {navLinks.map((link) => {
@@ -123,27 +123,27 @@ export function Navigation() {
               <Link
                 key={link.name}
                 href={link.href}
-                className="flex flex-col items-center justify-center py-2.5 px-1 transition-all duration-300 relative group"
+                className="flex flex-col items-center justify-center py-3 px-1 transition-all duration-300 relative group"
                 style={{
                   flex: '1',
-                  backgroundColor: isActive ? 'rgba(212, 160, 23, 0.08)' : 'transparent'
+                  backgroundColor: isActive ? 'rgba(220, 20, 60, 0.1)' : 'transparent'
                 }}
               >
-                <div className="relative mb-0.5">
+                <div className="relative mb-1">
                   <Icon
                     className="h-6 w-6 transition-all duration-300"
                     style={{
-                      color: isActive ? '#D4A017' : '#8E8E93',
-                      strokeWidth: '1.5',
-                      fill: isActive ? '#D4A017' : 'none',
-                      fillOpacity: isActive ? '0.15' : '0'
+                      color: isActive ? '#DC143C' : '#1F2937',
+                      strokeWidth: '2',
+                      fill: isActive ? '#DC143C' : 'none',
+                      fillOpacity: isActive ? '0.2' : '0'
                     }}
                   />
                 </div>
                 <span
-                  className="text-[9px] font-medium transition-all duration-300 leading-none"
+                  className="text-[10px] font-semibold transition-all duration-300 leading-none"
                   style={{
-                    color: isActive ? '#D4A017' : '#8E8E93'
+                    color: isActive ? '#DC143C' : '#374151'
                   }}
                 >
                   {link.name}
@@ -157,24 +157,24 @@ export function Navigation() {
             href="https://wa.me/97517643416"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex flex-col items-center justify-center py-2.5 px-1 transition-all duration-300 relative group"
+            className="flex flex-col items-center justify-center py-3 px-1 transition-all duration-300 relative group"
             style={{ flex: '1' }}
           >
-            <div className="relative mb-0.5">
+            <div className="relative mb-1">
               <MessageCircle
                 className="h-6 w-6 transition-all duration-300"
                 style={{
                   color: '#25D366',
-                  strokeWidth: '1.5',
+                  strokeWidth: '2',
                   fill: '#25D366',
-                  fillOpacity: '0.15'
+                  fillOpacity: '0.2'
                 }}
               />
             </div>
             <span
-              className="text-[9px] font-medium transition-all duration-300 leading-none"
+              className="text-[10px] font-semibold transition-all duration-300 leading-none"
               style={{
-                color: '#25D366'
+                color: '#059669'
               }}
             >
               WhatsApp

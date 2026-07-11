@@ -30,6 +30,22 @@ export const metadata: Metadata = {
   title: "Wangchuks Tours & Treks - Discover the Last Shangri-La",
   description: "Experience authentic Bhutan with Wangchuks Tours & Treks. Cultural journeys, trekking adventures, and festival tours in the Land of the Thunder Dragon.",
   keywords: ["Bhutan tour", "Bhutan travel", "Bhutan trekking", "Bhutan festival", "Wangchuks Tours & Treks", "Bhutan adventures"],
+  icons: {
+    icon: [
+      {
+        url: "https://res.cloudinary.com/hckgrdeh/image/upload/v1782962660/wangchukstlogo_usxclz.png",
+        sizes: "any",
+        type: "image/png"
+      }
+    ],
+    apple: [
+      {
+        url: "https://res.cloudinary.com/hckgrdeh/image/upload/v1782962660/wangchukstlogo_usxclz.png",
+        sizes: "180x180",
+        type: "image/png"
+      }
+    ]
+  }
 };
 
 export default function RootLayout({
