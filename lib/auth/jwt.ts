@@ -11,6 +11,7 @@ export interface TokenPayload {
   email: string;
   role: string;
   name: string;
+  permissions?: string[]; // Include permissions in token for RBAC
 }
 
 export interface AuthTokens {
@@ -19,21 +20,31 @@ export interface AuthTokens {
 }
 
 /**
- * Generate JWT access token
+ * Generate JWT access token with enhanced payload
  */
 export function generateAccessToken(payload: TokenPayload): string {
-  return jwt.sign(payload, JWT_SECRET, {
-    expiresIn: JWT_EXPIRES_IN,
-  });
+  try {
+    return jwt.sign(payload, JWT_SECRET, {
+      expiresIn: JWT_EXPIRES_IN,
+    });
+  } catch (error) {
+    console.error('Error generating access token:', error);
+    throw new Error('Failed to generate access token');
+  }
 }
 
 /**
  * Generate JWT refresh token
  */
 export function generateRefreshToken(payload: TokenPayload): string {
-  return jwt.sign(payload, JWT_SECRET, {
-    expiresIn: REFRESH_TOKEN_EXPIRES_IN,
-  });
+  try {
+    return jwt.sign(payload, JWT_SECRET, {
+      expiresIn: REFRESH_TOKEN_EXPIRES_IN,
+    });
+  } catch (error) {
+    console.error('Error generating refresh token:', error);
+    throw new Error('Failed to generate refresh token');
+  }
 }
 
 /**
@@ -47,13 +58,25 @@ export function generateAuthTokens(payload: TokenPayload): AuthTokens {
 }
 
 /**
- * Verify JWT token
+ * Verify JWT token with enhanced error handling
  */
 export function verifyToken(token: string): TokenPayload | null {
   try {
+    if (!token || typeof token !== 'string') {
+      console.warn('Invalid token provided to verifyToken');
+      return null;
+    }
+
     const decoded = jwt.verify(token, JWT_SECRET) as TokenPayload;
     return decoded;
   } catch (error) {
+    if (error instanceof jwt.TokenExpiredError) {
+      console.warn('Token expired:', error.message);
+    } else if (error instanceof jwt.JsonWebTokenError) {
+      console.warn('Invalid token:', error.message);
+    } else {
+      console.error('Error verifying token:', error);
+    }
     return null;
   }
 }
@@ -62,92 +85,145 @@ export function verifyToken(token: string): TokenPayload | null {
  * Hash password using bcrypt
  */
 export async function hashPassword(password: string): Promise<string> {
-  return bcrypt.hash(password, 12); // 12 salt rounds
+  try {
+    return bcrypt.hash(password, 12); // 12 salt rounds
+  } catch (error) {
+    console.error('Error hashing password:', error);
+    throw new Error('Failed to hash password');
+  }
 }
 
 /**
  * Compare password with hash
  */
 export async function comparePassword(password: string, hash: string): Promise<boolean> {
-  return bcrypt.compare(password, hash);
+  try {
+    return bcrypt.compare(password, hash);
+  } catch (error) {
+    console.error('Error comparing password:', error);
+    return false;
+  }
 }
 
 /**
- * Set authentication cookies
+ * Set authentication cookies with enhanced options
  */
 export async function setAuthCookies(tokens: AuthTokens) {
-  const cookieStore = await cookies();
+  try {
+    const cookieStore = await cookies();
 
-  // Access token cookie (httpOnly for security)
-  cookieStore.set('access_token', tokens.accessToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: 15 * 60, // 15 minutes
-    path: '/',
-  });
+    // Access token cookie (httpOnly for security)
+    cookieStore.set('access_token', tokens.accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 15 * 60, // 15 minutes
+      path: '/',
+      // Additional security for production
+      ...(process.env.NODE_ENV === 'production' && {
+        domain: process.env.COOKIE_DOMAIN,
+      }),
+    });
 
-  // Refresh token cookie (longer lived)
-  cookieStore.set('refresh_token', tokens.refreshToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: 7 * 24 * 60 * 60, // 7 days
-    path: '/',
-  });
+    // Refresh token cookie (longer lived)
+    cookieStore.set('refresh_token', tokens.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60, // 7 days
+      path: '/',
+      ...(process.env.NODE_ENV === 'production' && {
+        domain: process.env.COOKIE_DOMAIN,
+      }),
+    });
+
+    console.log('Auth cookies set successfully');
+  } catch (error) {
+    console.error('Error setting auth cookies:', error);
+    throw new Error('Failed to set authentication cookies');
+  }
 }
 
 /**
  * Clear authentication cookies
  */
 export async function clearAuthCookies() {
-  const cookieStore = await cookies();
+  try {
+    const cookieStore = await cookies();
 
-  cookieStore.delete('access_token');
-  cookieStore.delete('refresh_token');
+    cookieStore.delete('access_token');
+    cookieStore.delete('refresh_token');
+
+    console.log('Auth cookies cleared successfully');
+  } catch (error) {
+    console.error('Error clearing auth cookies:', error);
+  }
 }
 
 /**
- * Get current user from request
+ * Get current user from request with enhanced error handling
  */
 export async function getCurrentUser(): Promise<TokenPayload | null> {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get('access_token')?.value;
+  try {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get('access_token')?.value;
 
-  if (!accessToken) {
+    if (!accessToken) {
+      console.log('No access token found in cookies');
+      return null;
+    }
+
+    const payload = verifyToken(accessToken);
+    if (!payload) {
+      console.log('Failed to verify access token');
+      return null;
+    }
+
+    return payload;
+  } catch (error) {
+    console.error('Error getting current user:', error);
     return null;
   }
-
-  return verifyToken(accessToken);
 }
 
 /**
- * Refresh access token using refresh token
+ * Refresh access token using refresh token with enhanced error handling
  */
 export async function refreshAccessToken(): Promise<string | null> {
-  const cookieStore = await cookies();
-  const refreshToken = cookieStore.get('refresh_token')?.value;
+  try {
+    const cookieStore = await cookies();
+    const refreshToken = cookieStore.get('refresh_token')?.value;
 
-  if (!refreshToken) {
+    if (!refreshToken) {
+      console.log('No refresh token found in cookies');
+      return null;
+    }
+
+    const payload = verifyToken(refreshToken);
+    if (!payload) {
+      console.log('Failed to verify refresh token');
+      return null;
+    }
+
+    // Generate new access token
+    const newAccessToken = generateAccessToken(payload);
+
+    // Set new access token cookie
+    cookieStore.set('access_token', newAccessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 15 * 60,
+      path: '/',
+      ...(process.env.NODE_ENV === 'production' && {
+        domain: process.env.COOKIE_DOMAIN,
+      }),
+    });
+
+    console.log('Access token refreshed successfully');
+    return newAccessToken;
+  } catch (error) {
+    console.error('Error refreshing access token:', error);
     return null;
   }
-
-  const payload = verifyToken(refreshToken);
-  if (!payload) {
-    return null;
-  }
-
-  // Generate new access token
-  const newAccessToken = generateAccessToken(payload);
-
-  // Set new access token cookie
-  cookieStore.set('access_token', newAccessToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: 15 * 60,
-    path: '/',
-  });
-
-  return newAccessToken;
 }

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/jwt';
 import { createClient } from '@/utils/supabase/server';
+import type { AdminUser } from '@/lib/auth/rbac';
 
 export async function GET() {
   try {
@@ -24,13 +25,23 @@ export async function GET() {
       .single();
 
     if (error || !user) {
+      console.error('Database error fetching user:', error);
       return NextResponse.json(
         { error: 'User not found' },
         { status: 404 }
       );
     }
 
-    return NextResponse.json({ user });
+    // Return user in RBAC-compatible format
+    const adminUser: AdminUser = {
+      id: user.id,
+      email: user.email,
+      name: user.name || 'Admin',
+      role: user.role || 'admin',
+      permissions: user.permissions || [],
+    };
+
+    return NextResponse.json({ user: adminUser });
   } catch (error) {
     console.error('Get current user error:', error);
     return NextResponse.json(

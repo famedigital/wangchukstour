@@ -18,7 +18,8 @@
       "Bash(node check-cloudinary.js:*)",
       "Bash(node:*)",
       "Bash(cmd:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(dir appapiadminblog)"
     ]
   }
 }

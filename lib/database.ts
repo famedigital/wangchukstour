@@ -51,19 +51,26 @@ export interface BlogPost {
   id: string;
   title: string;
   slug: string;
-  excerpt: string;
   content: string;
-  featured_image_public_id: string;
-  featured_image_url: string;
-  thumbnail_public_id: string;
-  thumbnail_url: string;
-  author: string;
+  excerpt?: string | null;
+  author_name: string;
+  author_bio?: string | null;
+  author_avatar_url?: string | null;
+  author_avatar_public_id?: string | null;
+  featured_image_url?: string | null;
+  featured_image_public_id?: string | null;
   category: string;
   tags: string[];
-  published_date: string;
-  is_featured: boolean;
-  is_published: boolean;
-  read_time: number;
+  meta_description?: string | null;
+  meta_keywords?: string[] | null;
+  published_at?: string | null;
+  status: string; // 'draft' | 'published' | 'archived'
+  views: number;
+  read_time?: number | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+  created_by?: string | null;
+  updated_by?: string | null;
 }
 
 export interface HeroSlide {
@@ -203,8 +210,8 @@ export async function getPublishedBlogPosts(limit?: number): Promise<BlogPost[]>
     let query = supabase
       .from('blog_posts')
       .select('*')
-      .eq('is_published', true)
-      .order('published_date', { ascending: false });
+      .eq('status', 'published')
+      .order('published_at', { ascending: false });
 
     if (limit) {
       query = query.limit(limit);
@@ -228,7 +235,7 @@ export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> 
       .from('blog_posts')
       .select('*')
       .eq('slug', slug)
-      .eq('is_published', true)
+      .eq('status', 'published')
       .single();
 
     if (error) return null;

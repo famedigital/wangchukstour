@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
         .from('blog_posts')
         .select('*')
         .eq('slug', slug)
-        .eq('is_published', true)
+        .eq('status', 'published')
         .single();
 
       if (error) {
@@ -61,8 +61,8 @@ export async function GET(request: NextRequest) {
     let query = supabase
       .from('blog_posts')
       .select('*', { count: 'exact' })
-      .eq('is_published', true)
-      .order('published_date', { ascending: false })
+      .eq('status', 'published')
+      .order('published_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
     // Filter by category
@@ -70,10 +70,11 @@ export async function GET(request: NextRequest) {
       query = query.eq('category', category);
     }
 
-    // Filter by featured
-    if (featured === 'true') {
-      query = query.eq('is_featured', true);
-    }
+    // Note: is_featured column doesn't exist in database schema
+    // Featured filtering is disabled until the column is added
+    // if (featured === 'true') {
+    //   query = query.eq('is_featured', true);
+    // }
 
     // Search functionality
     if (search) {

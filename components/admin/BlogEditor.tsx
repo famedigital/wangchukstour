@@ -36,7 +36,6 @@ interface BlogPost {
   author_name: string;
   author_bio?: string;
   is_published: boolean;
-  is_featured: boolean;
   published_date?: string;
   read_time?: number;
   meta_title?: string;
@@ -66,7 +65,6 @@ export function BlogEditor({ post, postId, isNewPost, onSave, onCancel }: BlogEd
       tags: [],
       author_name: '',
       is_published: false,
-      is_featured: false,
     }
   );
 
@@ -75,6 +73,29 @@ export function BlogEditor({ post, postId, isNewPost, onSave, onCancel }: BlogEd
   const [showMediaPicker, setShowMediaPicker] = useState(false);
   const [autoSaveStatus, setAutoSaveStatus] = useState<'saved' | 'saving' | 'unsaved'>('saved');
   const [seoPreview, setSeoPreview] = useState(false);
+
+  // Fetch post data when postId is provided (editing existing post)
+  useEffect(() => {
+    if (postId && !post) {
+      const fetchPost = async () => {
+        try {
+          const response = await fetch(`/api/admin/blog/${postId}`);
+          if (response.ok) {
+            const postData = await response.json();
+            setFormData(postData);
+          } else {
+            console.error('Failed to fetch blog post');
+            toast.error('Failed to load blog post');
+          }
+        } catch (error) {
+          console.error('Error fetching blog post:', error);
+          toast.error('Failed to load blog post');
+        }
+      };
+
+      fetchPost();
+    }
+  }, [postId, post]);
 
   // Auto-save functionality
   useEffect(() => {
@@ -467,11 +488,11 @@ export function BlogEditor({ post, postId, isNewPost, onSave, onCancel }: BlogEd
                 <label className="flex items-center gap-2 text-sm">
                   <input
                     type="checkbox"
-                    checked={formData.is_featured}
-                    onChange={(e) => handleChange('is_featured', e.target.checked)}
+                    checked={formData.is_published}
+                    onChange={(e) => handleChange('is_published', e.target.checked)}
                     className="rounded"
                   />
-                  Featured post
+                  Published post
                 </label>
               </div>
             </div>

@@ -51,12 +51,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate auth tokens
+    // Generate auth tokens with permissions
     const tokens = generateAuthTokens({
       userId: user.id,
       email: user.email,
       role: user.role,
       name: user.name || 'Admin',
+      permissions: user.permissions || [],
     });
 
     // Set auth cookies

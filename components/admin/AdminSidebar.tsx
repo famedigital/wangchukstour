@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   LayoutDashboard,
   Calendar,
@@ -24,6 +25,7 @@ import {
   Bell,
   FolderKanban,
 } from 'lucide-react';
+import type { AdminUser } from '@/lib/auth/rbac';
 
 interface NavItem {
   id: string;
@@ -31,10 +33,13 @@ interface NavItem {
   icon: any;
   href?: string;
   badge?: number | string;
+  permission?: string; // Required permission to view this item
   children?: NavItem[];
 }
 
 interface AdminSidebarProps {
+  user: AdminUser | null;
+  hasPermission: (permission: string) => boolean;
   isCollapsed: boolean;
   onToggle: () => void;
   isMobileOpen: boolean;
@@ -47,16 +52,17 @@ const navigationItems: NavItem[] = [
     label: 'Dashboard',
     icon: LayoutDashboard,
     href: '/admin/dashboard',
+    permission: 'analytics.view', // Dashboard shows stats
   },
   {
     id: 'content',
     label: 'Content',
     icon: FolderKanban,
     children: [
-      { id: 'tours', label: 'Tours', icon: MapPin, href: '/admin/tours' },
-      { id: 'blog', label: 'Blog Posts', icon: FileText, href: '/admin/blog' },
-      { id: 'media', label: 'Media Library', icon: Image, href: '/admin/media' },
-      { id: 'hero', label: 'Hero Slides', icon: Globe, href: '/admin/hero' },
+      { id: 'tours', label: 'Tours', icon: MapPin, href: '/admin/tours', permission: 'tour.read' },
+      { id: 'blog', label: 'Blog Posts', icon: FileText, href: '/admin/blog', permission: 'blog.read' },
+      { id: 'media', label: 'Media Library', icon: Image, href: '/admin/media', permission: 'media.read' },
+      { id: 'hero', label: 'Hero Slides', icon: Globe, href: '/admin/hero', permission: 'settings.edit' },
     ],
   },
   {
@@ -64,6 +70,7 @@ const navigationItems: NavItem[] = [
     label: 'Bookings',
     icon: Calendar,
     href: '/admin/bookings',
+    permission: 'booking.read',
     badge: '5', // This would be dynamic
   },
   {
@@ -71,6 +78,7 @@ const navigationItems: NavItem[] = [
     label: 'Inquiries',
     icon: Mail,
     href: '/admin/inquiries',
+    permission: 'inquiry.read',
     badge: '3', // This would be dynamic
   },
   {
@@ -78,35 +86,41 @@ const navigationItems: NavItem[] = [
     label: 'Customers',
     icon: Users,
     href: '/admin/customers',
+    permission: 'user.read',
   },
   {
     id: 'analytics',
     label: 'Analytics',
     icon: BarChart3,
     href: '/admin/analytics',
+    permission: 'analytics.view',
   },
   {
     id: 'settings',
     label: 'Settings',
     icon: Settings,
     children: [
-      { id: 'general', label: 'General', icon: Settings, href: '/admin/settings/general' },
-      { id: 'site', label: 'Site Settings', icon: Globe, href: '/admin/settings/site' },
-      { id: 'navigation', label: 'Navigation', icon: Menu, href: '/admin/settings/navigation' },
-      { id: 'users', label: 'Users & Roles', icon: Shield, href: '/admin/settings/users' },
-      { id: 'payments', label: 'Payments', icon: CreditCard, href: '/admin/settings/payments' },
+      { id: 'general', label: 'General', icon: Settings, href: '/admin/settings/general', permission: 'settings.read' },
+      { id: 'site', label: 'Site Settings', icon: Globe, href: '/admin/settings/site', permission: 'settings.edit' },
+      { id: 'navigation', label: 'Navigation', icon: Menu, href: '/admin/settings/navigation', permission: 'settings.edit' },
+      { id: 'users', label: 'Users & Roles', icon: Shield, href: '/admin/settings/users', permission: 'user.manage' },
+      { id: 'payments', label: 'Payments', icon: CreditCard, href: '/admin/settings/payments', permission: 'settings.edit' },
     ],
   },
 ];
 
 export function AdminSidebar({
+  user,
+  hasPermission,
   isCollapsed,
   onToggle,
   isMobileOpen,
   onMobileClose,
 }: AdminSidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const [expandedItems, setExpandedItems] = useState<string[]>(['content', 'settings']);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const toggleExpanded = (itemId: string) => {
     setExpandedItems(prev =>
@@ -117,6 +131,30 @@ export function AdminSidebar({
   };
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
+
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      onMobileClose(); // Close mobile menu if open
+
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+      });
+
+      if (response.ok) {
+        router.push('/admin/login');
+        router.refresh();
+      } else {
+        console.error('Logout failed');
+        router.push('/admin/login');
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+      router.push('/admin/login');
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   return (
     <>
@@ -132,14 +170,14 @@ export function AdminSidebar({
       <aside
         className={`
           fixed lg:static inset-y-0 left-0 z-50
-          bg-white border-r shadow-xl lg:shadow-none
+          bg-white shadow-xl lg:shadow-none flex flex-col
           transition-all duration-300 ease-in-out
           ${isCollapsed ? 'w-20' : 'w-72'}
           ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}
       >
         {/* Logo Section */}
-        <div className="flex items-center justify-between h-20 px-6 border-b">
+        <div className="flex items-center justify-between h-20 px-6 shrink-0">
           {!isCollapsed ? (
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)' }}>
@@ -168,15 +206,15 @@ export function AdminSidebar({
         {/* Collapse Toggle (Desktop) */}
         <button
           onClick={onToggle}
-          className="hidden lg:flex absolute -right-3 top-24 h-6 w-6 items-center justify-center rounded-full bg-white border-2 border-gray-200 shadow-sm hover:bg-gray-50"
+          className="hidden lg:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 h-8 w-4 items-center justify-center rounded-l bg-white shadow-md hover:bg-gray-50 z-10"
         >
           <ChevronDown
-            className={`h-4 w-4 transition-transform ${isCollapsed ? 'rotate-180' : ''}`}
+            className={`h-4 w-4 transition-transform ${isCollapsed ? 'rotate-90' : '-rotate-90'}`}
           />
         </button>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto py-6 px-3 space-y-1">
+        <nav className="flex-1 overflow-y-auto overflow-x-hidden py-6 px-3 space-y-1">
           {navigationItems.map((item) => {
             const Icon = item.icon;
             const hasChildren = item.children && item.children.length > 0;
@@ -184,6 +222,9 @@ export function AdminSidebar({
             const isItemActive = hasChildren
               ? item.children?.some(child => child.href ? isActive(child.href) : false)
               : item.href ? isActive(item.href) : false;
+
+            // TEMPORARY: Skip permission filtering to get blog working first
+            const filteredChildren = hasChildren ? item.children : [];
 
             return (
               <div key={item.id}>
@@ -216,7 +257,7 @@ export function AdminSidebar({
                     {/* Children */}
                     {!isCollapsed && isExpanded && (
                       <div className="mt-1 ml-8 space-y-1">
-                        {item.children?.map((child) => {
+                        {filteredChildren?.map((child) => {
                           const ChildIcon = child.icon;
                           return (
                             <Link
@@ -280,7 +321,7 @@ export function AdminSidebar({
         </nav>
 
         {/* Bottom Section */}
-        <div className="border-t p-4 space-y-1">
+        <div className="p-4 space-y-1 mt-4 shrink-0">
           <Link
             href="/"
             target="_blank"
@@ -294,14 +335,17 @@ export function AdminSidebar({
             {!isCollapsed && <span>View Website</span>}
           </Link>
           <button
+            onClick={handleLogout}
+            disabled={isLoggingOut}
             className={`
               w-full flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium
               text-red-600 hover:bg-red-50 transition-all duration-200
+              disabled:opacity-50 disabled:cursor-not-allowed
               ${isCollapsed ? 'justify-center' : ''}
             `}
           >
             <LogOut className="h-5 w-5 shrink-0" />
-            {!isCollapsed && <span>Logout</span>}
+            {!isCollapsed && <span>{isLoggingOut ? 'Logging out...' : 'Logout'}</span>}
           </button>
         </div>
       </aside>

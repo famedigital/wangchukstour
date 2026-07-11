@@ -11,10 +11,10 @@ export interface Blog {
   video_url?: string;
   category: string;
   tags: string[];
-  author: string;
+  author_name: string;
   author_bio: string;
-  is_published: boolean;
-  is_featured: boolean;
+  status: 'draft' | 'published' | 'archived';
+  // is_featured: boolean; // Removed - field doesn't exist in database schema
   published_at: string;
   meta_title?: string;
   meta_description?: string;
@@ -78,10 +78,10 @@ Whether you're seeking spiritual connection or simply one of the world's most st
     ],
     category: 'Travel Guide',
     tags: ['tigers-nest', 'monastery', 'paro', 'spiritual', 'hiking', 'bhutan-culture'],
-    author: 'Wangchuk Dorji',
+    author_name: 'Wangchuk Dorji',
     author_bio: 'Founder of Wangchuk Tour with 15+ years of experience guiding travelers through Bhutan.',
-    is_published: true,
-    is_featured: true,
+    status: 'published',
+    // is_featured: true, // Removed - field doesn't exist in database schema
     published_at: '2024-03-15',
     meta_title: 'The Ultimate Guide to Tiger\'s Nest Monastery - Wangchuk Tour',
     meta_description: 'Complete guide to visiting Bhutan\'s sacred Tiger\'s Nest Monastery. Learn about the hike, history, and spiritual significance.',
@@ -143,10 +143,10 @@ Spring in Bhutan isn't just a season - it's a celebration of life, culture, and 
     ],
     category: 'Seasonal',
     tags: ['spring', 'festivals', 'rhododendrons', 'best-time-to-visit'],
-    author: 'Karma Wangchuk',
+    author_name: 'Karma Wangchuk',
     author_bio: 'Senior guide at Wangchuk Tour with expertise in Bhutanese history and Buddhism.',
-    is_published: true,
-    is_featured: true,
+    status: 'published',
+    // is_featured: true, // Removed - field doesn't exist in database schema
     published_at: '2024-02-20',
     meta_title: 'Bhutan in Spring - Complete Season Guide',
     meta_description: 'Discover why spring is the perfect time to visit Bhutan. Rhododendrons, festivals, and ideal trekking conditions await.',
@@ -233,10 +233,10 @@ Gross National Happiness isn't just a policy - it's a lived philosophy that perm
     ],
     category: 'Culture',
     tags: ['gnh', 'bhutan-philosophy', 'culture', 'sustainability'],
-    author: 'Wangchuk Dorji',
+    author_name: 'Wangchuk Dorji',
     author_bio: 'Founder of Wangchuk Tour with 15+ years of experience guiding travelers through Bhutan.',
-    is_published: true,
-    is_featured: false,
+    status: 'published',
+    // is_featured: false, // Removed - field doesn't exist in database schema
     published_at: '2024-01-10',
     meta_title: 'Understanding Gross National Happiness in Bhutan',
     meta_description: 'Learn about Bhutan\'s unique development philosophy that prioritizes citizen wellbeing over economic growth.',
@@ -344,10 +344,10 @@ Bhutanese cuisine is more than just food - it's a window into the culture, refle
     gallery_images: [],
     category: 'Food & Culture',
     tags: ['food', 'cuisine', 'ema-datshi', 'bhutanese-culture'],
-    author: 'Tashi Deki',
+    author_name: 'Tashi Deki',
     author_bio: 'Operations Manager at Wangchuk Tour. Born and raised in Thimphu with deep knowledge of Bhutanese culture.',
-    is_published: true,
-    is_featured: false,
+    status: 'published',
+    // is_featured: false, // Removed - field doesn't exist in database schema
     published_at: '2023-12-05',
     meta_title: 'A Beginner\'s Guide to Bhutanese Cuisine',
     meta_description: 'Discover the flavors of Bhutan - from spicy ema datshi to delicious momos. Complete guide to Bhutanese food.',
@@ -359,13 +359,17 @@ export const getBlogBySlug = (slug: string): Blog | undefined => {
 };
 
 export const getPublishedBlogs = (): Blog[] => {
-  return mockBlogs.filter(blog => blog.is_published);
+  return mockBlogs.filter(blog => blog.status === 'published');
 };
 
 export const getFeaturedBlogs = (): Blog[] => {
-  return mockBlogs.filter(blog => blog.is_featured && blog.is_published);
+  // Note: is_featured field doesn't exist in database schema
+  // Returning empty array until featured functionality is implemented
+  // Alternatively, could return all published posts as featured
+  return mockBlogs.filter(blog => blog.status === 'published');
+  // return mockBlogs.filter(blog => blog.is_featured && blog.status === 'published');
 };
 
 export const getBlogsByCategory = (category: string): Blog[] => {
-  return mockBlogs.filter(blog => blog.category === category && blog.is_published);
+  return mockBlogs.filter(blog => blog.category === category && blog.status === 'published');
 };

@@ -41,37 +41,8 @@ CREATE TABLE IF NOT EXISTS tours (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Blog posts table
-CREATE TABLE IF NOT EXISTS blog_posts (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-  title VARCHAR(255) NOT NULL,
-  slug VARCHAR(255) UNIQUE NOT NULL,
-  excerpt TEXT,
-  content TEXT,
-  featured_image_public_id VARCHAR(255),
-  featured_image_url TEXT,
-  thumbnail_public_id VARCHAR(255),
-  thumbnail_url TEXT,
-  gallery_public_ids TEXT[],
-  author VARCHAR(255),
-  author_avatar_public_id VARCHAR(255),
-  author_avatar_url TEXT,
-  category VARCHAR(100),
-  tags TEXT[],
-  published_date DATE,
-  is_featured BOOLEAN DEFAULT false,
-  is_published BOOLEAN DEFAULT false,
-  read_time INTEGER, -- in minutes
-  views INTEGER DEFAULT 0,
-  meta_title VARCHAR(255),
-  meta_description TEXT,
-  meta_keywords TEXT[],
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  published_at TIMESTAMP WITH TIME ZONE
-);
-
 -- Hero slideshow table
+-- NOTE: Blog posts table is now in database-schema-canonical.sql
 CREATE TABLE IF NOT EXISTS hero_slides (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   title VARCHAR(255),
@@ -112,12 +83,6 @@ CREATE INDEX IF NOT EXISTS idx_tours_featured ON tours(is_featured) WHERE is_fea
 CREATE INDEX IF NOT EXISTS idx_tours_active ON tours(is_active) WHERE is_active = true;
 CREATE INDEX IF NOT EXISTS idx_tours_sort_order ON tours(sort_order);
 
-CREATE INDEX IF NOT EXISTS idx_blog_slug ON blog_posts(slug);
-CREATE INDEX IF NOT EXISTS idx_blog_category ON blog_posts(category);
-CREATE INDEX IF NOT EXISTS idx_blog_published ON blog_posts(is_published) WHERE is_published = true;
-CREATE INDEX IF NOT EXISTS idx_blog_featured ON blog_posts(is_featured) WHERE is_featured = true;
-CREATE INDEX IF NOT EXISTS idx_blog_published_date ON blog_posts(published_date);
-
 CREATE INDEX IF NOT EXISTS idx_hero_active ON hero_slides(is_active) WHERE is_active = true;
 CREATE INDEX IF NOT EXISTS idx_hero_order ON hero_slides(slide_order);
 
@@ -135,9 +100,6 @@ $$ language 'plpgsql';
 
 -- Create triggers for updated_at
 CREATE TRIGGER update_tours_updated_at BEFORE UPDATE ON tours
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER update_blog_posts_updated_at BEFORE UPDATE ON blog_posts
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_hero_slides_updated_at BEFORE UPDATE ON hero_slides

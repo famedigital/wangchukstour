@@ -1,15 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
 import { getCurrentUser } from '@/lib/auth/jwt';
+import { requirePermission, Permissions, type AdminUser } from '@/lib/auth/rbac';
 
 export async function GET(request: NextRequest) {
   try {
-    // TEMPORARY: Disabled authentication for development
-    // TODO: Re-enable when authentication is properly configured
-    // const currentUser = await getCurrentUser();
-    // if (!currentUser) {
-    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    // }
+    // Authentication check
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // RBAC permission check
+    const adminUser: AdminUser = {
+      id: user.userId,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      permissions: user.permissions || [],
+    };
+
+    requirePermission(adminUser, Permissions.TOUR_READ);
 
     const supabase = await createClient();
 

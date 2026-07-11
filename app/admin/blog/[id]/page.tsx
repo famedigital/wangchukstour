@@ -7,35 +7,53 @@ import { BlogEditor } from '@/components/admin/BlogEditor';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { AdminLayout } from '@/components/admin/AdminLayout';
 
 export default function EditBlogPostPage() {
   const params = useParams();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [post, setPost] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check if user is authenticated
-    const checkAuth = async () => {
+    // Check if user is authenticated and fetch post data
+    const initialize = async () => {
       try {
-        const response = await fetch('/api/auth/me');
-        if (!response.ok) {
-          router.push('/admin/login');
-          return;
+        // Check authentication
+        const authResponse = await fetch('/api/auth/me');
+        if (!authResponse.ok) {
+          // Try to refresh token
+          console.log('Auth check failed, trying to refresh token...');
+          const refreshResponse = await fetch('/api/auth/refresh', {
+            method: 'POST',
+          });
+
+          if (!refreshResponse.ok) {
+            router.push('/admin/login');
+            return;
+          }
         }
-        const data = await response.json();
-        if (!data.user) {
-          router.push('/admin/login');
+
+        // Fetch post data
+        const postId = params.id as string;
+        const postResponse = await fetch(`/api/admin/blog/${postId}`);
+        if (postResponse.ok) {
+          const postData = await postResponse.json();
+          setPost(postData);
+        } else {
+          setError('Failed to load blog post');
         }
       } catch (error) {
-        console.error('Auth check failed:', error);
-        router.push('/admin/login');
+        console.error('Initialization failed:', error);
+        setError('Failed to load blog post');
       } finally {
         setLoading(false);
       }
     };
 
-    checkAuth();
-  }, [router]);
+    initialize();
+  }, [params.id, router]);
 
   const handleCancel = () => {
     router.push('/admin/blog');
@@ -43,31 +61,52 @@ export default function EditBlogPostPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-red-600" />
-      </div>
+      <AdminLayout>
+        <div className="flex items-center justify-center min-h-screen">
+          <Loader2 className="h-8 w-8 animate-spin text-red-600" />
+          <span className="ml-3">Loading blog post...</span>
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <AdminLayout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <p className="text-red-600 mb-4">{error}</p>
+            <Button onClick={handleCancel}>Back to Blog</Button>
+          </div>
+        </div>
+      </AdminLayout>
     );
   }
 
   const postId = params.id as string;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header with back button */}
-        <div className="mb-6">
+    <AdminLayout>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">Edit Blog Post</h1>
+            {post && <p className="text-gray-500 mt-1">Editing: {post.title}</p>}
+          </div>
           <Button
             onClick={handleCancel}
             variant="ghost"
-            className="mb-4"
+            size="sm"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Dashboard
+            Back to Blog
           </Button>
-          <h1 className="text-3xl font-bold">Edit Blog Post</h1>
         </div>
-        <BlogEditor postId={postId} onCancel={handleCancel} />
+
+        {/* Editor */}
+        <BlogEditor post={post} postId={postId} onCancel={handleCancel} />
       </div>
-    </div>
+    </AdminLayout>
   );
 }

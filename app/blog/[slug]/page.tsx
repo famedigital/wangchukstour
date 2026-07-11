@@ -7,8 +7,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, User, Clock, Tag, ArrowLeft, Mail, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
+import { getBlogPostBySlug, getPublishedBlogPosts } from '@/lib/database';
 
-const optimizeImageUrl = (url: string | undefined, width: number, height: number) => {
+const optimizeImageUrl = (url: string | null | undefined, width: number, height: number) => {
   if (!url) return '/placeholder.jpg';
   if (url.includes('cloudinary')) {
     const transformations = `q_auto,f_auto,w_${width},h_${height},c_fill`;
@@ -20,32 +21,18 @@ const optimizeImageUrl = (url: string | undefined, width: number, height: number
 export default async function BlogDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
 
-  // Fetch blog post from database
-  const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'}/api/blog?slug=${slug}`, {
-    cache: 'no-store'
-  });
-
-  if (!response.ok) {
-    notFound();
-  }
-
-  const data = await response.json();
-  const blog = data.post;
+  // Fetch blog post directly from database - instant loading!
+  const blog = await getBlogPostBySlug(slug);
 
   if (!blog) {
     notFound();
   }
 
-  // Fetch related posts by category
-  const relatedResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'}/api/blog?category=${blog.category}&limit=3`, {
-    cache: 'no-store'
-  });
-
-  let relatedPosts = [];
-  if (relatedResponse.ok) {
-    const relatedData = await relatedResponse.json();
-    relatedPosts = (relatedData.posts || []).filter((post: any) => post.id !== blog.id).slice(0, 3);
-  }
+  // Fetch related posts by category - also from database
+  const allPosts = await getPublishedBlogPosts();
+  const relatedPosts = allPosts
+    .filter(post => post.category === blog.category && post.id !== blog.id)
+    .slice(0, 3);
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -89,13 +76,13 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)' }}>
                     <User className="h-5 w-5 text-white" />
                   </div>
-                  <span>{blog.author}</span>
+                  <span>{blog.author_name}</span>
                 </div>
                 <div className="flex items-center gap-3 font-medium">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: 'linear-gradient(135deg, #D4A017 0%, #B8860B 100%)' }}>
                     <Calendar className="h-5 w-5 text-white" />
                   </div>
-                  <span>{format(new Date(blog.published_at), 'MMMM d, yyyy')}</span>
+                  <span>{format(new Date(blog.published_at || blog.created_at || new Date()), 'MMMM d, yyyy')}</span>
                 </div>
                 <div className="flex items-center gap-3 font-medium">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: 'linear-gradient(135deg, #B91C1C 0%, #8B0000 100%)' }}>
@@ -213,13 +200,13 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
                     <div className="relative h-28 w-28 overflow-hidden rounded-2xl shadow-lg shrink-0">
                       <img
                         src={optimizeImageUrl('https://res.cloudinary.com/hckgrdeh/image/upload/q_auto,f_auto/v1782912162/thimphu-moonsoon_dftrcz.jpg', 200, 200)}
-                        alt={blog.author}
+                        alt={blog.author_name}
                         className="h-full w-full object-cover"
                       />
                       <div className="absolute inset-0 bg-gradient-to-br from-prayer-red/20 to-monastery-red/20" />
                     </div>
                     <div>
-                      <p className="font-bold text-xl mb-2">Written by {blog.author}</p>
+                      <p className="font-bold text-xl mb-2">Written by {blog.author_name}</p>
                       <p className="text-muted-foreground text-lg leading-relaxed">{blog.author_bio}</p>
                     </div>
                   </div>
