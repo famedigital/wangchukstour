@@ -18,7 +18,12 @@ interface HeroSlide {
 // Optimize image URL for performance
 const optimizeImageUrl = (url: string, isAboveFold: boolean) => {
   if (url.includes('cloudinary')) {
-    // Use Cloudinary transformations for optimization
+    // Check if URL already has transformations
+    if (url.includes('/image/upload/v')) {
+      // URL already has transformations, return as-is to avoid conflicts
+      return url;
+    }
+    // Add transformations for fresh uploads without existing transformations
     const transformations = 'q_auto,f_auto,w_1920,h_1080,c_limit';
     return url.replace('/image/upload/', `/image/upload/${transformations}/`);
   }
