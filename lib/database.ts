@@ -253,7 +253,7 @@ export async function getActiveHeroSlides(): Promise<HeroSlide[]> {
     // Debug logging for production issues
     console.log('[getActiveHeroSlides] Fetching hero slides...');
 
-    const { data, error, count } = await supabase
+    const { data, error } = await supabase
       .from('hero_slides')
       .select('*')
       .eq('is_active', true)
@@ -264,8 +264,11 @@ export async function getActiveHeroSlides(): Promise<HeroSlide[]> {
       throw error;
     }
 
-    console.log('[getActiveHeroSlides] Success! Found', count, 'active slides');
-    console.log('[getActiveHeroSlides] Sample data:', data?.[0]?.title);
+    console.log('[getActiveHeroSlides] Success! Found', data?.length || 0, 'active slides');
+    if (data && data.length > 0) {
+      console.log('[getActiveHeroSlides] Sample data:', data[0]?.title);
+      console.log('[getActiveHeroSlides] First slide image:', data[0]?.image_url?.substring(0, 100));
+    }
 
     return data || [];
   } catch (error) {
