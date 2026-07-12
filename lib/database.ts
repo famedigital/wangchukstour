@@ -250,16 +250,26 @@ export async function getActiveHeroSlides(): Promise<HeroSlide[]> {
   try {
     const supabase = await createClient();
 
-    const { data, error } = await supabase
+    // Debug logging for production issues
+    console.log('[getActiveHeroSlides] Fetching hero slides...');
+
+    const { data, error, count } = await supabase
       .from('hero_slides')
       .select('*')
       .eq('is_active', true)
       .order('slide_order', { ascending: true });
 
-    if (error) throw error;
+    if (error) {
+      console.error('[getActiveHeroSlides] Database error:', error);
+      throw error;
+    }
+
+    console.log('[getActiveHeroSlides] Success! Found', count, 'active slides');
+    console.log('[getActiveHeroSlides] Sample data:', data?.[0]?.title);
+
     return data || [];
   } catch (error) {
-    console.error('Error fetching active hero slides:', error);
+    console.error('[getActiveHeroSlides] Error fetching active hero slides:', error);
     return [];
   }
 }

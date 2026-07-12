@@ -7,7 +7,16 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 export const createClient = async () => {
   const cookieStore = await cookies();
 
-  return createServerClient(
+  // Debug logging for production
+  console.log('[createClient] Creating Supabase client...');
+  console.log('[createClient] Supabase URL:', supabaseUrl ? '✅ Set' : '❌ Missing');
+  console.log('[createClient] Service Role Key:', supabaseKey ? '✅ Set (length: ' + supabaseKey.length + ')' : '❌ Missing');
+
+  if (!supabaseUrl || !supabaseKey) {
+    console.error('[createClient] Missing required credentials!');
+  }
+
+  const client = createServerClient(
     supabaseUrl!,
     supabaseKey!,
     {
@@ -27,4 +36,7 @@ export const createClient = async () => {
       },
     },
   );
+
+  console.log('[createClient] Client created successfully');
+  return client;
 };
