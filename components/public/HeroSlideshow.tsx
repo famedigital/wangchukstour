@@ -18,12 +18,18 @@ interface HeroSlide {
 // Optimize image URL for performance
 const optimizeImageUrl = (url: string, isAboveFold: boolean) => {
   if (url.includes('cloudinary')) {
-    // Check if URL already has transformations
-    if (url.includes('/image/upload/v')) {
-      // URL already has transformations, return as-is to avoid conflicts
-      return url;
+    // Check if URL already has any Cloudinary transformations (anything between /upload/ and /vXXXXX/)
+    // Database URLs already have transformations like q_auto,f_auto, so don't add more
+    const uploadIndex = url.indexOf('/image/upload/');
+    if (uploadIndex !== -1) {
+      const afterUpload = url.substring(uploadIndex + 17); // '/image/upload/'.length
+      // Check if there's a transformation before the version folder (e.g., 'q_auto,f_auto/v1782911267/')
+      if (afterUpload.match(/^[a-z_0-9,]+\/v\d+/)) {
+        // Already has transformations, return as-is
+        return url;
+      }
     }
-    // Add transformations for fresh uploads without existing transformations
+    // No transformations found, add them
     const transformations = 'q_auto,f_auto,w_1920,h_1080,c_limit';
     return url.replace('/image/upload/', `/image/upload/${transformations}/`);
   }
