@@ -322,8 +322,8 @@ function HeroSlideForm({
       <PremiumInput
         label="Slide Order"
         type="number"
-        value={formData.slide_order}
-        onChange={(e) => handleChange('slide_order', parseInt(e.target.value))}
+        value={formData.slide_order?.toString() || '0'}
+        onChange={(e) => handleChange('slide_order', parseInt(e.target.value) || 0)}
         placeholder="Display order (0 = first)"
       />
 
