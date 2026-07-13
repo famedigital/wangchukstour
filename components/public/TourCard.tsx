@@ -11,21 +11,10 @@ interface TourCardProps {
   index: number;
 }
 
-// Optimize image URL for performance
+// Optimize image URL for performance - NO DUPLICATION
 const optimizeImageUrl = (url: string) => {
-  if (url && url.includes('cloudinary')) {
-    // Check if URL has version number
-    const versionMatch = url.match(/\/image\/upload\/v\d+\//);
-    if (versionMatch) {
-      // URL has version number, insert transformations after version
-      const transformations = 'q_auto,f_auto,w_800,h_600,c_fill';
-      return url.replace(/\/image\/upload\/(v\d+)/, `/image/upload/$1/${transformations}`);
-    } else {
-      // No version number, insert transformations after /upload/
-      const transformations = 'q_auto,f_auto,w_800,h_600,c_fill';
-      return url.replace('/image/upload/', `/image/upload/${transformations}/`);
-    }
-  }
+  // Return URL as-is to avoid Cloudinary transformation duplication
+  // Database URLs already have proper transformations applied
   return url;
 };
 

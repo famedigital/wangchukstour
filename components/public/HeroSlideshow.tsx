@@ -15,24 +15,10 @@ interface HeroSlide {
   cta_link?: string;
 }
 
-// Optimize image URL for performance
+// Optimize image URL for performance - NO DUPLICATION
 const optimizeImageUrl = (url: string, isAboveFold: boolean) => {
-  if (url.includes('cloudinary')) {
-    // Check if URL already has any Cloudinary transformations (anything between /upload/ and /vXXXXX/)
-    // Database URLs already have transformations like q_auto,f_auto, so don't add more
-    const uploadIndex = url.indexOf('/image/upload/');
-    if (uploadIndex !== -1) {
-      const afterUpload = url.substring(uploadIndex + 17); // '/image/upload/'.length
-      // Check if there's a transformation before the version folder (e.g., 'q_auto,f_auto/v1782911267/')
-      if (afterUpload.match(/^[a-z_0-9,]+\/v\d+/)) {
-        // Already has transformations, return as-is
-        return url;
-      }
-    }
-    // No transformations found, add them
-    const transformations = 'q_auto,f_auto,w_1920,h_1080,c_limit';
-    return url.replace('/image/upload/', `/image/upload/${transformations}/`);
-  }
+  // Return URL as-is to avoid Cloudinary transformation duplication
+  // Database URLs already have proper transformations applied
   return url;
 };
 
