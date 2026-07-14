@@ -60,6 +60,15 @@ export default async function HomePage() {
     getActiveHeroSlides()
   ]);
 
+  // DEBUG: Log what we actually received for Vercel troubleshooting
+  console.log('[HOMEPAGE] Featured tours:', featuredTours.length);
+  console.log('[HOMEPAGE] Hero slides:', heroSlides.length);
+  console.log('[HOMEPAGE] First hero slide:', heroSlides[0] ? {
+    id: heroSlides[0]?.id,
+    title: heroSlides[0]?.title,
+    hasImage: !!heroSlides[0]?.image_url
+  } : 'NO SLIDES');
+
   return (
     <div className="flex min-h-screen flex-col bg-background safe-bottom-padding lg:pb-0">
       <Navigation />

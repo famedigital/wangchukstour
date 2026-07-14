@@ -39,6 +39,14 @@ export function HeroSlideshow({
 }: HeroSlideshowProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  // DEBUG: Log what slides we received
+  console.log('[HERO_SLIDESHOW] Component rendered with slides:', slides.length);
+  console.log('[HERO_SLIDESHOW] Slides data:', slides.map(s => ({
+    id: s.id,
+    title: s.title,
+    hasImage: !!s.image_url
+  })));
+
   const activeSlides = slides.length > 0 ? slides : [];
 
   useEffect(() => {
@@ -53,8 +61,16 @@ export function HeroSlideshow({
 
   const currentSlide = activeSlides[currentIndex];
 
+  // DEBUG: Log current slide state
+  console.log('[HERO_SLIDESHOW] Current slide:', currentSlide ? {
+    index: currentIndex,
+    title: currentSlide.title,
+    hasImage: !!currentSlide.image_url
+  } : 'NO CURRENT SLIDE');
+
   // Handle case when no slides are available
   if (!currentSlide) {
+    console.log('[HERO_SLIDESHOW] Showing fallback content');
     return (
       <section className="relative h-screen w-full overflow-hidden bg-black">
         {/* Fallback background */}
@@ -96,6 +112,8 @@ export function HeroSlideshow({
       </section>
     );
   }
+
+  console.log('[HERO_SLIDESHOW] Rendering active slides with images');
 
   return (
     <section className="relative h-screen w-full overflow-hidden bg-black">
