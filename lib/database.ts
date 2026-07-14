@@ -80,10 +80,10 @@ export interface HeroSlide {
   description: string;
   image_public_id: string;
   image_url: string;
-  mobile_image_public_id: string;
-  mobile_image_url: string;
-  cta_text: string;
-  cta_link: string;
+  mobile_image_public_id?: string | null;
+  mobile_image_url?: string | null;
+  cta_text?: string | null;
+  cta_link?: string | null;
   slide_order: number;
   is_active: boolean;
 }
