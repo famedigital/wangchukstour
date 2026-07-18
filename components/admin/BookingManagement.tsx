@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import {
   Search,
   Eye,
@@ -49,6 +50,7 @@ interface Booking {
     title: string;
     category: string;
     duration: number;
+    price?: number | null;
   } | null;
   tour_title?: string | null;
   number_of_adults: number;
@@ -65,11 +67,14 @@ interface Booking {
   payments?: BookingPayment[];
   amount_paid?: number;
   balance_due?: number;
+  suggested_total?: number | null;
 }
 
 type PaymentDialogMode = 'confirm' | 'add';
 
 export function BookingManagement() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -78,6 +83,8 @@ export function BookingManagement() {
   const [filterDateTo, setFilterDateTo] = useState('');
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [editTotalAmount, setEditTotalAmount] = useState('');
+  const [savingAmount, setSavingAmount] = useState(false);
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
   const [paymentMode, setPaymentMode] = useState<PaymentDialogMode>('add');
   const [paymentTarget, setPaymentTarget] = useState<Booking | null>(null);
@@ -85,10 +92,22 @@ export function BookingManagement() {
   const [paymentNote, setPaymentNote] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('bank');
   const [savingPayment, setSavingPayment] = useState(false);
+  const [focusId, setFocusId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchBookings();
   }, [filterStatus, filterDateFrom, filterDateTo, searchQuery]);
+
+  useEffect(() => {
+    const id = searchParams.get('id');
+    if (!id || loading || bookings.length === 0) return;
+    const match = bookings.find((b) => b.id === id);
+    if (match) {
+      setFocusId(id);
+      openDetailModal(match);
+      router.replace('/admin/bookings', { scroll: false });
+    }
+  }, [searchParams, bookings, loading]);
 
   const fetchBookings = async () => {
     try {
@@ -139,9 +158,10 @@ export function BookingManagement() {
   const openPaymentDialog = (booking: Booking, mode: PaymentDialogMode) => {
     setPaymentTarget(booking);
     setPaymentMode(mode);
+    const baseTotal = Number(booking.total_amount || booking.suggested_total || 0);
     const suggested =
-      mode === 'confirm' && !(booking.amount_paid || booking.deposit_amount)
-        ? Math.round((Number(booking.total_amount || 0) * 0.3) * 100) / 100
+      mode === 'confirm' && !(booking.amount_paid || booking.deposit_amount) && baseTotal > 0
+        ? Math.round(baseTotal * 0.3 * 100) / 100
         : '';
     setPaymentAmount(suggested ? String(suggested) : '');
     setPaymentNote('');
@@ -183,6 +203,7 @@ export function BookingManagement() {
       window.dispatchEvent(new Event('admin-badges-refresh'));
       if (showDetailModal) {
         setSelectedBooking(updated);
+        setEditTotalAmount(String(updated.total_amount ?? 0));
       }
     } catch {
       toast.error('Could not save deposit');
@@ -193,7 +214,43 @@ export function BookingManagement() {
 
   const openDetailModal = (booking: Booking) => {
     setSelectedBooking(booking);
+    setEditTotalAmount(
+      String(
+        Number(booking.total_amount) > 0
+          ? booking.total_amount
+          : booking.suggested_total || 0
+      )
+    );
     setShowDetailModal(true);
+  };
+
+  const saveTotalAmount = async () => {
+    if (!selectedBooking) return;
+    const next = Number(editTotalAmount);
+    if (!Number.isFinite(next) || next < 0) {
+      toast.error('Enter a valid total amount');
+      return;
+    }
+    try {
+      setSavingAmount(true);
+      const updated = await patchBooking({
+        id: selectedBooking.id,
+        total_amount: Math.round(next * 100) / 100,
+      });
+      setSelectedBooking(updated);
+      toast.success('Total amount updated');
+      await fetchBookings();
+    } catch {
+      toast.error('Could not update amount');
+    } finally {
+      setSavingAmount(false);
+    }
+  };
+
+  const applySuggestedTotal = () => {
+    if (selectedBooking?.suggested_total != null) {
+      setEditTotalAmount(String(selectedBooking.suggested_total));
+    }
   };
 
   const downloadInvoice = (booking: Booking) => {
@@ -222,11 +279,11 @@ export function BookingManagement() {
   const amountPaid = (booking: Booking) =>
     Number(booking.amount_paid ?? booking.deposit_amount ?? 0);
 
-  const balanceDue = (booking: Booking) =>
-    Number(
-      booking.balance_due ??
-        Math.max(0, Number(booking.total_amount || 0) - amountPaid(booking))
-    );
+  const displayTotal = (booking: Booking) => {
+    const total = Number(booking.total_amount || 0);
+    if (total > 0) return total;
+    return Number(booking.suggested_total || 0);
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -418,10 +475,12 @@ export function BookingManagement() {
           </div>
         ) : bookings.length > 0 ? (
           <>
-            {/* Mobile cards */}
             <div className="space-y-3 md:hidden">
               {bookings.map((booking) => (
-                <Card key={booking.id}>
+                <Card
+                  key={booking.id}
+                  className={cn(focusId === booking.id && 'ring-2 ring-primary')}
+                >
                   <CardContent className="p-4 space-y-3">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
@@ -457,8 +516,11 @@ export function BookingManagement() {
                           Total
                         </p>
                         <p className="text-sm font-semibold">
-                          ${(booking.total_amount ?? 0).toLocaleString()}
+                          ${displayTotal(booking).toLocaleString()}
                         </p>
+                        {!booking.total_amount && booking.suggested_total ? (
+                          <p className="text-[10px] text-amber-600">from tour</p>
+                        ) : null}
                       </div>
                       <div>
                         <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
@@ -473,7 +535,11 @@ export function BookingManagement() {
                           Due
                         </p>
                         <p className="text-sm font-semibold">
-                          ${balanceDue(booking).toLocaleString()}
+                          $
+                          {Math.max(
+                            0,
+                            displayTotal(booking) - amountPaid(booking)
+                          ).toLocaleString()}
                         </p>
                       </div>
                     </div>
@@ -483,9 +549,6 @@ export function BookingManagement() {
                         className={`px-2.5 py-1 rounded-full text-[11px] font-medium capitalize ${getPaymentStatusColor(booking.payment_status)}`}
                       >
                         {booking.payment_status}
-                        {(booking.payments?.length || 0) > 0
-                          ? ` · ${booking.payments!.length} deposit${booking.payments!.length === 1 ? '' : 's'}`
-                          : ''}
                       </span>
                       <BookingActions booking={booking} />
                     </div>
@@ -494,7 +557,6 @@ export function BookingManagement() {
               ))}
             </div>
 
-            {/* Desktop table */}
             <Card className="hidden md:block overflow-hidden py-0">
               <div className="overflow-x-auto">
                 <table className="w-full">
@@ -525,7 +587,13 @@ export function BookingManagement() {
                   </thead>
                   <tbody>
                     {bookings.map((booking) => (
-                      <tr key={booking.id} className="border-b border-border hover:bg-muted/50">
+                      <tr
+                        key={booking.id}
+                        className={cn(
+                          'border-b border-border hover:bg-muted/50',
+                          focusId === booking.id && 'bg-primary/5'
+                        )}
+                      >
                         <td className="py-4 px-6 font-medium">{booking.booking_number}</td>
                         <td className="py-4 px-6">
                           <div className="font-medium">{booking.client_name}</div>
@@ -549,12 +617,19 @@ export function BookingManagement() {
                         </td>
                         <td className="py-4 px-6">
                           <div className="font-medium">
-                            ${(booking.total_amount ?? 0).toLocaleString()}
+                            ${displayTotal(booking).toLocaleString()}
                           </div>
-                          <div className="text-xs text-muted-foreground">
-                            Paid ${amountPaid(booking).toLocaleString()} · Due $
-                            {balanceDue(booking).toLocaleString()}
-                          </div>
+                          {!booking.total_amount && booking.suggested_total ? (
+                            <div className="text-xs text-amber-600">Suggested from tour price</div>
+                          ) : (
+                            <div className="text-xs text-muted-foreground">
+                              Paid ${amountPaid(booking).toLocaleString()} · Due $
+                              {Math.max(
+                                0,
+                                displayTotal(booking) - amountPaid(booking)
+                              ).toLocaleString()}
+                            </div>
+                          )}
                           <span
                             className={`mt-1 inline-block px-2 py-0.5 rounded-full text-[11px] font-medium capitalize ${getPaymentStatusColor(booking.payment_status)}`}
                           >
@@ -591,7 +666,6 @@ export function BookingManagement() {
         )}
       </div>
 
-      {/* Detail dialog */}
       <Dialog open={showDetailModal} onOpenChange={setShowDetailModal}>
         <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           {selectedBooking && (
@@ -641,24 +715,56 @@ export function BookingManagement() {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2 rounded-xl border border-border p-3 text-center">
-                  <div>
-                    <p className="text-[10px] uppercase text-muted-foreground">Total</p>
-                    <p className="font-semibold">
-                      ${(selectedBooking.total_amount ?? 0).toLocaleString()}
-                    </p>
+                <div className="space-y-3 rounded-xl border border-border p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <h3 className="font-semibold text-sm">Tour total (USD)</h3>
+                    {selectedBooking.suggested_total != null && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 text-xs"
+                        onClick={applySuggestedTotal}
+                      >
+                        Use tour price (${selectedBooking.suggested_total.toLocaleString()})
+                      </Button>
+                    )}
                   </div>
-                  <div>
-                    <p className="text-[10px] uppercase text-muted-foreground">Paid</p>
-                    <p className="font-semibold text-green-700 dark:text-green-400">
-                      ${amountPaid(selectedBooking).toLocaleString()}
-                    </p>
+                  <div className="flex flex-col gap-2 sm:flex-row">
+                    <Input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={editTotalAmount}
+                      onChange={(e) => setEditTotalAmount(e.target.value)}
+                      className="sm:flex-1"
+                    />
+                    <Button
+                      type="button"
+                      onClick={saveTotalAmount}
+                      disabled={savingAmount}
+                      className="sm:w-auto"
+                    >
+                      {savingAmount ? 'Saving…' : 'Save amount'}
+                    </Button>
                   </div>
-                  <div>
-                    <p className="text-[10px] uppercase text-muted-foreground">Balance</p>
-                    <p className="font-semibold">
-                      ${balanceDue(selectedBooking).toLocaleString()}
-                    </p>
+                  <div className="grid grid-cols-2 gap-2 text-center text-sm">
+                    <div className="rounded-lg bg-muted/50 p-2">
+                      <p className="text-[10px] uppercase text-muted-foreground">Paid</p>
+                      <p className="font-semibold text-green-700 dark:text-green-400">
+                        ${amountPaid(selectedBooking).toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="rounded-lg bg-muted/50 p-2">
+                      <p className="text-[10px] uppercase text-muted-foreground">Balance</p>
+                      <p className="font-semibold">
+                        $
+                        {Math.max(
+                          0,
+                          Number(editTotalAmount || 0) - amountPaid(selectedBooking)
+                        ).toLocaleString()}
+                      </p>
+                    </div>
                   </div>
                 </div>
 
@@ -734,7 +840,6 @@ export function BookingManagement() {
         </DialogContent>
       </Dialog>
 
-      {/* Confirm / add deposit dialog */}
       <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -754,7 +859,7 @@ export function BookingManagement() {
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Tour total</span>
                   <span className="font-medium">
-                    ${(paymentTarget.total_amount ?? 0).toLocaleString()}
+                    ${displayTotal(paymentTarget).toLocaleString()}
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -766,7 +871,11 @@ export function BookingManagement() {
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Balance due</span>
                   <span className="font-medium">
-                    ${balanceDue(paymentTarget).toLocaleString()}
+                    $
+                    {Math.max(
+                      0,
+                      displayTotal(paymentTarget) - amountPaid(paymentTarget)
+                    ).toLocaleString()}
                   </span>
                 </div>
               </div>

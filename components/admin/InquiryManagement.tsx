@@ -1,11 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Loader2, Mail, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 type Inquiry = {
   id: string;
@@ -29,10 +31,13 @@ const statusSelectClassName =
   'flex h-9 w-auto min-w-[7.5rem] shrink-0 rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30';
 
 export function InquiryManagement() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('all');
+  const [focusId, setFocusId] = useState<string | null>(null);
 
   const load = async () => {
     try {
@@ -54,6 +59,22 @@ export function InquiryManagement() {
   useEffect(() => {
     load();
   }, [status]);
+
+  useEffect(() => {
+    const id = searchParams.get('id');
+    if (!id || loading || inquiries.length === 0) return;
+    const match = inquiries.find((i) => i.id === id);
+    if (match) {
+      setFocusId(id);
+      router.replace('/admin/inquiries', { scroll: false });
+      requestAnimationFrame(() => {
+        document.getElementById(`inquiry-${id}`)?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      });
+    }
+  }, [searchParams, inquiries, loading, router]);
 
   const updateStatus = async (id: string, next: string) => {
     try {
@@ -116,7 +137,11 @@ export function InquiryManagement() {
             const email = item.email || item.client_email || '';
             const phone = item.phone || item.client_phone || '';
             return (
-              <Card key={item.id}>
+              <Card
+                key={item.id}
+                id={`inquiry-${item.id}`}
+                className={cn(focusId === item.id && 'ring-2 ring-primary')}
+              >
                 <CardContent className="p-4 md:p-5">
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="min-w-0 flex-1">

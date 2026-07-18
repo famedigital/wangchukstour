@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { InquiryManagement } from '@/components/admin/InquiryManagement';
 
@@ -11,7 +12,9 @@ export default function InquiriesPage() {
           <h1 className="text-2xl font-bold">Customer Inquiries</h1>
           <p className="text-gray-500 mt-1">Messages from the public contact form</p>
         </div>
-        <InquiryManagement />
+        <Suspense fallback={<div className="py-12 text-center text-muted-foreground">Loading…</div>}>
+          <InquiryManagement />
+        </Suspense>
       </div>
     </AdminLayout>
   );

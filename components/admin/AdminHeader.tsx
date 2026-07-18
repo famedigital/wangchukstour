@@ -75,7 +75,12 @@ export function AdminHeader({ onMobileMenuOpen, user }: AdminHeaderProps) {
   useEffect(() => {
     loadNotifications();
     const interval = setInterval(loadNotifications, 60_000);
-    return () => clearInterval(interval);
+    const onRefresh = () => loadNotifications();
+    window.addEventListener('admin-badges-refresh', onRefresh);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('admin-badges-refresh', onRefresh);
+    };
   }, [loadNotifications]);
 
   useEffect(() => {
@@ -102,6 +107,10 @@ export function AdminHeader({ onMobileMenuOpen, user }: AdminHeaderProps) {
     }
   };
 
+  const refreshBadges = () => {
+    window.dispatchEvent(new Event('admin-badges-refresh'));
+  };
+
   const markAllRead = async () => {
     try {
       await fetch('/api/admin/notifications', {
@@ -110,7 +119,7 @@ export function AdminHeader({ onMobileMenuOpen, user }: AdminHeaderProps) {
         body: JSON.stringify({ action: 'mark_inquiries_read' }),
       });
       await loadNotifications();
-      window.dispatchEvent(new Event('admin-badges-refresh'));
+      refreshBadges();
     } catch {
       // ignore
     }
@@ -118,15 +127,23 @@ export function AdminHeader({ onMobileMenuOpen, user }: AdminHeaderProps) {
 
   const openNotification = async (n: NotificationItem) => {
     setNotificationsOpen(false);
-    if (n.type === 'inquiry') {
-      await fetch('/api/admin/notifications', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'mark_inquiry_read', id: n.id }),
-      });
-      window.dispatchEvent(new Event('admin-badges-refresh'));
-    }
+
+    // Navigate immediately so the click always feels responsive
     router.push(n.href);
+
+    try {
+      if (n.type === 'inquiry') {
+        await fetch('/api/admin/notifications', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'mark_inquiry_read', id: n.id }),
+        });
+      }
+      await loadNotifications();
+      refreshBadges();
+    } catch {
+      // navigation already happened
+    }
   };
 
   return (
@@ -197,22 +214,21 @@ export function AdminHeader({ onMobileMenuOpen, user }: AdminHeaderProps) {
                   <p className="p-4 text-sm text-muted-foreground">No new notifications</p>
                 ) : (
                   notifications.map((notification) => (
-                    <DropdownMenuItem
+                    <button
                       key={notification.id}
-                      onClick={() => openNotification(notification)}
+                      type="button"
+                      onClick={() => void openNotification(notification)}
                       className={cn(
-                        'cursor-pointer items-start rounded-none border-b border-border/60 p-4 focus:bg-muted/60',
+                        'flex w-full flex-col items-start border-b border-border/60 p-4 text-left last:border-0 hover:bg-muted/60',
                         notification.unread && 'bg-primary/5'
                       )}
                     >
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-foreground">{notification.title}</p>
-                        <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">
-                          {notification.message}
-                        </p>
-                        <p className="mt-1 text-xs text-muted-foreground">{notification.time}</p>
-                      </div>
-                    </DropdownMenuItem>
+                      <p className="text-sm font-medium text-foreground">{notification.title}</p>
+                      <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">
+                        {notification.message}
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">{notification.time}</p>
+                    </button>
                   ))
                 )}
               </div>
@@ -225,7 +241,7 @@ export function AdminHeader({ onMobileMenuOpen, user }: AdminHeaderProps) {
                     className="h-auto flex-1 p-0"
                     onClick={(e) => {
                       e.preventDefault();
-                      markAllRead();
+                      void markAllRead();
                     }}
                   >
                     Mark inquiries read
@@ -269,9 +285,7 @@ export function AdminHeader({ onMobileMenuOpen, user }: AdminHeaderProps) {
                 <User className="size-4 text-muted-foreground" />
                 My Profile
               </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => router.push('/admin/settings/general')}
-              >
+              <DropdownMenuItem onClick={() => router.push('/admin/settings/general')}>
                 <Settings className="size-4 text-muted-foreground" />
                 Settings
               </DropdownMenuItem>

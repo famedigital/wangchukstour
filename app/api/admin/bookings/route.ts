@@ -14,18 +14,40 @@ function mapBooking(row: Record<string, unknown>) {
   const { payments, cleanNotes } = parsePaymentLedger(
     typeof row.notes === 'string' ? row.notes : null
   );
-  const tours = row.tours as { title?: string; category?: string; duration?: number } | null;
+  const tours = row.tours as {
+    title?: string;
+    category?: string;
+    duration?: number;
+    price?: number | null;
+  } | null;
   const amountPaid = sumPayments(payments);
   const totalAmount = Number(row.total_amount || 0);
+  const travelers =
+    Number(row.total_travelers) ||
+    Number(row.number_of_adults || 0) + Number(row.number_of_children || 0) ||
+    1;
+  const tourUnitPrice = Number(tours?.price || 0);
+  const suggestedTotal =
+    tourUnitPrice > 0 ? Math.round(tourUnitPrice * travelers * 100) / 100 : null;
 
   return {
     ...row,
-    tour: tours || (row.tour_title ? { title: row.tour_title } : null),
+    tour: tours
+      ? {
+          title: tours.title,
+          category: tours.category,
+          duration: tours.duration,
+          price: tours.price ?? null,
+        }
+      : row.tour_title
+        ? { title: row.tour_title, category: null, duration: null, price: null }
+        : null,
     tours: undefined,
     notes: cleanNotes,
     payments,
     amount_paid: amountPaid,
     balance_due: Math.max(0, totalAmount - amountPaid),
+    suggested_total: suggestedTotal,
   };
 }
 
@@ -50,7 +72,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabase
       .from('bookings')
-      .select('*, tours(title, category, duration)', { count: 'exact' })
+      .select('*, tours(title, category, duration, price)', { count: 'exact' })
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
@@ -164,7 +186,8 @@ export async function PATCH(request: NextRequest) {
       action === 'add_payment' ||
       action === 'confirm' ||
       action === 'remove_payment' ||
-      nextPayments !== payments
+      nextPayments !== payments ||
+      payload.total_amount !== undefined
     ) {
       const amountPaid = sumPayments(nextPayments);
       const totalAmount = Number(
@@ -172,16 +195,18 @@ export async function PATCH(request: NextRequest) {
           ? payload.total_amount
           : currentBooking.total_amount || 0
       );
-      payload.notes = serializePaymentLedger(
-        nextPayments,
-        typeof updates.notes === 'string' ? updates.notes : cleanNotes
-      );
-      payload.deposit_amount = amountPaid;
-      payload.deposit_paid = amountPaid > 0;
-      payload.deposit_paid_at =
-        amountPaid > 0
-          ? nextPayments[nextPayments.length - 1]?.paid_at || new Date().toISOString()
-          : null;
+      if (action === 'add_payment' || action === 'confirm' || action === 'remove_payment' || nextPayments !== payments) {
+        payload.notes = serializePaymentLedger(
+          nextPayments,
+          typeof updates.notes === 'string' ? updates.notes : cleanNotes
+        );
+        payload.deposit_amount = amountPaid;
+        payload.deposit_paid = amountPaid > 0;
+        payload.deposit_paid_at =
+          amountPaid > 0
+            ? nextPayments[nextPayments.length - 1]?.paid_at || new Date().toISOString()
+            : null;
+      }
       payload.fully_paid = totalAmount > 0 && amountPaid >= totalAmount;
       payload.payment_status = derivePaymentStatus(totalAmount, amountPaid);
     }
@@ -190,7 +215,7 @@ export async function PATCH(request: NextRequest) {
       .from('bookings')
       .update(payload)
       .eq('id', id)
-      .select('*, tours(title, category, duration)')
+      .select('*, tours(title, category, duration, price)')
       .single();
 
     if (error) throw error;

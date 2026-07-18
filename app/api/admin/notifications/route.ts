@@ -73,7 +73,7 @@ export async function GET() {
         type: 'booking' as const,
         title: 'New booking request',
         message: `${b.client_name || 'Guest'} — ${tourTitle}${b.booking_number ? ` (${b.booking_number})` : ''}`,
-        href: '/admin/bookings',
+        href: `/admin/bookings?id=${b.id}`,
         created_at: b.created_at,
         unread: true,
       };
@@ -87,7 +87,7 @@ export async function GET() {
         type: 'inquiry' as const,
         title: 'New inquiry',
         message: `${name} — ${detail}`,
-        href: '/admin/inquiries',
+        href: `/admin/inquiries?id=${inq.id}`,
         created_at: inq.created_at,
         unread: true,
       };

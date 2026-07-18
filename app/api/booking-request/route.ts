@@ -26,20 +26,25 @@ export async function POST(request: NextRequest) {
 
     let tourId: string | null = null;
     let resolvedTitle = tourTitle || null;
+    let tourPrice = 0;
 
     if (tourSlug) {
       const { data: tour } = await supabase
         .from('tours')
-        .select('id, title')
+        .select('id, title, price')
         .eq('slug', tourSlug)
         .maybeSingle();
       if (tour) {
         tourId = tour.id;
         resolvedTitle = tour.title;
+        tourPrice = Number(tour.price) || 0;
       }
     }
 
     const adults = groupSize ? parseInt(groupSize, 10) : 1;
+    const travelerCount = Number.isFinite(adults) && adults > 0 ? adults : 1;
+    const totalAmount =
+      tourPrice > 0 ? Math.round(tourPrice * travelerCount * 100) / 100 : null;
 
     const { data: booking, error: bookingError } = await supabase
       .from('bookings')
@@ -49,11 +54,12 @@ export async function POST(request: NextRequest) {
         client_name: name,
         client_email: email.toLowerCase(),
         client_phone: phone || null,
-        number_of_adults: Number.isFinite(adults) && adults > 0 ? adults : 1,
+        number_of_adults: travelerCount,
         number_of_children: 0,
         travel_date: null,
         preferred_dates: travelDates ? { note: travelDates } : null,
         custom_requests: message,
+        total_amount: totalAmount,
         status: 'pending',
         payment_status: 'pending',
       })

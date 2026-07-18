@@ -165,56 +165,56 @@ export default function AdminDashboardPage() {
         ) : (
           <>
             {/* Stats Grid */}
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
+            <div className="mb-8 grid grid-cols-2 gap-3 md:gap-6 lg:grid-cols-4">
               <Card className="transition-shadow duration-300">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: 'var(--primary)' }}>
-                      <Calendar className="h-6 w-6 text-white" />
+                <CardContent className="p-4 md:p-6">
+                  <div className="mb-3 flex items-center justify-between md:mb-4">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl md:h-12 md:w-12" style={{ background: 'var(--primary)' }}>
+                      <Calendar className="h-4 w-4 text-white md:h-6 md:w-6" />
                     </div>
-                    <span className="text-green-600 text-sm font-medium">{stats?.totalBookings || 0}</span>
+                    <span className="hidden text-sm font-medium text-green-600 sm:inline">{stats?.totalBookings || 0}</span>
                   </div>
-                  <div className="text-3xl font-bold text-foreground">{stats?.totalBookings || 0}</div>
-                  <div className="text-sm text-muted-foreground">Total Bookings</div>
+                  <div className="text-2xl font-bold text-foreground md:text-3xl">{stats?.totalBookings || 0}</div>
+                  <div className="text-xs text-muted-foreground md:text-sm">Total Bookings</div>
                 </CardContent>
               </Card>
 
               <Card className="transition-shadow duration-300">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500">
-                      <Clock className="h-6 w-6 text-white" />
+                <CardContent className="p-4 md:p-6">
+                  <div className="mb-3 flex items-center justify-between md:mb-4">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500 md:h-12 md:w-12">
+                      <Clock className="h-4 w-4 text-white md:h-6 md:w-6" />
                     </div>
-                    <span className="text-amber-600 text-sm font-medium">{stats?.pendingBookings || 0} pending</span>
+                    <span className="hidden text-sm font-medium text-amber-600 sm:inline">{stats?.pendingBookings || 0} pending</span>
                   </div>
-                  <div className="text-3xl font-bold text-foreground">{stats?.pendingBookings || 0}</div>
-                  <div className="text-sm text-muted-foreground">Pending</div>
+                  <div className="text-2xl font-bold text-foreground md:text-3xl">{stats?.pendingBookings || 0}</div>
+                  <div className="text-xs text-muted-foreground md:text-sm">Pending</div>
                 </CardContent>
               </Card>
 
               <Card className="transition-shadow duration-300">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-500">
-                      <DollarSign className="h-6 w-6 text-white" />
+                <CardContent className="p-4 md:p-6">
+                  <div className="mb-3 flex items-center justify-between md:mb-4">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-green-500 md:h-12 md:w-12">
+                      <DollarSign className="h-4 w-4 text-white md:h-6 md:w-6" />
                     </div>
-                    <span className="text-green-600 text-sm font-medium">${stats?.monthlyRevenue?.toLocaleString() || 0}</span>
+                    <span className="hidden text-sm font-medium text-green-600 sm:inline">${stats?.monthlyRevenue?.toLocaleString() || 0}</span>
                   </div>
-                  <div className="text-3xl font-bold text-foreground">${stats?.monthlyRevenue?.toLocaleString() || 0}</div>
-                  <div className="text-sm text-muted-foreground">Monthly Revenue</div>
+                  <div className="text-2xl font-bold text-foreground md:text-3xl">${stats?.monthlyRevenue?.toLocaleString() || 0}</div>
+                  <div className="text-xs text-muted-foreground md:text-sm">Monthly Revenue</div>
                 </CardContent>
               </Card>
 
               <Card className="transition-shadow duration-300">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500">
-                      <Users className="h-6 w-6 text-white" />
+                <CardContent className="p-4 md:p-6">
+                  <div className="mb-3 flex items-center justify-between md:mb-4">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500 md:h-12 md:w-12">
+                      <Users className="h-4 w-4 text-white md:h-6 md:w-6" />
                     </div>
-                    <span className="text-blue-600 text-sm font-medium">{stats?.activeTours || 0} tours</span>
+                    <span className="hidden text-sm font-medium text-blue-600 sm:inline">{stats?.activeTours || 0} tours</span>
                   </div>
-                  <div className="text-3xl font-bold text-foreground">{stats?.activeTours || 0}</div>
-                  <div className="text-sm text-muted-foreground">Active Tours</div>
+                  <div className="text-2xl font-bold text-foreground md:text-3xl">{stats?.activeTours || 0}</div>
+                  <div className="text-xs text-muted-foreground md:text-sm">Active Tours</div>
                 </CardContent>
               </Card>
             </div>
