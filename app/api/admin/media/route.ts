@@ -2,15 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/jwt';
 import { getCloudinaryImages } from '@/lib/cloudinary';
 
-// GET /api/admin/media - Get all images from Cloudinary
 export async function GET(request: NextRequest) {
   try {
-    // TEMPORARY: Skip authentication for development testing
-    // TODO: Re-enable authentication when testing is complete
-    // const user = await getCurrentUser();
-    // if (!user) {
-    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    // }
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     const { searchParams } = new URL(request.url);
     const folder = searchParams.get('folder') || undefined;
@@ -19,17 +16,17 @@ export async function GET(request: NextRequest) {
     const resourceType = searchParams.get('resource_type') || 'image';
 
     const images = await getCloudinaryImages({
-      folder: folder || undefined, // Don't filter by folder if not specified
+      folder: folder || undefined,
       tags,
       maxResults,
       resource_type: resourceType,
     });
 
-    // Transform images to match the expected MediaPicker format
-    const transformedImages = images.map((img) => ({
+    const media = images.map((img) => ({
       id: img.public_id,
       public_id: img.public_id,
       url: img.secure_url,
+      secure_url: img.secure_url,
       thumbnail_url: img.secure_url.replace('/upload/', '/upload/c_fill,w_200,h_200,q_auto/'),
       name: img.public_id.split('/').pop(),
       type: img.resource_type,
@@ -42,14 +39,18 @@ export async function GET(request: NextRequest) {
     }));
 
     return NextResponse.json({
-      images: transformedImages,
-      total: transformedImages.length,
+      media,
+      images: media,
+      total: media.length,
       folder: folder || 'wangchuk-tour',
     });
   } catch (error) {
     console.error('Media fetch error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch media from Cloudinary', details: error instanceof Error ? error.message : 'Unknown error' },
+      {
+        error: 'Failed to fetch media from Cloudinary',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     );
   }

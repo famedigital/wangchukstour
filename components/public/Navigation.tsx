@@ -3,50 +3,54 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Home, Compass, Users, Book, Mail, Mountain, MessageCircle } from 'lucide-react';
+import { Home, Compass, Users, Book, Mail, MessageCircle, ChevronDown } from 'lucide-react';
 
-const navLinks = [
+const baseNavLinks = [
   { name: 'Home', href: '/', icon: Home },
-  { name: 'Tours', href: '/tours', icon: Compass },
   { name: 'About', href: '/about', icon: Users },
   { name: 'Blog', href: '/blog', icon: Book },
   { name: 'Contact', href: '/contact', icon: Mail },
 ];
 
+type TourCategory = { name: string; slug: string };
+
 export function Navigation() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [mounted, setMounted] = useState(false);
-
-  const isHomepage = pathname === '/';
-  const isToursPage = pathname === '/tours';
+  const [tourCategories, setTourCategories] = useState<TourCategory[]>([]);
+  const [toursOpen, setToursOpen] = useState(false);
+  const [mobileToursOpen, setMobileToursOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
     setScrolled(window.scrollY > 50);
-
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
-    };
+    const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    fetch('/api/tour-categories')
+      .then((r) => r.json())
+      .then((data) => setTourCategories(data.categories || []))
+      .catch(() => setTourCategories([
+        { name: 'International Tour', slug: 'international' },
+        { name: 'Regional Tour', slug: 'regional' },
+      ]));
+  }, []);
+
+  const isToursActive = pathname === '/tours' || pathname.startsWith('/tours');
 
   return (
     <>
       <nav
         className={`hidden lg:flex fixed top-0 left-0 right-0 z-50 ${
-          (!mounted || scrolled)
-            ? 'bg-white/95 backdrop-blur-md shadow-lg'
-            : 'bg-transparent'
+          !mounted || scrolled ? 'bg-white/95 backdrop-blur-md shadow-lg' : 'bg-transparent'
         }`}
-        style={{
-          transition: 'background-color 0.3s ease, backdrop-filter 0.3s ease, box-shadow 0.3s ease'
-        }}
+        style={{ transition: 'background-color 0.3s ease, backdrop-filter 0.3s ease, box-shadow 0.3s ease' }}
       >
         <div className="container flex h-20 items-center justify-between">
-          {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group">
             <div className="relative h-14 w-auto transition-transform duration-300 group-hover:scale-105">
               <img
@@ -58,125 +62,125 @@ export function Navigation() {
             </div>
           </Link>
 
-          {/* Desktop Navigation */}
           <div className="flex items-center gap-1">
-            {navLinks.map((link) => (
+            <Link
+              href="/"
+              className="px-5 py-3 text-sm font-medium rounded-lg"
+              style={{ color: '#D4A017' }}
+            >
+              Home
+            </Link>
+
+            <div
+              className="relative"
+              onMouseEnter={() => setToursOpen(true)}
+              onMouseLeave={() => setToursOpen(false)}
+            >
+              <button
+                type="button"
+                className="px-5 py-3 text-sm font-medium rounded-lg inline-flex items-center gap-1"
+                style={{ color: isToursActive ? '#FF6B00' : '#D4A017' }}
+                onClick={() => setToursOpen((v) => !v)}
+              >
+                Tours <ChevronDown className="h-4 w-4" />
+              </button>
+              {toursOpen && (
+                <div className="absolute top-full left-0 pt-2 min-w-[220px]">
+                  <div className="bg-white rounded-xl shadow-xl border border-gray-100 py-2 overflow-hidden">
+                    <Link
+                      href="/tours"
+                      className="block px-4 py-2.5 text-sm text-gray-800 hover:bg-red-50 hover:text-red-700"
+                    >
+                      All Tours
+                    </Link>
+                    {tourCategories.map((cat) => (
+                      <Link
+                        key={cat.slug}
+                        href={`/tours?category=${cat.slug}`}
+                        className="block px-4 py-2.5 text-sm text-gray-800 hover:bg-red-50 hover:text-red-700"
+                      >
+                        {cat.name}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {baseNavLinks.filter((l) => l.name !== 'Home').map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
-                className="px-5 py-3 text-sm font-medium rounded-lg transition-all duration-300 relative overflow-hidden group"
-                style={{
-                  color: '#D4A017',
-                  transition: 'all 0.3s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = '#FF6B00';
-                  e.currentTarget.style.textShadow = '0 0 20px rgba(255, 107, 0, 0.5), 0 0 40px rgba(255, 107, 0, 0.3)';
-                  e.currentTarget.style.transform = 'scale(1.1)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = '#D4A017';
-                  e.currentTarget.style.textShadow = 'none';
-                  e.currentTarget.style.transform = 'scale(1)';
-                }}
+                className="px-5 py-3 text-sm font-medium rounded-lg"
+                style={{ color: '#D4A017' }}
               >
-                <span className="relative z-10">{link.name}</span>
-                {/* Premium glow effect on hover */}
-                <div className="absolute inset-0 bg-gradient-to-r from-orange-500/20 via-orange-400/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl" />
-                {/* Shine effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                {link.name}
               </Link>
             ))}
+
             <Link
               href="/contact"
-              className="ml-4 inline-flex items-center justify-center rounded-lg border border-transparent px-5 py-3 text-sm font-medium transition-all hover:scale-105 relative overflow-hidden group"
-              style={{
-                backgroundColor: '#D4A017',
-                color: '#FFFFFF',
-                boxShadow: '0 4px 14px rgba(212, 160, 23, 0.3)'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#FF6B00';
-                e.currentTarget.style.boxShadow = '0 6px 20px rgba(255, 107, 0, 0.5)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#D4A017';
-                e.currentTarget.style.boxShadow = '0 4px 14px rgba(212, 160, 23, 0.3)';
-              }}
+              className="ml-4 inline-flex items-center justify-center rounded-lg px-5 py-3 text-sm font-medium"
+              style={{ backgroundColor: '#D4A017', color: '#FFFFFF' }}
             >
-              <span className="relative z-10">Get Quote</span>
-              {/* Shine effect on hover */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+              Get Quote
             </Link>
           </div>
         </div>
       </nav>
 
-      {/* Mobile Bottom Navigation */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white backdrop-blur-lg shadow-2xl border-t-2 border-gray-200 safe-area-inset-bottom">
-        <div className="flex flex-row max-w-screen-lg mx-auto">
-          {/* Navigation Links */}
-          {navLinks.map((link) => {
-            const Icon = link.icon;
-            const isActive = pathname === link.href;
-            return (
+      {/* Mobile bottom nav */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white shadow-2xl border-t-2 border-gray-200 safe-area-inset-bottom">
+        {mobileToursOpen && (
+          <div className="border-b bg-white px-3 py-2 grid grid-cols-2 gap-2">
+            <Link
+              href="/tours"
+              onClick={() => setMobileToursOpen(false)}
+              className="min-h-11 flex items-center justify-center rounded-lg bg-gray-50 text-sm font-medium"
+            >
+              All Tours
+            </Link>
+            {tourCategories.map((cat) => (
               <Link
-                key={link.name}
-                href={link.href}
-                className="flex flex-col items-center justify-center py-3 px-2 transition-all duration-300 relative group min-w-0 flex-1"
-                style={{
-                  backgroundColor: isActive ? 'rgba(220, 20, 60, 0.1)' : 'transparent'
-                }}
+                key={cat.slug}
+                href={`/tours?category=${cat.slug}`}
+                onClick={() => setMobileToursOpen(false)}
+                className="min-h-11 flex items-center justify-center rounded-lg bg-gray-50 text-sm font-medium text-center px-2"
               >
-                <div className="relative mb-1">
-                  <Icon
-                    className="h-6 w-6 transition-all duration-300"
-                    style={{
-                      color: isActive ? '#DC143C' : '#1F2937',
-                      strokeWidth: '2',
-                      fill: isActive ? '#DC143C' : 'none',
-                      fillOpacity: isActive ? '0.2' : '0'
-                    }}
-                  />
-                </div>
-                <span
-                  className="text-[10px] font-semibold transition-all duration-300 leading-none whitespace-nowrap overflow-hidden text-ellipsis"
-                  style={{
-                    color: isActive ? '#DC143C' : '#374151'
-                  }}
-                >
-                  {link.name}
-                </span>
+                {cat.name}
               </Link>
-            );
-          })}
-
-          {/* WhatsApp CTA */}
+            ))}
+          </div>
+        )}
+        <div className="flex flex-row max-w-screen-lg mx-auto">
+          <Link href="/" className="flex flex-col items-center justify-center py-3 px-2 min-w-0 flex-1">
+            <Home className="h-6 w-6 mb-1" style={{ color: pathname === '/' ? '#DC143C' : '#1F2937' }} />
+            <span className="text-[10px] font-semibold" style={{ color: pathname === '/' ? '#DC143C' : '#374151' }}>Home</span>
+          </Link>
+          <button
+            type="button"
+            onClick={() => setMobileToursOpen((v) => !v)}
+            className="flex flex-col items-center justify-center py-3 px-2 min-w-0 flex-1"
+          >
+            <Compass className="h-6 w-6 mb-1" style={{ color: isToursActive || mobileToursOpen ? '#DC143C' : '#1F2937' }} />
+            <span className="text-[10px] font-semibold" style={{ color: isToursActive || mobileToursOpen ? '#DC143C' : '#374151' }}>Tours</span>
+          </button>
+          <Link href="/about" className="flex flex-col items-center justify-center py-3 px-2 min-w-0 flex-1">
+            <Users className="h-6 w-6 mb-1" style={{ color: pathname === '/about' ? '#DC143C' : '#1F2937' }} />
+            <span className="text-[10px] font-semibold" style={{ color: pathname === '/about' ? '#DC143C' : '#374151' }}>About</span>
+          </Link>
+          <Link href="/blog" className="flex flex-col items-center justify-center py-3 px-2 min-w-0 flex-1">
+            <Book className="h-6 w-6 mb-1" style={{ color: pathname?.startsWith('/blog') ? '#DC143C' : '#1F2937' }} />
+            <span className="text-[10px] font-semibold" style={{ color: pathname?.startsWith('/blog') ? '#DC143C' : '#374151' }}>Blog</span>
+          </Link>
           <a
             href="https://wa.me/97517643416"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex flex-col items-center justify-center py-3 px-2 transition-all duration-300 relative group min-w-0 flex-1"
+            className="flex flex-col items-center justify-center py-3 px-2 min-w-0 flex-1"
           >
-            <div className="relative mb-1">
-              <MessageCircle
-                className="h-6 w-6 transition-all duration-300"
-                style={{
-                  color: '#25D366',
-                  strokeWidth: '2',
-                  fill: '#25D366',
-                  fillOpacity: '0.2'
-                }}
-              />
-            </div>
-            <span
-              className="text-[10px] font-semibold transition-all duration-300 leading-none whitespace-nowrap overflow-hidden text-ellipsis"
-              style={{
-                color: '#059669'
-              }}
-            >
-              WhatsApp
-            </span>
+            <MessageCircle className="h-6 w-6 mb-1" style={{ color: '#25D366' }} />
+            <span className="text-[10px] font-semibold" style={{ color: '#059669' }}>WhatsApp</span>
           </a>
         </div>
       </div>

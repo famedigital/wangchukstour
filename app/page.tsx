@@ -4,8 +4,7 @@ import { Footer } from '@/components/public/Footer';
 import { MagneticButton } from '@/components/ui/magnetic-button';
 import { ScrollReveal } from '@/components/ui/scroll-reveal';
 import { Badge } from '@/components/ui/badge';
-import { getFeaturedTours } from '@/lib/database';
-import { getActiveHeroSlides } from '@/lib/database';
+import { getFeaturedTours, getActiveHeroSlides, getFeaturedTestimonials } from '@/lib/database';
 import { HeroSlideshow } from '@/components/public/HeroSlideshow';
 import { TestimonialsSection } from '@/components/public/TestimonialsSection';
 
@@ -29,8 +28,7 @@ export const metadata: Metadata = {
   },
 };
 
-// Testimonials Data
-const testimonials = [
+const fallbackTestimonials = [
   {
     name: 'Sarah & Michael',
     location: 'Sydney, Australia',
@@ -55,19 +53,22 @@ const testimonials = [
 ];
 
 export default async function HomePage() {
-  const [featuredTours, heroSlides] = await Promise.all([
+  const [featuredTours, heroSlides, dbTestimonials] = await Promise.all([
     getFeaturedTours(),
-    getActiveHeroSlides()
+    getActiveHeroSlides(),
+    getFeaturedTestimonials(),
   ]);
 
-  // DEBUG: Log what we actually received for Vercel troubleshooting
-  console.log('[HOMEPAGE] Featured tours:', featuredTours.length);
-  console.log('[HOMEPAGE] Hero slides:', heroSlides.length);
-  console.log('[HOMEPAGE] First hero slide:', heroSlides[0] ? {
-    id: heroSlides[0]?.id,
-    title: heroSlides[0]?.title,
-    hasImage: !!heroSlides[0]?.image_url
-  } : 'NO SLIDES');
+  const testimonials =
+    dbTestimonials.length > 0
+      ? dbTestimonials.map((t) => ({
+          name: t.name,
+          location: t.location,
+          text: t.text,
+          rating: t.rating,
+          image: t.image_url,
+        }))
+      : fallbackTestimonials;
 
   return (
     <div className="flex min-h-screen flex-col bg-background safe-bottom-padding lg:pb-0">

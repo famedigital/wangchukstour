@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Inter, Playfair_Display } from "next/font/google";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 // Plus Jakarta Sans - Modern, professional headings
@@ -58,7 +59,10 @@ export default function RootLayout({
       lang="en"
       className={`${jakartaSans.variable} ${inter.variable} ${playfair.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col font-sans">{children}</body>
+      <body className="min-h-full flex flex-col font-sans">
+        {children}
+        <Toaster richColors position="top-right" />
+      </body>
     </html>
   );
 }

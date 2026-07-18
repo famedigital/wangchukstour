@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
 import { getCurrentUser } from '@/lib/auth/jwt';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 // GET /api/admin/users - Get all users
 export async function GET(request: NextRequest) {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Upload, Plus, Trash2, ChevronDown, ChevronRight, Calendar, MapPin, Users, DollarSign, Clock, TrendingUp, Star, Loader2, Eye, Check } from 'lucide-react';
 import { PremiumCard } from '@/components/ui/premium-card';
 import { PremiumButton } from '@/components/ui/premium-button';
@@ -8,6 +8,38 @@ import { PremiumInput } from '@/components/ui/premium-input';
 import { MediaPickerModal } from '@/components/admin/MediaPickerModal';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
+
+function CategorySelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [options, setOptions] = useState<{ slug: string; name: string }[]>([
+    { slug: 'regional', name: 'Regional Tour' },
+    { slug: 'international', name: 'International Tour' },
+  ]);
+
+  useEffect(() => {
+    fetch('/api/admin/tour-categories')
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.categories?.length) {
+          setOptions(data.categories.map((c: any) => ({ slug: c.slug, name: c.name })));
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  return (
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="w-full min-h-11 px-4 py-3 rounded-xl shadow-premium-sm focus:shadow-premium-md transition-all outline-none bg-white"
+    >
+      {options.map((o) => (
+        <option key={o.slug} value={o.slug}>
+          {o.name}
+        </option>
+      ))}
+    </select>
+  );
+}
 
 interface TourFormProps {
   tour?: any;
@@ -40,7 +72,7 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
     tagline: tour?.tagline || '',
     description: tour?.description || '',
     long_description: tour?.long_description || '',
-    category: tour?.category || 'cultural',
+    category: tour?.category || 'regional',
     duration: tour?.duration || 7,
     price: tour?.price || 0,
     difficulty_level: tour?.difficulty_level || 'moderate',
@@ -322,18 +354,11 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
 
                     <div className="grid gap-6 md:grid-cols-3">
                       <div>
-                        <label className="block text-sm font-medium mb-2">Category</label>
-                        <select
+                        <label className="block text-sm font-medium mb-2">Tour Category (nav group)</label>
+                        <CategorySelect
                           value={formData.category}
-                          onChange={(e) => updateField('category', e.target.value)}
-                          className="w-full px-4 py-3 rounded-xl shadow-premium-sm focus:shadow-premium-md transition-all outline-none bg-white"
-                        >
-                          <option value="cultural">Cultural</option>
-                          <option value="adventure">Adventure</option>
-                          <option value="trekking">Trekking</option>
-                          <option value="spiritual">Spiritual</option>
-                          <option value="festival">Festival</option>
-                        </select>
+                          onChange={(v) => updateField('category', v)}
+                        />
                       </div>
 
                       <PremiumInput

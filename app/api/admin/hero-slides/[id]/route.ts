@@ -1,16 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/utils/supabase/server';
+import { createAdminClient } from '@/utils/supabase/admin';
+import { isAuthError, requireAuth } from '@/lib/auth/require-auth';
 
-// PATCH /api/admin/hero-slides/[id] - Update hero slide
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const auth = await requireAuth();
+    if (isAuthError(auth)) return auth;
+
     const { id } = await params;
     const body = await request.json();
-
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     const { data: slide, error } = await supabase
       .from('hero_slides')
@@ -20,32 +22,29 @@ export async function PATCH(
       .single();
 
     if (error) throw error;
-
     return NextResponse.json(slide);
-  } catch (error: any) {
+  } catch (error) {
     console.error('Hero slide update error:', error);
     return NextResponse.json({ error: 'Failed to update hero slide' }, { status: 500 });
   }
 }
 
-// DELETE /api/admin/hero-slides/[id] - Delete hero slide
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const auth = await requireAuth();
+    if (isAuthError(auth)) return auth;
+
     const { id } = await params;
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
-    const { error } = await supabase
-      .from('hero_slides')
-      .delete()
-      .eq('id', id);
-
+    const { error } = await supabase.from('hero_slides').delete().eq('id', id);
     if (error) throw error;
 
     return NextResponse.json({ message: 'Hero slide deleted successfully' });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Hero slide deletion error:', error);
     return NextResponse.json({ error: 'Failed to delete hero slide' }, { status: 500 });
   }

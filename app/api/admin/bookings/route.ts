@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/utils/supabase/server';
+import { createAdminClient } from '@/utils/supabase/admin';
 import { getCurrentUser } from '@/lib/auth/jwt';
 
 // GET /api/admin/bookings - List all bookings
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     const dateTo = searchParams.get('date_to');
     const offset = (page - 1) * limit;
 
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     let query = supabase
       .from('bookings')
@@ -75,7 +75,7 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Booking ID is required' }, { status: 400 });
     }
 
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     // Get current booking
     const { data: currentBooking, error: fetchError } = await supabase

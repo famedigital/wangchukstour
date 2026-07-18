@@ -71,8 +71,22 @@ export function BlogEditor({ post, postId, isNewPost, onSave, onCancel }: BlogEd
   const [saving, setSaving] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
   const [showMediaPicker, setShowMediaPicker] = useState(false);
+  const [mediaPickerMode, setMediaPickerMode] = useState<'featured' | 'insert'>('featured');
   const [autoSaveStatus, setAutoSaveStatus] = useState<'saved' | 'saving' | 'unsaved'>('saved');
   const [seoPreview, setSeoPreview] = useState(false);
+
+  // Auto-fill author from logged-in admin
+  useEffect(() => {
+    if (!isNewPost && formData.author_name) return;
+    fetch('/api/auth/me')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.user?.name && !formData.author_name) {
+          setFormData((prev) => ({ ...prev, author_name: data.user.name }));
+        }
+      })
+      .catch(() => {});
+  }, [isNewPost]);
 
   // Fetch post data when postId is provided (editing existing post)
   useEffect(() => {
@@ -144,16 +158,30 @@ export function BlogEditor({ post, postId, isNewPost, onSave, onCancel }: BlogEd
 
   // Handle media selection from picker
   const handleMediaSelect = (media: any) => {
-    if (Array.isArray(media)) {
-      // Multiple selection - insert into content
-      const images = media.map((m: any) => `![${m.alt_text || m.public_id}](${m.secure_url})`).join('\n');
-      handleChange('content', formData.content + '\n' + images);
+    if (mediaPickerMode === 'insert') {
+      const items = Array.isArray(media) ? media : [media];
+      const images = items
+        .map((m: any) => `![${m.alt_text || m.name || 'image'}](${m.secure_url || m.url})`)
+        .join('\n');
+      handleChange('content', `${formData.content}\n${images}\n`);
     } else {
-      // Single selection - set as featured image
-      handleChange('featured_image', media.secure_url);
-      handleChange('featured_image_public_id', media.public_id);
+      const item = Array.isArray(media) ? media[0] : media;
+      if (item) {
+        handleChange('featured_image', item.secure_url || item.url);
+        handleChange('featured_image_public_id', item.public_id);
+      }
     }
     setShowMediaPicker(false);
+  };
+
+  const openFeaturedPicker = () => {
+    setMediaPickerMode('featured');
+    setShowMediaPicker(true);
+  };
+
+  const openInsertPicker = () => {
+    setMediaPickerMode('insert');
+    setShowMediaPicker(true);
   };
 
   // Insert content blocks
@@ -162,7 +190,7 @@ export function BlogEditor({ post, postId, isNewPost, onSave, onCancel }: BlogEd
 
     switch (type) {
       case 'image':
-        setShowMediaPicker(true);
+        openInsertPicker();
         return;
       case 'video':
         block = '\n[Video: YouTube or Vimeo URL]\n';
@@ -420,7 +448,7 @@ export function BlogEditor({ post, postId, isNewPost, onSave, onCancel }: BlogEd
             <div className="bg-white rounded-xl p-4 shadow-premium-sm">
               <label className="block text-sm font-medium mb-3">Featured Image</label>
               <button
-                onClick={() => setShowMediaPicker(true)}
+                onClick={openFeaturedPicker}
                 className="w-full h-32 rounded-lg border-2 border-dashed border-gray-200 hover:border-red-300 transition-colors flex flex-col items-center justify-center gap-2"
               >
                 {formData.featured_image ? (
@@ -480,8 +508,11 @@ export function BlogEditor({ post, postId, isNewPost, onSave, onCancel }: BlogEd
               <PremiumInput
                 value={formData.author_name}
                 onChange={(e) => handleChange('author_name', e.target.value)}
-                placeholder="Author name"
+                placeholder="Author name (auto from login)"
+                readOnly
+                className="bg-gray-50"
               />
+              <p className="text-xs text-gray-500 mt-1">Set automatically from your admin account</p>
             </div>
 
             {/* Publishing */}
@@ -570,9 +601,9 @@ export function BlogEditor({ post, postId, isNewPost, onSave, onCancel }: BlogEd
         isOpen={showMediaPicker}
         onClose={() => setShowMediaPicker(false)}
         onSelect={handleMediaSelect}
-        multiple={false}
+        multiple={mediaPickerMode === 'insert'}
         allowedTypes={['image']}
-        currentFolder="/blog/"
+        currentFolder="blog"
       />
     </div>
   );

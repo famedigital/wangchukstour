@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { PremiumButton } from '@/components/ui/premium-button';
 import { PremiumInput, PremiumTextarea } from '@/components/ui/premium-input';
+import { MediaPickerModal } from '@/components/admin/MediaPickerModal';
 
 interface HeroSlide {
   id: string;
@@ -258,9 +259,14 @@ function HeroSlideForm({
     slide_order: slide?.slide_order || 0,
     is_active: slide?.is_active ?? true,
   });
+  const [showMediaPicker, setShowMediaPicker] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.image_url || !formData.image_public_id) {
+      toast.error('Please select a hero image');
+      return;
+    }
     onSave(formData);
   };
 
@@ -269,13 +275,13 @@ function HeroSlideForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-6 space-y-4">
+    <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 max-h-[85vh] overflow-y-auto">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-xl font-bold">{slide ? 'Edit Slide' : 'New Slide'}</h3>
         <button
           type="button"
           onClick={onCancel}
-          className="text-gray-400 hover:text-gray-600"
+          className="min-h-11 min-w-11 text-gray-400 hover:text-gray-600 text-2xl"
         >
           ×
         </button>
@@ -327,31 +333,39 @@ function HeroSlideForm({
         placeholder="Display order (0 = first)"
       />
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 min-h-11">
         <input
           type="checkbox"
           id="is_active"
           checked={formData.is_active}
           onChange={(e) => handleChange('is_active', e.target.checked)}
-          className="rounded"
+          className="rounded h-4 w-4"
         />
         <label htmlFor="is_active" className="text-sm font-medium">
           Active (show on homepage)
         </label>
       </div>
 
-      {/* Image Upload Placeholder */}
-      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-        <ImageIcon className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-        <p className="text-sm text-gray-600 mb-2">
-          {formData.image_url ? 'Image uploaded' : 'Image upload functionality coming soon'}
-        </p>
-        {formData.image_url && (
-          <img src={formData.image_url} alt="Preview" className="max-h-32 mx-auto rounded" />
+      <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center space-y-3">
+        {formData.image_url ? (
+          <img src={formData.image_url} alt="Preview" className="max-h-40 mx-auto rounded-lg object-cover" />
+        ) : (
+          <ImageIcon className="h-12 w-12 text-gray-400 mx-auto" />
         )}
+        <p className="text-sm text-gray-600">
+          {formData.image_url ? 'Hero image selected' : 'Select a hero image from Media Library'}
+        </p>
+        <button
+          type="button"
+          onClick={() => setShowMediaPicker(true)}
+          className="min-h-11 px-4 py-2 rounded-xl text-white text-sm"
+          style={{ background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)' }}
+        >
+          {formData.image_url ? 'Change Image' : 'Choose Image'}
+        </button>
       </div>
 
-      <div className="flex items-center gap-3 justify-end pt-4">
+      <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-3 justify-end pt-4 sticky bottom-0 bg-white">
         <PremiumButton
           type="button"
           variant="secondary"
@@ -364,6 +378,22 @@ function HeroSlideForm({
           {slide ? 'Update' : 'Create'} Slide
         </PremiumButton>
       </div>
+
+      <MediaPickerModal
+        isOpen={showMediaPicker}
+        onClose={() => setShowMediaPicker(false)}
+        onSelect={(media) => {
+          const item = Array.isArray(media) ? media[0] : media;
+          if (item) {
+            handleChange('image_url', item.secure_url || item.url);
+            handleChange('image_public_id', item.public_id);
+          }
+          setShowMediaPicker(false);
+        }}
+        multiple={false}
+        allowedTypes={['image']}
+        currentFolder="hero"
+      />
     </form>
   );
 }

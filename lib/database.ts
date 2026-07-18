@@ -1,5 +1,4 @@
 import { createClient } from '@/utils/supabase/server';
-import { cookies } from 'next/headers';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 
 // Database types
@@ -248,10 +247,9 @@ export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> 
 
 export async function getActiveHeroSlides(): Promise<HeroSlide[]> {
   try {
-    const supabase = await createClient();
-
-    // Debug logging for production issues
-    console.log('[getActiveHeroSlides] Fetching hero slides...');
+    // Use anon/publishable client (same as tours) — reliable on Vercel serverless.
+    // The cookie + service-role SSR client often fails in production and returns [].
+    const supabase = createReadClient();
 
     const { data, error } = await supabase
       .from('hero_slides')
@@ -259,27 +257,17 @@ export async function getActiveHeroSlides(): Promise<HeroSlide[]> {
       .eq('is_active', true)
       .order('slide_order', { ascending: true });
 
-    if (error) {
-      console.error('[getActiveHeroSlides] Database error:', error);
-      throw error;
-    }
-
-    console.log('[getActiveHeroSlides] Success! Found', data?.length || 0, 'active slides');
-    if (data && data.length > 0) {
-      console.log('[getActiveHeroSlides] Sample data:', data[0]?.title);
-      console.log('[getActiveHeroSlides] First slide image:', data[0]?.image_url?.substring(0, 100));
-    }
-
+    if (error) throw error;
     return data || [];
   } catch (error) {
-    console.error('[getActiveHeroSlides] Error fetching active hero slides:', error);
+    console.error('Error fetching active hero slides:', error);
     return [];
   }
 }
 
 export async function getFeaturedTestimonials(): Promise<Testimonial[]> {
   try {
-    const supabase = await createClient();
+    const supabase = createReadClient();
 
     const { data, error } = await supabase
       .from('testimonials')

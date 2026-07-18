@@ -148,8 +148,9 @@ export function TourManagement() {
             className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
           >
             <option value="all">All Categories</option>
-            <option value="cultural">Cultural</option>
-            <option value="trekking">Trekking</option>
+            <option value="all">All Categories</option>
+            <option value="international">International Tour</option>
+            <option value="regional">Regional Tour</option>
             <option value="festival">Festival</option>
             <option value="spiritual">Spiritual</option>
             <option value="adventure">Adventure</option>

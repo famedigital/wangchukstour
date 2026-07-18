@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/utils/supabase/server';
+import { createAdminClient } from '@/utils/supabase/admin';
+import { isAuthError, requireAuth } from '@/lib/auth/require-auth';
 
-// GET /api/admin/blog/[id] - Get single blog post
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // TEMPORARY: Skip authentication to get blog working first
-    // TODO: Re-enable after confirming Supabase connection works
+    const auth = await requireAuth();
+    if (isAuthError(auth)) return auth;
 
     const { id } = await params;
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     const { data: post, error } = await supabase
       .from('blog_posts')
@@ -23,43 +23,30 @@ export async function GET(
       return NextResponse.json({ error: 'Blog post not found' }, { status: 404 });
     }
 
-    // Map database fields to BlogEditor format
-    const responsePost = {
+    return NextResponse.json({
       ...post,
-      // Map featured_image_url to featured_image for BlogEditor
       featured_image: post.featured_image_url,
-      // Map status to is_published for BlogEditor
       is_published: post.status === 'published',
-      // Map published_at to published_date for BlogEditor
       published_date: post.published_at,
-      // Note: is_featured is not in database schema, so we don't include it
-    };
-
-    return NextResponse.json(responsePost);
+    });
   } catch (error) {
     console.error('Blog post fetch error:', error);
     return NextResponse.json({ error: 'Failed to fetch blog post' }, { status: 500 });
   }
 }
 
-// PATCH /api/admin/blog/[id] - Update blog post
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // TEMPORARY: Skip authentication to get blog working first
-    // TODO: Re-enable after confirming Supabase connection works
+    const auth = await requireAuth();
+    if (isAuthError(auth)) return auth;
 
     const body = await request.json();
-
-    // Explicitly remove is_featured if present (not in database schema)
     const { is_featured, ...cleanBody } = body;
+    const updateData: Record<string, unknown> = { updated_by: auth.userId };
 
-    // Map BlogEditor fields to database schema
-    const updateData: any = {};
-
-    // Direct field mappings
     if (cleanBody.title !== undefined) updateData.title = cleanBody.title;
     if (cleanBody.slug !== undefined) updateData.slug = cleanBody.slug;
     if (cleanBody.content !== undefined) updateData.content = cleanBody.content;
@@ -71,41 +58,33 @@ export async function PATCH(
     if (cleanBody.meta_description !== undefined) updateData.meta_description = cleanBody.meta_description;
     if (cleanBody.meta_keywords !== undefined) updateData.meta_keywords = cleanBody.meta_keywords;
     if (cleanBody.read_time !== undefined) updateData.read_time = cleanBody.read_time;
-
-    // Map featured_image to featured_image_url
     if (cleanBody.featured_image !== undefined) updateData.featured_image_url = cleanBody.featured_image;
-    if (cleanBody.featured_image_public_id !== undefined) updateData.featured_image_public_id = cleanBody.featured_image_public_id;
+    if (cleanBody.featured_image_public_id !== undefined) {
+      updateData.featured_image_public_id = cleanBody.featured_image_public_id;
+    }
 
-    // Map is_published to status
     if (cleanBody.is_published !== undefined) {
       updateData.status = cleanBody.is_published ? 'published' : 'draft';
     } else if (cleanBody.status !== undefined) {
       updateData.status = cleanBody.status;
     }
 
-    // Map published_date to published_at
     if (cleanBody.published_date !== undefined) {
       updateData.published_at = cleanBody.published_date;
     } else if (cleanBody.is_published && !cleanBody.published_date) {
       updateData.published_at = new Date().toISOString();
     }
 
-    // Recalculate read time if content changed and not provided
     if (cleanBody.content && !cleanBody.read_time) {
-      const wordCount = cleanBody.content.split(/\s+/).length;
-      updateData.read_time = Math.ceil(wordCount / 200);
+      updateData.read_time = Math.ceil(String(cleanBody.content).split(/\s+/).length / 200);
     }
 
-    // Note: is_featured is not in database schema, so we skip it
-    // If you need is_featured functionality, add it to the database schema first
-
     const { id } = await params;
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
-    // Get current post
     const { data: currentPost, error: fetchError } = await supabase
       .from('blog_posts')
-      .select('*')
+      .select('id')
       .eq('id', id)
       .single();
 
@@ -113,7 +92,6 @@ export async function PATCH(
       return NextResponse.json({ error: 'Blog post not found' }, { status: 404 });
     }
 
-    // Update post
     const { data: updatedPost, error } = await supabase
       .from('blog_posts')
       .update(updateData)
@@ -121,40 +99,20 @@ export async function PATCH(
       .select()
       .single();
 
-    if (error) {
-      console.error('Database update error:', error);
-      throw error;
-    }
+    if (error) throw error;
 
-    // Log the update
-    try {
-      // await supabase.from('audit_logs').insert({
-      //   user_id: user.userId,
-      //   user_name: user.name,
-      //   user_email: user.email,
-      //   action: 'update',
-      //   entity_type: 'blog_post',
-      //   entity_id: updatedPost.id,
-      //   entity_title: updatedPost.title,
-      //   old_values: currentPost,
-      //   new_values: updatedPost,
-      //   ip_address: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || null,
-      //   user_agent: request.headers.get('user-agent') || null,
-      // });
-      console.log('Blog post updated:', updatedPost.id, updatedPost.title);
-    } catch (logError) {
-      // Don't fail the update if logging fails
-      console.error('Failed to log update:', logError);
-    }
-
-    return NextResponse.json(updatedPost);
+    return NextResponse.json({
+      ...updatedPost,
+      featured_image: updatedPost.featured_image_url,
+      is_published: updatedPost.status === 'published',
+      published_date: updatedPost.published_at,
+    });
   } catch (error) {
     console.error('Blog post update error:', error);
     return NextResponse.json({ error: 'Failed to update blog post' }, { status: 500 });
   }
 }
 
-// PUT /api/admin/blog/[id] - Update blog post (alias for PATCH)
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -162,22 +120,20 @@ export async function PUT(
   return PATCH(request, { params });
 }
 
-// DELETE /api/admin/blog/[id] - Delete blog post
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // TEMPORARY: Skip authentication to get blog working first
-    // TODO: Re-enable after confirming Supabase connection works
+    const auth = await requireAuth();
+    if (isAuthError(auth)) return auth;
 
     const { id } = await params;
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
-    // Get post before deletion
     const { data: post, error: fetchError } = await supabase
       .from('blog_posts')
-      .select('*')
+      .select('id')
       .eq('id', id)
       .single();
 
@@ -185,34 +141,8 @@ export async function DELETE(
       return NextResponse.json({ error: 'Blog post not found' }, { status: 404 });
     }
 
-    // Soft delete by setting status to 'archived'
-    const { error } = await supabase
-      .from('blog_posts')
-      .update({
-        status: 'archived',
-      })
-      .eq('id', id);
-
+    const { error } = await supabase.from('blog_posts').delete().eq('id', id);
     if (error) throw error;
-
-    // Log the deletion
-    try {
-      // await supabase.from('audit_logs').insert({
-      //   user_id: user.userId,
-      //   user_name: user.name,
-      //   user_email: user.email,
-      //   action: 'delete',
-      //   entity_type: 'blog_post',
-      //   entity_id: post.id,
-      //   entity_title: post.title,
-      //   old_values: post,
-      //   ip_address: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || null,
-      //   user_agent: request.headers.get('user-agent') || null,
-      // });
-      console.log('Blog post deleted:', post.id, post.title);
-    } catch (logError) {
-      console.error('Failed to log deletion:', logError);
-    }
 
     return NextResponse.json({ message: 'Blog post deleted successfully' });
   } catch (error) {

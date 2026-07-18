@@ -1,42 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/utils/supabase/server';
+import { createAdminClient } from '@/utils/supabase/admin';
+import { isAuthError, requireAuth } from '@/lib/auth/require-auth';
 
-// GET /api/admin/hero-slides - Get all hero slides
 export async function GET(request: NextRequest) {
   try {
+    const auth = await requireAuth();
+    if (isAuthError(auth)) return auth;
+
     const { searchParams } = new URL(request.url);
     const activeOnly = searchParams.get('active') === 'true';
-
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     let query = supabase
       .from('hero_slides')
       .select('*')
       .order('slide_order', { ascending: true });
 
-    if (activeOnly) {
-      query = query.eq('is_active', true);
-    }
+    if (activeOnly) query = query.eq('is_active', true);
 
     const { data: slides, error } = await query;
-
     if (error) throw error;
 
     return NextResponse.json({ slides: slides || [] });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Hero slides fetch error:', error);
     return NextResponse.json({ error: 'Failed to fetch hero slides' }, { status: 500 });
   }
 }
 
-// POST /api/admin/hero-slides - Create new hero slide
 export async function POST(request: NextRequest) {
   try {
+    const auth = await requireAuth();
+    if (isAuthError(auth)) return auth;
+
     const body = await request.json();
+    const supabase = createAdminClient();
 
-    const supabase = await createClient();
-
-    // Get the highest current order
     const { data: existingSlides } = await supabase
       .from('hero_slides')
       .select('slide_order')
@@ -66,9 +65,8 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) throw error;
-
     return NextResponse.json(slide, { status: 201 });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Hero slide creation error:', error);
     return NextResponse.json({ error: 'Failed to create hero slide' }, { status: 500 });
   }

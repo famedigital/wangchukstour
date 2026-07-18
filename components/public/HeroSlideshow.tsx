@@ -38,16 +38,13 @@ export function HeroSlideshow({
   interval = 6000
 }: HeroSlideshowProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-
-  // DEBUG: Log what slides we received
-  console.log('[HERO_SLIDESHOW] Component rendered with slides:', slides.length);
-  console.log('[HERO_SLIDESHOW] Slides data:', slides.map(s => ({
-    id: s.id,
-    title: s.title,
-    hasImage: !!s.image_url
-  })));
+  const [hasMounted, setHasMounted] = useState(false);
 
   const activeSlides = slides.length > 0 ? slides : [];
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!autoPlay || activeSlides.length <= 1) return;
@@ -61,16 +58,8 @@ export function HeroSlideshow({
 
   const currentSlide = activeSlides[currentIndex];
 
-  // DEBUG: Log current slide state
-  console.log('[HERO_SLIDESHOW] Current slide:', currentSlide ? {
-    index: currentIndex,
-    title: currentSlide.title,
-    hasImage: !!currentSlide.image_url
-  } : 'NO CURRENT SLIDE');
-
   // Handle case when no slides are available
   if (!currentSlide) {
-    console.log('[HERO_SLIDESHOW] Showing fallback content');
     return (
       <section className="relative h-screen w-full overflow-hidden bg-black">
         {/* Fallback background */}
@@ -113,8 +102,6 @@ export function HeroSlideshow({
     );
   }
 
-  console.log('[HERO_SLIDESHOW] Rendering active slides with images');
-
   return (
     <section className="relative h-screen w-full overflow-hidden bg-black">
       {/* Background Image with Crossfade - No White Flash */}
@@ -122,9 +109,10 @@ export function HeroSlideshow({
         {activeSlides.map((slide, index) => (
           <motion.div
             key={slide.id}
-            initial={{ opacity: 0 }}
+            // First paint must show slide 0 (avoid opacity:0 blank hero before hydration)
+            initial={false}
             animate={{ opacity: index === currentIndex ? 1 : 0 }}
-            transition={{ duration: 1.2, ease: "easeInOut" }}
+            transition={hasMounted ? { duration: 1.2, ease: "easeInOut" } : { duration: 0 }}
             className="absolute inset-0"
           >
             <img
@@ -132,6 +120,7 @@ export function HeroSlideshow({
               alt={slide.title}
               className="w-full h-full object-cover"
               loading={index === 0 ? 'eager' : 'lazy'}
+              fetchPriority={index === 0 ? 'high' : 'auto'}
               style={{ objectPosition: 'center 35%' }}
             />
             {/* Dark gradient overlay */}

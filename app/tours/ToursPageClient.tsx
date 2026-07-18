@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { Navigation } from '@/components/public/Navigation';
 import { Footer } from '@/components/public/Footer';
 import { MagneticButton } from '@/components/ui/magnetic-button';
@@ -12,24 +13,11 @@ import {
   TrendingUp,
   Filter,
   X,
-  Mountain,
-  Users,
-  Sparkles,
-  Camera,
-  Heart,
   Compass,
   ArrowRight,
   Mail,
+  Users,
 } from 'lucide-react';
-
-const categories = [
-  { value: 'all', label: 'All Tours', icon: Compass },
-  { value: 'cultural', label: 'Cultural Tours', icon: Mountain },
-  { value: 'trekking', label: 'Trekking', icon: TrendingUp },
-  { value: 'festival', label: 'Festival Tours', icon: Sparkles },
-  { value: 'spiritual', label: 'Spiritual Journeys', icon: Heart },
-  { value: 'adventure', label: 'Adventure', icon: Camera },
-];
 
 const difficulties = ['easy', 'moderate', 'challenging'];
 
@@ -46,11 +34,39 @@ const priceRanges = [
 ];
 
 export function ToursPageClient({ tours }: { tours: any[] }) {
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const searchParams = useSearchParams();
+  const initialCategory = searchParams.get('category') || 'all';
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+  const [categories, setCategories] = useState<{ value: string; label: string }[]>([
+    { value: 'all', label: 'All Tours' },
+  ]);
   const [selectedDifficulty, setSelectedDifficulty] = useState<string[]>([]);
   const [selectedDuration, setSelectedDuration] = useState<string[]>([]);
   const [selectedPriceRange, setSelectedPriceRange] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+
+  useEffect(() => {
+    setSelectedCategory(searchParams.get('category') || 'all');
+  }, [searchParams]);
+
+  useEffect(() => {
+    fetch('/api/tour-categories')
+      .then((r) => r.json())
+      .then((data) => {
+        const cats = (data.categories || []).map((c: any) => ({
+          value: c.slug,
+          label: c.name,
+        }));
+        setCategories([{ value: 'all', label: 'All Tours' }, ...cats]);
+      })
+      .catch(() => {
+        setCategories([
+          { value: 'all', label: 'All Tours' },
+          { value: 'international', label: 'International Tour' },
+          { value: 'regional', label: 'Regional Tour' },
+        ]);
+      });
+  }, []);
 
   const toggleFilter = (
     value: string,
@@ -73,7 +89,6 @@ export function ToursPageClient({ tours }: { tours: any[] }) {
   };
 
   const filteredTours = tours.filter((tour) => {
-    // Category filter
     if (selectedCategory !== 'all' && tour.category !== selectedCategory) {
       return false;
     }
@@ -120,7 +135,7 @@ export function ToursPageClient({ tours }: { tours: any[] }) {
     selectedPriceRange.length +
     (searchQuery ? 1 : 0);
 
-  const categoryIcon = categories.find((c) => c.value === selectedCategory)?.icon || Compass;
+  const categoryLabel = categories.find((c) => c.value === selectedCategory)?.label || 'All Tours';
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -155,6 +170,23 @@ export function ToursPageClient({ tours }: { tours: any[] }) {
                   Showing results for "{searchQuery}"
                 </div>
               )}
+            </div>
+
+            <div className="mb-10 flex flex-wrap justify-center gap-2">
+              {categories.map((cat) => (
+                <button
+                  key={cat.value}
+                  type="button"
+                  onClick={() => setSelectedCategory(cat.value)}
+                  className={`min-h-11 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                    selectedCategory === cat.value
+                      ? 'bg-red-600 text-white'
+                      : 'bg-white text-gray-700 shadow hover:bg-gray-50'
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              ))}
             </div>
           </div>
 

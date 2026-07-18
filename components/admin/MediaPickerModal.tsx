@@ -78,9 +78,20 @@ export function MediaPickerModal({
       const data = await response.json();
       console.log('📦 API Response data:', data);
 
-      // Handle different response formats
-      let fetchedMedia = data.images || data || [];
-      console.log(`🖼️ Found ${fetchedMedia.length} images`);
+      // Normalize Cloudinary items for the picker
+      let fetchedMedia = (data.media || data.images || []).map((item: any) => ({
+        public_id: item.public_id,
+        url: item.url || item.secure_url,
+        secure_url: item.secure_url || item.url,
+        thumbnail_url: item.thumbnail_url || item.secure_url || item.url,
+        format: item.format || 'jpg',
+        width: item.width || 0,
+        height: item.height || 0,
+        resource_type: item.resource_type || item.type || 'image',
+        folder: item.public_id?.includes('/') ? item.public_id.split('/')[0] : undefined,
+        tags: item.tags || [],
+        created_at: item.created_at || new Date().toISOString(),
+      }));
 
       // Filter by folder if specified
       if (currentFolderFilter && currentFolderFilter !== 'All Images') {
@@ -155,8 +166,7 @@ export function MediaPickerModal({
         setUploading(true);
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('folder', currentFolderFilter);
-        formData.append('upload_preset', 'ml_default'); // Cloudinary upload preset
+        formData.append('folder', currentFolderFilter === 'All Images' ? 'wangchuk-tour' : currentFolderFilter);
 
         const response = await fetch('/api/upload', {
           method: 'POST',

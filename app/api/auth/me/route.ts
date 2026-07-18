@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/jwt';
-import { createClient } from '@/utils/supabase/server';
+import { createAdminClient } from '@/utils/supabase/admin';
 import type { AdminUser } from '@/lib/auth/rbac';
 
 export async function GET() {
@@ -8,14 +8,10 @@ export async function GET() {
     const payload = await getCurrentUser();
 
     if (!payload) {
-      return NextResponse.json(
-        { error: 'Not authenticated' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    // Get full user data from database
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     const { data: user, error } = await supabase
       .from('admin_users')
@@ -26,27 +22,20 @@ export async function GET() {
 
     if (error || !user) {
       console.error('Database error fetching user:', error);
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // Return user in RBAC-compatible format
     const adminUser: AdminUser = {
       id: user.id,
       email: user.email,
       name: user.name || 'Admin',
       role: user.role || 'admin',
-      permissions: user.permissions || [],
+      permissions: Array.isArray(user.permissions) ? user.permissions : [],
     };
 
     return NextResponse.json({ user: adminUser });
   } catch (error) {
     console.error('Get current user error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

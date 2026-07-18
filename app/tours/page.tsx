@@ -1,10 +1,13 @@
+import { Suspense } from 'react';
 import { getAllTours } from '@/lib/database';
 import { ToursPageClient } from './ToursPageClient';
 
 export default async function ToursPage() {
-  // Fetch all tours on server
   const tours = await getAllTours();
 
-  // Pass to client component for filtering
-  return <ToursPageClient tours={tours} />;
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading tours...</div>}>
+      <ToursPageClient tours={tours} />
+    </Suspense>
+  );
 }

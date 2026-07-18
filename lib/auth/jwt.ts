@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { cookies } from 'next/headers';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
@@ -113,28 +113,23 @@ export async function setAuthCookies(tokens: AuthTokens) {
     const cookieStore = await cookies();
 
     // Access token cookie (httpOnly for security)
-    cookieStore.set('access_token', tokens.accessToken, {
+    const cookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 15 * 60, // 15 minutes
+      sameSite: 'lax' as const,
       path: '/',
-      // Additional security for production
-      ...(process.env.NODE_ENV === 'production' && {
-        domain: process.env.COOKIE_DOMAIN,
-      }),
+      // Only set domain when explicitly configured (undefined domain breaks cookies on Vercel)
+      ...(process.env.COOKIE_DOMAIN ? { domain: process.env.COOKIE_DOMAIN } : {}),
+    };
+
+    cookieStore.set('access_token', tokens.accessToken, {
+      ...cookieOptions,
+      maxAge: 15 * 60, // 15 minutes
     });
 
-    // Refresh token cookie (longer lived)
     cookieStore.set('refresh_token', tokens.refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      ...cookieOptions,
       maxAge: 7 * 24 * 60 * 60, // 7 days
-      path: '/',
-      ...(process.env.NODE_ENV === 'production' && {
-        domain: process.env.COOKIE_DOMAIN,
-      }),
     });
 
     console.log('Auth cookies set successfully');
@@ -215,9 +210,7 @@ export async function refreshAccessToken(): Promise<string | null> {
       sameSite: 'lax',
       maxAge: 15 * 60,
       path: '/',
-      ...(process.env.NODE_ENV === 'production' && {
-        domain: process.env.COOKIE_DOMAIN,
-      }),
+      ...(process.env.COOKIE_DOMAIN ? { domain: process.env.COOKIE_DOMAIN } : {}),
     });
 
     console.log('Access token refreshed successfully');

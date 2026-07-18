@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/utils/supabase/server';
+import { createAdminClient } from '@/utils/supabase/admin';
 import { comparePassword, generateAuthTokens, setAuthCookies } from '@/lib/auth/jwt';
 import { z } from 'zod';
 
-// Login validation schema
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
@@ -13,7 +12,6 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    // Validate request body
     const validation = loginSchema.safeParse(body);
     if (!validation.success) {
       return NextResponse.json(
@@ -24,10 +22,8 @@ export async function POST(request: NextRequest) {
 
     const { email, password } = validation.data;
 
-    // Get Supabase client
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
-    // Find user by email
     const { data: user, error: userError } = await supabase
       .from('admin_users')
       .select('*')
@@ -36,13 +32,13 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (userError || !user) {
+      console.error('Login user lookup failed:', userError?.message || 'User not found');
       return NextResponse.json(
         { error: 'Invalid credentials' },
         { status: 401 }
       );
     }
 
-    // Verify password
     const isPasswordValid = await comparePassword(password, user.password_hash);
     if (!isPasswordValid) {
       return NextResponse.json(
@@ -51,7 +47,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate auth tokens with permissions
     const tokens = generateAuthTokens({
       userId: user.id,
       email: user.email,
@@ -60,10 +55,8 @@ export async function POST(request: NextRequest) {
       permissions: user.permissions || [],
     });
 
-    // Set auth cookies
     await setAuthCookies(tokens);
 
-    // Update last login
     await supabase
       .from('admin_users')
       .update({
@@ -72,7 +65,6 @@ export async function POST(request: NextRequest) {
       })
       .eq('id', user.id);
 
-    // Log the login event
     await supabase.from('audit_logs').insert({
       user_id: user.id,
       user_name: user.name,
@@ -83,7 +75,6 @@ export async function POST(request: NextRequest) {
       user_agent: request.headers.get('user-agent') || null,
     });
 
-    // Return user data (excluding password)
     const { password_hash, verification_token, reset_password_token, reset_password_expires, ...safeUser } = user;
 
     return NextResponse.json({
