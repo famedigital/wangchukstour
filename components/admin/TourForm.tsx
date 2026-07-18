@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { PremiumInput } from '@/components/ui/premium-input';
+import { FormField } from '@/components/ui/form-field';
 import { MediaPickerModal } from '@/components/admin/MediaPickerModal';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -376,7 +376,7 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
                 {currentStep === 0 && (
                   <div className="space-y-6">
                     <div className="grid gap-6 md:grid-cols-2">
-                      <PremiumInput
+                      <FormField
                         label="Tour Title"
                         value={formData.title}
                         onChange={(e) => updateField('title', e.target.value)}
@@ -386,7 +386,7 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
                       />
 
                       <div className="space-y-2">
-                        <PremiumInput
+                        <FormField
                           label="URL Slug"
                           value={formData.slug}
                           onChange={(e) => updateField('slug', e.target.value)}
@@ -404,7 +404,7 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
                       </div>
                     </div>
 
-                    <PremiumInput
+                    <FormField
                       label="Tagline"
                       value={formData.tagline}
                       onChange={(e) => updateField('tagline', e.target.value)}
@@ -420,7 +420,7 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
                         />
                       </div>
 
-                      <PremiumInput
+                      <FormField
                         label="Duration (Days)"
                         type="number"
                         value={formData.duration}
@@ -430,7 +430,7 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
                         error={validationErrors.duration}
                       />
 
-                      <PremiumInput
+                      <FormField
                         label="Price (USD)"
                         type="number"
                         value={formData.price}
@@ -443,7 +443,7 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
                     </div>
 
                     <div className="grid gap-6 md:grid-cols-3">
-                      <PremiumInput
+                      <FormField
                         label="Difficulty Level"
                         value={formData.difficulty_level}
                         onChange={(e) => updateField('difficulty_level', e.target.value)}
@@ -456,7 +456,7 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
                         ]}
                       />
 
-                      <PremiumInput
+                      <FormField
                         label="Min Group Size"
                         type="number"
                         value={formData.min_group_size}
@@ -464,7 +464,7 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
                         min="1"
                       />
 
-                      <PremiumInput
+                      <FormField
                         label="Max Group Size"
                         type="number"
                         value={formData.max_group_size}
@@ -478,7 +478,7 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
                 {/* Step 2: Content */}
                 {currentStep === 1 && (
                   <div className="space-y-6">
-                    <PremiumInput
+                    <FormField
                       label="Short Description"
                       value={formData.description}
                       onChange={(e) => updateField('description', e.target.value)}
@@ -489,7 +489,7 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
                       error={validationErrors.description}
                     />
 
-                    <PremiumInput
+                    <FormField
                       label="Detailed Description"
                       value={formData.long_description}
                       onChange={(e) => updateField('long_description', e.target.value)}
@@ -515,7 +515,7 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
                       <div className="space-y-3">
                         {formData.highlights.map((highlight: string, index: number) => (
                           <div key={index} className="flex gap-3">
-                            <PremiumInput
+                            <FormField
                               value={highlight}
                               onChange={(e) => updateArrayItem('highlights', index, e.target.value)}
                               placeholder="e.g., Visit Tiger's Nest Monastery"
@@ -657,20 +657,20 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
                             </div>
                             <div className="flex-1 space-y-3">
                               <div className="grid gap-3 md:grid-cols-2">
-                                <PremiumInput
+                                <FormField
                                   label="Title"
                                   value={day.title || ''}
                                   onChange={(e) => updateArrayItem('itinerary', index, { ...day, title: e.target.value })}
                                   placeholder="e.g., Arrival in Paro"
                                 />
-                                <PremiumInput
+                                <FormField
                                   label="Location"
                                   value={day.location || ''}
                                   onChange={(e) => updateArrayItem('itinerary', index, { ...day, location: e.target.value })}
                                   placeholder="e.g., Paro"
                                 />
                               </div>
-                              <PremiumInput
+                              <FormField
                                 label="Description"
                                 value={day.description || ''}
                                 onChange={(e) => updateArrayItem('itinerary', index, { ...day, description: e.target.value })}
@@ -679,13 +679,13 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
                                 placeholder="Day activities..."
                               />
                               <div className="grid gap-3 md:grid-cols-2">
-                                <PremiumInput
+                                <FormField
                                   label="Meals Included"
                                   value={day.meals || ''}
                                   onChange={(e) => updateArrayItem('itinerary', index, { ...day, meals: e.target.value })}
                                   placeholder="e.g., Breakfast, Lunch"
                                 />
-                                <PremiumInput
+                                <FormField
                                   label="Accommodation"
                                   value={day.accommodation || ''}
                                   onChange={(e) => updateArrayItem('itinerary', index, { ...day, accommodation: e.target.value })}
@@ -734,7 +734,7 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
                             <div className="flex-shrink-0 mt-3">
                               <Check className="h-5 w-5 text-green-600" />
                             </div>
-                            <PremiumInput
+                            <FormField
                               value={item}
                               onChange={(e) => updateArrayItem('included_items', index, e.target.value)}
                               placeholder="e.g., All accommodations"
@@ -770,7 +770,7 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
                             <div className="flex-shrink-0 mt-3">
                               <X className="h-5 w-5 text-red-600" />
                             </div>
-                            <PremiumInput
+                            <FormField
                               value={item}
                               onChange={(e) => updateArrayItem('excluded_items', index, e.target.value)}
                               placeholder="e.g., International flights"
@@ -793,7 +793,7 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
                 {/* Step 6: SEO */}
                 {currentStep === 5 && (
                   <div className="space-y-6">
-                    <PremiumInput
+                    <FormField
                       label="Meta Title"
                       value={formData.meta_title}
                       onChange={(e) => updateField('meta_title', e.target.value)}
@@ -801,7 +801,7 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
                       maxLength={60}
                     />
 
-                    <PremiumInput
+                    <FormField
                       label="Meta Description"
                       value={formData.meta_description}
                       onChange={(e) => updateField('meta_description', e.target.value)}

@@ -3,8 +3,7 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { MediaPickerModal } from './MediaPickerModal';
-import { PremiumButton } from '@/components/ui/premium-button';
-import { PremiumInput, PremiumTextarea } from '@/components/ui/premium-input';
+import { FormField, FormTextarea } from '@/components/ui/form-field';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -346,40 +345,40 @@ export function BlogEditor({ post, postId, isNewPost, onSave, onCancel }: BlogEd
         </div>
 
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-          <PremiumButton
+          <Button
             variant="secondary"
             onClick={() => setPreviewMode(!previewMode)}
-            icon={<Eye className="h-4 w-4" />}
             className="flex-1 sm:flex-none text-xs sm:text-sm"
           >
+            <Eye className="h-4 w-4" />
             {previewMode ? 'Edit' : 'Preview'}
-          </PremiumButton>
+          </Button>
 
           {onCancel && (
-            <PremiumButton variant="secondary" onClick={onCancel} className="flex-1 sm:flex-none text-xs sm:text-sm">
+            <Button variant="secondary" onClick={onCancel} className="flex-1 sm:flex-none text-xs sm:text-sm">
               Cancel
-            </PremiumButton>
+            </Button>
           )}
 
-          <PremiumButton
+          <Button
             variant="outline"
             onClick={() => handleSave(false)}
-            loading={saving}
-            icon={<Save className="h-4 w-4" />}
+            disabled={saving}
             className="flex-1 sm:flex-none text-xs sm:text-sm"
           >
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             <span className="hidden sm:inline">Save Draft</span>
             <span className="sm:hidden">Draft</span>
-          </PremiumButton>
+          </Button>
 
-          <PremiumButton
-            variant="primary"
+          <Button
             onClick={() => handleSave(true)}
-            loading={saving}
+            disabled={saving}
             className="flex-1 sm:flex-none text-xs sm:text-sm"
           >
+            {saving && <Loader2 className="h-4 w-4 animate-spin" />}
             {formData.is_published ? 'Update' : 'Publish'}
-          </PremiumButton>
+          </Button>
         </div>
       </div>
 
@@ -389,7 +388,7 @@ export function BlogEditor({ post, postId, isNewPost, onSave, onCancel }: BlogEd
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Title & Slug */}
             <div className="space-y-4">
-              <PremiumInput
+              <FormField
                 label="Post Title"
                 value={formData.title}
                 onChange={(e) => handleTitleChange(e.target.value)}
@@ -397,7 +396,7 @@ export function BlogEditor({ post, postId, isNewPost, onSave, onCancel }: BlogEd
                 className="text-2xl font-bold"
               />
 
-              <PremiumInput
+              <FormField
                 label="URL Slug"
                 value={formData.slug}
                 onChange={(e) => handleChange('slug', e.target.value)}
@@ -423,7 +422,7 @@ export function BlogEditor({ post, postId, isNewPost, onSave, onCancel }: BlogEd
                 </Button>
               </div>
 
-              <PremiumTextarea
+              <FormTextarea
                 value={formData.content}
                 onChange={(e) => handleChange('content', e.target.value)}
                 placeholder="Write your blog content here... You can use Markdown syntax"
@@ -504,7 +503,7 @@ export function BlogEditor({ post, postId, isNewPost, onSave, onCancel }: BlogEd
                 <User className="h-4 w-4" />
                 Author
               </label>
-              <PremiumInput
+              <FormField
                 value={formData.author_name}
                 onChange={(e) => handleChange('author_name', e.target.value)}
                 placeholder="Author name (auto from login)"
@@ -547,13 +546,13 @@ export function BlogEditor({ post, postId, isNewPost, onSave, onCancel }: BlogEd
               </button>
               {seoPreview && (
                 <div className="space-y-3">
-                  <PremiumInput
+                  <FormField
                     label="SEO Title"
                     value={formData.meta_title || ''}
                     onChange={(e) => handleChange('meta_title', e.target.value)}
                     placeholder="Custom SEO title"
                   />
-                  <PremiumTextarea
+                  <FormTextarea
                     label="Meta Description"
                     value={formData.meta_description || ''}
                     onChange={(e) => handleChange('meta_description', e.target.value)}

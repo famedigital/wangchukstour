@@ -2,7 +2,7 @@
 
 import React, { useState, ReactNode } from 'react';
 import { toast } from 'sonner';
-import { PremiumButton } from '@/components/ui/premium-button';
+import { Button } from '@/components/ui/button';
 import { Download, FileSpreadsheet, FileText, Database, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -267,7 +267,7 @@ export function ExportButton({
         const isExportingThis = exporting === format;
 
         return (
-          <PremiumButton
+          <Button
             key={format}
             onClick={() => handleExport(format)}
             disabled={exporting !== null}
@@ -286,7 +286,7 @@ export function ExportButton({
                 {format.toUpperCase()}
               </>
             )}
-          </PremiumButton>
+          </Button>
         );
       })}
     </div>
@@ -399,7 +399,7 @@ export function ExportMenu({
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-premium-xl border overflow-hidden z-20"
+            className="absolute right-0 z-20 mt-2 w-56 overflow-hidden rounded-lg border bg-card shadow-lg"
           >
             {formats.map(format => (
               <button

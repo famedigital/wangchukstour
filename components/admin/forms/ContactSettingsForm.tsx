@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { PremiumCard } from '@/components/ui/premium-card';
-import { PremiumButton } from '@/components/ui/premium-button';
-import { PremiumInput } from '@/components/ui/premium-input';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { FormField } from '@/components/ui/form-field';
 import { Loader2, Save, Mail, Phone, MapPin, Clock, Share2, MessageSquare } from 'lucide-react';
 import { ScrollReveal } from '@/components/ui/scroll-reveal';
 import { StaggerChildren } from '@/components/ui/scroll-reveal';
@@ -201,7 +201,7 @@ export function ContactSettingsForm() {
           <h2 className="font-heading text-2xl font-bold">Contact Page Settings</h2>
           <p className="text-muted-foreground">Manage contact information and form configuration</p>
         </div>
-        <PremiumButton
+        <Button
           onClick={handleSave}
           disabled={saving}
           className="min-w-[140px]"
@@ -217,27 +217,27 @@ export function ContactSettingsForm() {
               Save Changes
             </>
           )}
-        </PremiumButton>
+        </Button>
       </div>
 
       <StaggerChildren>
         {/* Hero Section */}
         <ScrollReveal>
-          <PremiumCard className="p-6">
+          <Card className="p-6">
             <div className="mb-6">
               <h3 className="font-heading text-xl font-bold mb-2">Hero Section</h3>
               <p className="text-muted-foreground text-sm">Banner content and background</p>
             </div>
 
             <div className="space-y-4">
-              <PremiumInput
+              <FormField
                 label="Title"
                 value={content.hero.title}
                 onChange={(e) => updateSection('hero', { ...content.hero, title: e.target.value })}
                 placeholder="e.g., Get in Touch"
               />
 
-              <PremiumInput
+              <FormField
                 label="Subtitle"
                 value={content.hero.subtitle}
                 onChange={(e) => updateSection('hero', { ...content.hero, subtitle: e.target.value })}
@@ -246,12 +246,12 @@ export function ContactSettingsForm() {
                 rows={2}
               />
             </div>
-          </PremiumCard>
+          </Card>
         </ScrollReveal>
 
         {/* Contact Information */}
         <ScrollReveal>
-          <PremiumCard className="p-6">
+          <Card className="p-6">
             <div className="mb-6">
               <h3 className="font-heading text-xl font-bold mb-2">Contact Information</h3>
               <p className="text-muted-foreground text-sm">Main contact details displayed on the page</p>
@@ -261,7 +261,7 @@ export function ContactSettingsForm() {
               <div className="flex items-start gap-3">
                 <Mail className="h-5 w-5 text-primary mt-1" />
                 <div className="flex-1">
-                  <PremiumInput
+                  <FormField
                     label="Email Address"
                     value={content.contactInfo.email}
                     onChange={(e) => updateSection('contactInfo', {
@@ -276,7 +276,7 @@ export function ContactSettingsForm() {
               <div className="flex items-start gap-3">
                 <Phone className="h-5 w-5 text-primary mt-1" />
                 <div className="flex-1">
-                  <PremiumInput
+                  <FormField
                     label="Phone Number"
                     value={content.contactInfo.phone}
                     onChange={(e) => updateSection('contactInfo', {
@@ -291,7 +291,7 @@ export function ContactSettingsForm() {
               <div className="flex items-start gap-3">
                 <MapPin className="h-5 w-5 text-primary mt-1" />
                 <div className="flex-1">
-                  <PremiumInput
+                  <FormField
                     label="Address"
                     value={content.contactInfo.address}
                     onChange={(e) => updateSection('contactInfo', {
@@ -306,7 +306,7 @@ export function ContactSettingsForm() {
               <div className="flex items-start gap-3">
                 <MessageSquare className="h-5 w-5 text-primary mt-1" />
                 <div className="flex-1">
-                  <PremiumInput
+                  <FormField
                     label="WhatsApp Number (optional)"
                     value={content.contactInfo.whatsapp || ''}
                     onChange={(e) => updateSection('contactInfo', {
@@ -318,12 +318,12 @@ export function ContactSettingsForm() {
                 </div>
               </div>
             </div>
-          </PremiumCard>
+          </Card>
         </ScrollReveal>
 
         {/* Office Hours */}
         <ScrollReveal>
-          <PremiumCard className="p-6">
+          <Card className="p-6">
             <div className="mb-6">
               <h3 className="font-heading text-xl font-bold mb-2">Office Hours</h3>
               <p className="text-muted-foreground text-sm">Business hours displayed on the contact page</p>
@@ -333,7 +333,7 @@ export function ContactSettingsForm() {
               <div className="flex items-start gap-3">
                 <Clock className="h-5 w-5 text-primary mt-1" />
                 <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <PremiumInput
+                  <FormField
                     label="Weekdays"
                     value={content.officeHours.weekdays}
                     onChange={(e) => updateSection('officeHours', {
@@ -343,7 +343,7 @@ export function ContactSettingsForm() {
                     placeholder="e.g., 9:00 AM - 6:00 PM"
                   />
 
-                  <PremiumInput
+                  <FormField
                     label="Saturdays"
                     value={content.officeHours.saturdays}
                     onChange={(e) => updateSection('officeHours', {
@@ -353,7 +353,7 @@ export function ContactSettingsForm() {
                     placeholder="e.g., 10:00 AM - 4:00 PM"
                   />
 
-                  <PremiumInput
+                  <FormField
                     label="Sundays"
                     value={content.officeHours.sundays}
                     onChange={(e) => updateSection('officeHours', {
@@ -365,12 +365,12 @@ export function ContactSettingsForm() {
                 </div>
               </div>
             </div>
-          </PremiumCard>
+          </Card>
         </ScrollReveal>
 
         {/* Social Media Links */}
         <ScrollReveal>
-          <PremiumCard className="p-6">
+          <Card className="p-6">
             <div className="mb-6">
               <h3 className="font-heading text-xl font-bold mb-2">Social Media</h3>
               <p className="text-muted-foreground text-sm">Social media profile links</p>
@@ -380,7 +380,7 @@ export function ContactSettingsForm() {
               <div className="flex items-start gap-3">
                 <Share2 className="h-5 w-5 text-primary mt-1" />
                 <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <PremiumInput
+                  <FormField
                     label="Facebook"
                     value={content.socialMedia.facebook || ''}
                     onChange={(e) => updateSection('socialMedia', {
@@ -390,7 +390,7 @@ export function ContactSettingsForm() {
                     placeholder="https://facebook.com/..."
                   />
 
-                  <PremiumInput
+                  <FormField
                     label="Instagram"
                     value={content.socialMedia.instagram || ''}
                     onChange={(e) => updateSection('socialMedia', {
@@ -400,7 +400,7 @@ export function ContactSettingsForm() {
                     placeholder="https://instagram.com/..."
                   />
 
-                  <PremiumInput
+                  <FormField
                     label="Twitter"
                     value={content.socialMedia.twitter || ''}
                     onChange={(e) => updateSection('socialMedia', {
@@ -410,7 +410,7 @@ export function ContactSettingsForm() {
                     placeholder="https://twitter.com/..."
                   />
 
-                  <PremiumInput
+                  <FormField
                     label="YouTube"
                     value={content.socialMedia.youtube || ''}
                     onChange={(e) => updateSection('socialMedia', {
@@ -420,7 +420,7 @@ export function ContactSettingsForm() {
                     placeholder="https://youtube.com/@..."
                   />
 
-                  <PremiumInput
+                  <FormField
                     label="LinkedIn (optional)"
                     value={content.socialMedia.linkedin || ''}
                     onChange={(e) => updateSection('socialMedia', {
@@ -432,12 +432,12 @@ export function ContactSettingsForm() {
                 </div>
               </div>
             </div>
-          </PremiumCard>
+          </Card>
         </ScrollReveal>
 
         {/* Form Fields Configuration */}
         <ScrollReveal>
-          <PremiumCard className="p-6">
+          <Card className="p-6">
             <div className="mb-6">
               <h3 className="font-heading text-xl font-bold mb-2">Contact Form Fields</h3>
               <p className="text-muted-foreground text-sm">Configure which fields appear on the contact form</p>
@@ -472,12 +472,12 @@ export function ContactSettingsForm() {
                 </div>
               ))}
             </div>
-          </PremiumCard>
+          </Card>
         </ScrollReveal>
 
         {/* Auto-Reply Configuration */}
         <ScrollReveal>
-          <PremiumCard className="p-6">
+          <Card className="p-6">
             <div className="mb-6">
               <h3 className="font-heading text-xl font-bold mb-2">Auto-Reply Message</h3>
               <p className="text-muted-foreground text-sm">Automatic response sent when users submit the form</p>
@@ -498,7 +498,7 @@ export function ContactSettingsForm() {
                 />
               </div>
 
-              <PremiumInput
+              <FormField
                 label="Email Subject"
                 value={content.autoReply.subject}
                 onChange={(e) => updateSection('autoReply', {
@@ -509,7 +509,7 @@ export function ContactSettingsForm() {
                 disabled={!content.autoReply.enabled}
               />
 
-              <PremiumInput
+              <FormField
                 label="Auto-Reply Message"
                 value={content.autoReply.message}
                 onChange={(e) => updateSection('autoReply', {
@@ -522,7 +522,7 @@ export function ContactSettingsForm() {
                 disabled={!content.autoReply.enabled}
               />
             </div>
-          </PremiumCard>
+          </Card>
         </ScrollReveal>
       </StaggerChildren>
     </div>

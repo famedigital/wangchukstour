@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { toast } from 'sonner';
-import { PremiumButton } from '@/components/ui/premium-button';
+import { Button } from '@/components/ui/button';
 import { Loader2, Check, X, Trash2, Archive, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
@@ -125,20 +125,20 @@ export function BulkOperations({
                   </span>
                 </div>
 
-                <PremiumButton
+                <Button
                   onClick={clearSelection}
                   size="sm"
                   variant="outline"
                   className="text-xs"
                 >
                   Clear Selection
-                </PremiumButton>
+                </Button>
               </div>
 
               {/* Bulk Actions */}
               <div className="flex items-center gap-2 flex-wrap">
                 {actions.map(action => (
-                  <PremiumButton
+                  <Button
                     key={action.id}
                     onClick={() => executeAction(action)}
                     disabled={executingAction !== null}
@@ -156,7 +156,7 @@ export function BulkOperations({
                     )}
                     <span className="hidden sm:inline">{action.label}</span>
                     <span className="sm:hidden">{action.icon && <action.icon className="h-4 w-4" />}</span>
-                  </PremiumButton>
+                  </Button>
                 ))}
               </div>
             </div>
@@ -325,14 +325,14 @@ export function MobileBulkActionBar({
         <span className="text-sm font-medium">{selectedCount} selected</span>
         <div className="flex items-center gap-2">
           {actions.slice(0, 3).map(action => (
-            <PremiumButton
+            <Button
               key={action.id}
               onClick={() => onAction(action)}
               size="sm"
               variant="outline"
             >
               <action.icon className="h-4 w-4" />
-            </PremiumButton>
+            </Button>
           ))}
         </div>
       </div>

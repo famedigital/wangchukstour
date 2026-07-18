@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { PremiumCard } from '@/components/ui/premium-card';
-import { PremiumButton } from '@/components/ui/premium-button';
-import { PremiumInput } from '@/components/ui/premium-input';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { FormField } from '@/components/ui/form-field';
 import { Loader2, Save, Plus, Trash2, Edit3, Check, X, Star, MessageSquare, ThumbsUp, ThumbsDown, Calendar, Filter, Search } from 'lucide-react';
 import { ScrollReveal } from '@/components/ui/scroll-reveal';
 import { StaggerChildren } from '@/components/ui/scroll-reveal';
@@ -250,7 +250,7 @@ export function TestimonialManager() {
           <h2 className="font-heading text-2xl font-bold">Testimonial Management</h2>
           <p className="text-muted-foreground">Manage customer reviews and testimonials</p>
         </div>
-        <PremiumButton
+        <Button
           onClick={() => {
             resetForm();
             setShowAddForm(!showAddForm);
@@ -259,31 +259,31 @@ export function TestimonialManager() {
         >
           <Plus className="h-4 w-4 mr-2" />
           Add Testimonial
-        </PremiumButton>
+        </Button>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <PremiumCard className="p-4 text-center">
+        <Card className="p-4 text-center">
           <div className="text-2xl font-bold text-prayer-red">{stats.total}</div>
           <div className="text-sm text-muted-foreground">Total</div>
-        </PremiumCard>
-        <PremiumCard className="p-4 text-center">
+        </Card>
+        <Card className="p-4 text-center">
           <div className="text-2xl font-bold text-green-600">{stats.approved}</div>
           <div className="text-sm text-muted-foreground">Approved</div>
-        </PremiumCard>
-        <PremiumCard className="p-4 text-center">
+        </Card>
+        <Card className="p-4 text-center">
           <div className="text-2xl font-bold text-amber-600">{stats.pending}</div>
           <div className="text-sm text-muted-foreground">Pending</div>
-        </PremiumCard>
-        <PremiumCard className="p-4 text-center">
+        </Card>
+        <Card className="p-4 text-center">
           <div className="text-2xl font-bold text-blue-600">{stats.featured}</div>
           <div className="text-sm text-muted-foreground">Featured</div>
-        </PremiumCard>
+        </Card>
       </div>
 
       {/* Filters */}
-      <PremiumCard className="p-4">
+      <Card className="p-4">
         <div className="flex flex-wrap items-center gap-4">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -292,7 +292,7 @@ export function TestimonialManager() {
               placeholder="Search testimonials..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-lg shadow-premium-sm focus:shadow-premium-md transition-all outline-none"
+              className="w-full rounded-lg border border-input bg-transparent py-2 pr-4 pl-10 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             />
           </div>
 
@@ -301,7 +301,7 @@ export function TestimonialManager() {
             <button
               onClick={() => setFilterStatus('all')}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                filterStatus === 'all' ? 'bg-white shadow-premium-sm' : 'bg-muted/50 hover:bg-muted'
+                filterStatus === 'all' ? 'bg-white shadow-sm' : 'bg-muted/50 hover:bg-muted'
               }`}
             >
               All
@@ -309,7 +309,7 @@ export function TestimonialManager() {
             <button
               onClick={() => setFilterStatus('approved')}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                filterStatus === 'approved' ? 'bg-white shadow-premium-sm' : 'bg-muted/50 hover:bg-muted'
+                filterStatus === 'approved' ? 'bg-white shadow-sm' : 'bg-muted/50 hover:bg-muted'
               }`}
             >
               Approved
@@ -317,19 +317,19 @@ export function TestimonialManager() {
             <button
               onClick={() => setFilterStatus('pending')}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                filterStatus === 'pending' ? 'bg-white shadow-premium-sm' : 'bg-muted/50 hover:bg-muted'
+                filterStatus === 'pending' ? 'bg-white shadow-sm' : 'bg-muted/50 hover:bg-muted'
               }`}
             >
               Pending
             </button>
           </div>
         </div>
-      </PremiumCard>
+      </Card>
 
       {/* Add New Testimonial Form */}
       {showAddForm && (
         <ScrollReveal>
-          <PremiumCard className="p-6">
+          <Card className="p-6">
             <div className="mb-6">
               <h3 className="font-heading text-xl font-bold">Add New Testimonial</h3>
               <p className="text-muted-foreground text-sm">Add a customer testimonial manually</p>
@@ -344,7 +344,7 @@ export function TestimonialManager() {
               }}
               saving={saving}
             />
-          </PremiumCard>
+          </Card>
         </ScrollReveal>
       )}
 
@@ -354,16 +354,16 @@ export function TestimonialManager() {
           {filteredTestimonials.map((testimonial, index) => (
             <ScrollReveal key={testimonial.id} delay={index * 50}>
               {editingId === testimonial.id ? (
-                <PremiumCard className="p-6">
+                <Card className="p-6">
                   <TestimonialForm
                     testimonial={editForm}
                     onSave={handleSave}
                     onCancel={() => setEditingId(null)}
                     saving={saving}
                   />
-                </PremiumCard>
+                </Card>
               ) : (
-                <PremiumCard className="hover:shadow-premium-md transition-all duration-300">
+                <Card className="hover:shadow-md transition-all duration-300">
                   <div className="p-6">
                     <div className="flex items-start gap-4">
                       {/* Avatar */}
@@ -436,7 +436,7 @@ export function TestimonialManager() {
                           <div className="flex items-center gap-2">
                             {!testimonial.isApproved && (
                               <>
-                                <PremiumButton
+                                <Button
                                   onClick={() => approveTestimonial(testimonial.id!)}
                                   size="sm"
                                   variant="outline"
@@ -444,8 +444,8 @@ export function TestimonialManager() {
                                 >
                                   <ThumbsUp className="h-3 w-3 mr-1" />
                                   Approve
-                                </PremiumButton>
-                                <PremiumButton
+                                </Button>
+                                <Button
                                   onClick={() => rejectTestimonial(testimonial.id!)}
                                   size="sm"
                                   variant="outline"
@@ -453,12 +453,12 @@ export function TestimonialManager() {
                                 >
                                   <ThumbsDown className="h-3 w-3 mr-1" />
                                   Reject
-                                </PremiumButton>
+                                </Button>
                               </>
                             )}
 
                             {testimonial.isApproved && (
-                              <PremiumButton
+                              <Button
                                 onClick={() => toggleFeatured(testimonial.id!)}
                                 size="sm"
                                 variant="outline"
@@ -466,19 +466,19 @@ export function TestimonialManager() {
                               >
                                 <Star className="h-3 w-3 mr-1" />
                                 {testimonial.isFeatured ? 'Unfeature' : 'Feature'}
-                              </PremiumButton>
+                              </Button>
                             )}
 
-                            <PremiumButton
+                            <Button
                               onClick={() => startEdit(testimonial)}
                               size="sm"
                               variant="outline"
                             >
                               <Edit3 className="h-3 w-3 mr-1" />
                               Edit
-                            </PremiumButton>
+                            </Button>
 
-                            <PremiumButton
+                            <Button
                               onClick={() => handleDelete(testimonial.id!)}
                               size="sm"
                               variant="outline"
@@ -486,13 +486,13 @@ export function TestimonialManager() {
                             >
                               <Trash2 className="h-3 w-3 mr-1" />
                               Delete
-                            </PremiumButton>
+                            </Button>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </PremiumCard>
+                </Card>
               )}
             </ScrollReveal>
           ))}
@@ -511,13 +511,13 @@ export function TestimonialManager() {
               : 'Start collecting customer feedback!'}
           </p>
           {(searchQuery || filterStatus !== 'all') && (
-            <PremiumButton
+            <Button
               onClick={() => { setSearchQuery(''); setFilterStatus('all'); }}
               variant="outline"
               className="min-w-[140px]"
             >
               Clear Filters
-            </PremiumButton>
+            </Button>
           )}
         </div>
       )}
@@ -547,7 +547,7 @@ function TestimonialForm({ testimonial, onSave, onCancel, saving }: TestimonialF
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid gap-4 md:grid-cols-2">
-        <PremiumInput
+        <FormField
           label="Client Name"
           value={formData.clientName}
           onChange={(e) => updateField('clientName', e.target.value)}
@@ -555,7 +555,7 @@ function TestimonialForm({ testimonial, onSave, onCancel, saving }: TestimonialF
           required
         />
 
-        <PremiumInput
+        <FormField
           label="Email (Optional)"
           type="email"
           value={formData.clientEmail || ''}
@@ -564,7 +564,7 @@ function TestimonialForm({ testimonial, onSave, onCancel, saving }: TestimonialF
         />
       </div>
 
-      <PremiumInput
+      <FormField
         label="Tour Name"
         value={formData.tourName}
         onChange={(e) => updateField('tourName', e.target.value)}
@@ -593,7 +593,7 @@ function TestimonialForm({ testimonial, onSave, onCancel, saving }: TestimonialF
         </div>
       </div>
 
-      <PremiumInput
+      <FormField
         label="Testimonial"
         value={formData.testimonial}
         onChange={(e) => updateField('testimonial', e.target.value)}
@@ -603,7 +603,7 @@ function TestimonialForm({ testimonial, onSave, onCancel, saving }: TestimonialF
         required
       />
 
-      <PremiumInput
+      <FormField
         label="Response (Optional)"
         value={formData.response || ''}
         onChange={(e) => updateField('response', e.target.value)}
@@ -619,7 +619,7 @@ function TestimonialForm({ testimonial, onSave, onCancel, saving }: TestimonialF
             type="date"
             value={formData.date}
             onChange={(e) => updateField('date', e.target.value)}
-            className="w-full px-4 py-3 rounded-xl shadow-premium-sm focus:shadow-premium-md transition-all outline-none bg-white"
+            className="w-full px-4 py-3 rounded-xl shadow-sm focus:shadow-sm transition-all outline-none bg-white"
             required
           />
         </div>
@@ -648,7 +648,7 @@ function TestimonialForm({ testimonial, onSave, onCancel, saving }: TestimonialF
       </div>
 
       <div className="flex gap-3 pt-4">
-        <PremiumButton
+        <Button
           type="submit"
           disabled={saving}
           className="min-w-[120px]"
@@ -664,15 +664,15 @@ function TestimonialForm({ testimonial, onSave, onCancel, saving }: TestimonialF
               Save Testimonial
             </>
           )}
-        </PremiumButton>
-        <PremiumButton
+        </Button>
+        <Button
           type="button"
           onClick={onCancel}
           variant="outline"
           className="min-w-[120px]"
         >
           Cancel
-        </PremiumButton>
+        </Button>
       </div>
     </form>
   );

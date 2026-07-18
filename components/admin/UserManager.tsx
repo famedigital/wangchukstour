@@ -220,7 +220,7 @@ export function UserManager() {
 
       {/* Create/Edit Form */}
       {showCreateForm && (
-        <Card className="shadow-premium-md">
+        <Card className="shadow-sm">
           <CardContent className="p-6">
             <h3 className="text-xl font-bold mb-6">
               {editingUser ? 'Edit User' : 'Create New User'}
@@ -290,7 +290,7 @@ export function UserManager() {
                   <select
                     value={formData.role}
                     onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                    className="w-full px-4 py-3 rounded-xl shadow-premium-sm focus:shadow-premium-md transition-shadow duration-300 outline-none"
+                    className="w-full px-4 py-3 rounded-xl shadow-sm focus:shadow-sm transition-shadow duration-300 outline-none"
                   >
                     <option value="admin">Admin</option>
                     <option value="super_admin">Super Admin</option>
@@ -334,7 +334,7 @@ export function UserManager() {
       {/* Users List */}
       <div className="grid gap-4">
         {users.length === 0 ? (
-          <Card className="shadow-premium-sm">
+          <Card className="shadow-sm">
             <CardContent className="p-12 text-center">
               <Users className="h-16 w-16 mx-auto mb-4 opacity-50 text-gray-400" />
               <p className="text-gray-500 mb-4">No users yet. Create your first admin user!</p>
@@ -342,7 +342,7 @@ export function UserManager() {
           </Card>
         ) : (
           users.map((user, index) => (
-            <Card key={user.id} className="shadow-premium-sm hover:shadow-premium-md transition-all duration-300">
+            <Card key={user.id} className="shadow-sm hover:shadow-md transition-all duration-300">
               <CardContent className="p-6">
                 <ScrollReveal delay={index * 50}>
                   <div className="flex items-start justify-between">

@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { PremiumCard } from '@/components/ui/premium-card';
-import { PremiumButton } from '@/components/ui/premium-button';
-import { PremiumInput } from '@/components/ui/premium-input';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { FormField } from '@/components/ui/form-field';
 import { Loader2, Save, Plus, Trash2, Edit3, GripVertical, Eye, EyeOff, Calendar, Image as ImageIcon } from 'lucide-react';
 import { ScrollReveal } from '@/components/ui/scroll-reveal';
 import { StaggerChildren } from '@/components/ui/scroll-reveal';
@@ -227,7 +227,7 @@ export function HeroSliderManager() {
           <h2 className="font-heading text-2xl font-bold">Hero Slider Management</h2>
           <p className="text-muted-foreground">Manage homepage hero slides and banners</p>
         </div>
-        <PremiumButton
+        <Button
           onClick={() => {
             resetForm();
             setShowAddForm(!showAddForm);
@@ -236,37 +236,37 @@ export function HeroSliderManager() {
         >
           <Plus className="h-4 w-4 mr-2" />
           Add Slide
-        </PremiumButton>
+        </Button>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <PremiumCard className="p-4 text-center">
+        <Card className="p-4 text-center">
           <div className="text-2xl font-bold text-prayer-red">{slides.length}</div>
           <div className="text-sm text-muted-foreground">Total Slides</div>
-        </PremiumCard>
-        <PremiumCard className="p-4 text-center">
+        </Card>
+        <Card className="p-4 text-center">
           <div className="text-2xl font-bold text-green-600">
             {slides.filter(s => s.isActive).length}
           </div>
           <div className="text-sm text-muted-foreground">Active</div>
-        </PremiumCard>
-        <PremiumCard className="p-4 text-center">
+        </Card>
+        <Card className="p-4 text-center">
           <div className="text-2xl font-bold text-amber-600">
             {slides.filter(s => !s.isActive).length}
           </div>
           <div className="text-sm text-muted-foreground">Inactive</div>
-        </PremiumCard>
-        <PremiumCard className="p-4 text-center">
+        </Card>
+        <Card className="p-4 text-center">
           <div className="text-2xl font-bold text-blue-600">15s</div>
           <div className="text-sm text-muted-foreground">Auto-rotate</div>
-        </PremiumCard>
+        </Card>
       </div>
 
       {/* Add New Slide Form */}
       {showAddForm && (
         <ScrollReveal>
-          <PremiumCard className="p-6">
+          <Card className="p-6">
             <div className="mb-6">
               <h3 className="font-heading text-xl font-bold">Add New Slide</h3>
               <p className="text-muted-foreground text-sm">Create a new hero slide for the homepage</p>
@@ -282,7 +282,7 @@ export function HeroSliderManager() {
               saving={saving}
               onMediaPicker={openMediaPicker}
             />
-          </PremiumCard>
+          </Card>
         </ScrollReveal>
       )}
 
@@ -292,7 +292,7 @@ export function HeroSliderManager() {
           {slides.map((slide, index) => (
             <ScrollReveal key={slide.id}>
               {editingId === slide.id ? (
-                <PremiumCard className="p-6">
+                <Card className="p-6">
                   <SlideForm
                     slide={editForm}
                     onSave={handleSave}
@@ -300,9 +300,9 @@ export function HeroSliderManager() {
                     saving={saving}
                     onMediaPicker={openMediaPicker}
                   />
-                </PremiumCard>
+                </Card>
               ) : (
-                <PremiumCard className="overflow-hidden">
+                <Card className="overflow-hidden">
                   <div className="flex flex-col md:flex-row">
                     {/* Slide Preview */}
                     <div className="relative w-full md:w-80 h-48 md:h-auto flex-shrink-0">
@@ -373,7 +373,7 @@ export function HeroSliderManager() {
 
                       <div className="flex items-center justify-between">
                         <div className="flex gap-2">
-                          <PremiumButton
+                          <Button
                             onClick={() => startEdit(slide)}
                             size="sm"
                             variant="outline"
@@ -381,9 +381,9 @@ export function HeroSliderManager() {
                           >
                             <Edit3 className="h-3 w-3 mr-2" />
                             Edit
-                          </PremiumButton>
+                          </Button>
 
-                          <PremiumButton
+                          <Button
                             onClick={() => toggleActive(slide.id!)}
                             size="sm"
                             variant="outline"
@@ -400,9 +400,9 @@ export function HeroSliderManager() {
                                 Show
                               </>
                             )}
-                          </PremiumButton>
+                          </Button>
 
-                          <PremiumButton
+                          <Button
                             onClick={() => handleDelete(slide.id!)}
                             size="sm"
                             variant="outline"
@@ -410,12 +410,12 @@ export function HeroSliderManager() {
                           >
                             <Trash2 className="h-3 w-3 mr-2" />
                             Delete
-                          </PremiumButton>
+                          </Button>
                         </div>
                       </div>
                     </div>
                   </div>
-                </PremiumCard>
+                </Card>
               )}
             </ScrollReveal>
           ))}
@@ -431,13 +431,13 @@ export function HeroSliderManager() {
           <p className="text-muted-foreground mb-8 text-lg">
             Get started by adding your first hero slide
           </p>
-          <PremiumButton
+          <Button
             onClick={() => setShowAddForm(true)}
             className="min-w-[140px]"
           >
             <Plus className="h-4 w-4 mr-2" />
             Add First Slide
-          </PremiumButton>
+          </Button>
         </div>
       )}
 
@@ -476,7 +476,7 @@ function SlideForm({ slide, onSave, onCancel, saving, onMediaPicker }: SlideForm
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid gap-4 md:grid-cols-2">
-        <PremiumInput
+        <FormField
           label="Title"
           value={formData.title}
           onChange={(e) => updateField('title', e.target.value)}
@@ -484,7 +484,7 @@ function SlideForm({ slide, onSave, onCancel, saving, onMediaPicker }: SlideForm
           required
         />
 
-        <PremiumInput
+        <FormField
           label="Subtitle"
           value={formData.subtitle}
           onChange={(e) => updateField('subtitle', e.target.value)}
@@ -493,7 +493,7 @@ function SlideForm({ slide, onSave, onCancel, saving, onMediaPicker }: SlideForm
         />
       </div>
 
-      <PremiumInput
+      <FormField
         label="Description (Optional)"
         value={formData.description || ''}
         onChange={(e) => updateField('description', e.target.value)}
@@ -503,7 +503,7 @@ function SlideForm({ slide, onSave, onCancel, saving, onMediaPicker }: SlideForm
       />
 
       <div className="grid gap-4 md:grid-cols-2">
-        <PremiumInput
+        <FormField
           label="CTA Button Text"
           value={formData.ctaText}
           onChange={(e) => updateField('ctaText', e.target.value)}
@@ -511,7 +511,7 @@ function SlideForm({ slide, onSave, onCancel, saving, onMediaPicker }: SlideForm
           required
         />
 
-        <PremiumInput
+        <FormField
           label="CTA Link"
           value={formData.ctaLink}
           onChange={(e) => updateField('ctaLink', e.target.value)}
@@ -580,7 +580,7 @@ function SlideForm({ slide, onSave, onCancel, saving, onMediaPicker }: SlideForm
             type="date"
             value={formData.startDate || ''}
             onChange={(e) => updateField('startDate', e.target.value)}
-            className="w-full px-4 py-3 rounded-xl shadow-premium-sm focus:shadow-premium-md transition-all outline-none bg-white"
+            className="w-full px-4 py-3 rounded-xl shadow-sm focus:shadow-sm transition-all outline-none bg-white"
           />
         </div>
         <div>
@@ -589,7 +589,7 @@ function SlideForm({ slide, onSave, onCancel, saving, onMediaPicker }: SlideForm
             type="date"
             value={formData.endDate || ''}
             onChange={(e) => updateField('endDate', e.target.value)}
-            className="w-full px-4 py-3 rounded-xl shadow-premium-sm focus:shadow-premium-md transition-all outline-none bg-white"
+            className="w-full px-4 py-3 rounded-xl shadow-sm focus:shadow-sm transition-all outline-none bg-white"
           />
         </div>
       </div>
@@ -605,7 +605,7 @@ function SlideForm({ slide, onSave, onCancel, saving, onMediaPicker }: SlideForm
       </div>
 
       <div className="flex gap-3 pt-4">
-        <PremiumButton
+        <Button
           type="submit"
           disabled={saving}
           className="min-w-[120px]"
@@ -621,15 +621,15 @@ function SlideForm({ slide, onSave, onCancel, saving, onMediaPicker }: SlideForm
               Save Slide
             </>
           )}
-        </PremiumButton>
-        <PremiumButton
+        </Button>
+        <Button
           type="button"
           onClick={onCancel}
           variant="outline"
           className="min-w-[120px]"
         >
           Cancel
-        </PremiumButton>
+        </Button>
       </div>
     </form>
   );

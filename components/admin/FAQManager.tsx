@@ -2,11 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { PremiumCard } from '@/components/ui/premium-card';
-import { PremiumButton } from '@/components/ui/premium-button';
-import { PremiumInput } from '@/components/ui/premium-input';
-import { Input } from '@/components/ui/input';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { FormField } from '@/components/ui/form-field';
+import { Input } from '@/components/ui/input';
 import { Loader2, Save, Plus, Trash2, Edit3, Check, X, GripVertical, Search, Filter } from 'lucide-react';
 import { ScrollReveal } from '@/components/ui/scroll-reveal';
 import { StaggerChildren } from '@/components/ui/scroll-reveal';
@@ -213,7 +212,7 @@ export function FAQManager() {
           <h2 className="font-heading text-2xl font-bold">FAQ Management</h2>
           <p className="text-muted-foreground">Manage frequently asked questions</p>
         </div>
-        <PremiumButton
+        <Button
           onClick={() => {
             resetForm();
             setShowAddForm(!showAddForm);
@@ -222,11 +221,11 @@ export function FAQManager() {
         >
           <Plus className="h-4 w-4 mr-2" />
           Add FAQ
-        </PremiumButton>
+        </Button>
       </div>
 
       {/* Filters */}
-      <PremiumCard className="p-4">
+      <Card className="p-4">
         <div className="flex flex-wrap items-center gap-4">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -262,18 +261,18 @@ export function FAQManager() {
             ))}
           </div>
         </div>
-      </PremiumCard>
+      </Card>
 
       {/* Add New FAQ Form */}
       {showAddForm && (
         <ScrollReveal>
-          <PremiumCard className="p-6">
+          <Card className="p-6">
             <div className="mb-4">
               <h3 className="font-heading text-xl font-bold">Add New FAQ</h3>
             </div>
 
             <div className="space-y-4">
-              <PremiumInput
+              <FormField
                 label="Question"
                 value={editForm.question}
                 onChange={(e) => setEditForm({ ...editForm, question: e.target.value })}
@@ -281,7 +280,7 @@ export function FAQManager() {
                 required
               />
 
-              <PremiumInput
+              <FormField
                 label="Answer"
                 value={editForm.answer}
                 onChange={(e) => setEditForm({ ...editForm, answer: e.target.value })}
@@ -320,7 +319,7 @@ export function FAQManager() {
               </div>
 
               <div className="flex gap-3 pt-4">
-                <PremiumButton
+                <Button
                   onClick={() => handleSave(editForm)}
                   disabled={saving || !editForm.question || !editForm.answer}
                   className="min-w-[120px]"
@@ -336,18 +335,18 @@ export function FAQManager() {
                       Save FAQ
                     </>
                   )}
-                </PremiumButton>
-                <PremiumButton
+                </Button>
+                <Button
                   onClick={cancelEdit}
                   variant="outline"
                   className="min-w-[120px]"
                 >
                   <X className="h-4 w-4 mr-2" />
                   Cancel
-                </PremiumButton>
+                </Button>
               </div>
             </div>
-          </PremiumCard>
+          </Card>
         </ScrollReveal>
       )}
 
@@ -355,7 +354,7 @@ export function FAQManager() {
       <StaggerChildren>
         {Object.entries(groupedFaqs).map(([category, categoryFaqs]) => (
           <ScrollReveal key={category}>
-            <PremiumCard className="p-6">
+            <Card className="p-6">
               <div className="mb-4">
                 <h3 className="font-heading text-xl font-bold">{category}</h3>
                 <p className="text-muted-foreground text-sm">{categoryFaqs.length} questions</p>
@@ -375,7 +374,7 @@ export function FAQManager() {
                     {editingId === faq.id ? (
                       // Edit Mode
                       <div className="space-y-4">
-                        <PremiumInput
+                        <FormField
                           label="Question"
                           value={editForm.question}
                           onChange={(e) => setEditForm({ ...editForm, question: e.target.value })}
@@ -383,7 +382,7 @@ export function FAQManager() {
                           rows={2}
                         />
 
-                        <PremiumInput
+                        <FormField
                           label="Answer"
                           value={editForm.answer}
                           onChange={(e) => setEditForm({ ...editForm, answer: e.target.value })}
@@ -417,7 +416,7 @@ export function FAQManager() {
                         </div>
 
                         <div className="flex gap-3">
-                          <PremiumButton
+                          <Button
                             onClick={() => handleSave(editForm)}
                             disabled={saving}
                             className="min-w-[100px]"
@@ -433,15 +432,15 @@ export function FAQManager() {
                                 Save
                               </>
                             )}
-                          </PremiumButton>
-                          <PremiumButton
+                          </Button>
+                          <Button
                             onClick={cancelEdit}
                             variant="outline"
                             className="min-w-[100px]"
                           >
                             <X className="h-4 w-4 mr-2" />
                             Cancel
-                          </PremiumButton>
+                          </Button>
                         </div>
                       </div>
                     ) : (
@@ -498,7 +497,7 @@ export function FAQManager() {
                   </motion.div>
                 ))}
               </div>
-            </PremiumCard>
+            </Card>
           </ScrollReveal>
         ))}
       </StaggerChildren>

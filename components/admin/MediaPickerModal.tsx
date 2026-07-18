@@ -3,8 +3,12 @@
 import { useState, useEffect } from 'react';
 import { Search, Upload, Image as ImageIcon, Check, Loader2, FolderOpen, Grid, List } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { PremiumModal } from '@/components/ui/premium-modal';
-import { PremiumButton } from '@/components/ui/premium-button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
@@ -237,12 +241,11 @@ export function MediaPickerModal({
   };
 
   return (
-    <PremiumModal
-      isOpen={isOpen}
-      onClose={handleClose}
-      title="Media Library"
-      size="xl"
-    >
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) handleClose(); }}>
+      <DialogContent className="sm:max-w-4xl w-full" showCloseButton>
+        <DialogHeader>
+          <DialogTitle>Media Library</DialogTitle>
+        </DialogHeader>
       <div className="space-y-6">
         {/* Header Actions */}
         <div className="flex items-center justify-between gap-4">
@@ -421,14 +424,13 @@ export function MediaPickerModal({
             )}
           </p>
           <div className="flex items-center gap-3">
-            <PremiumButton
+            <Button
               variant="secondary"
               onClick={handleClose}
             >
               Cancel
-            </PremiumButton>
-            <PremiumButton
-              variant="primary"
+            </Button>
+            <Button
               onClick={handleConfirm}
               disabled={selectedMedia.size === 0}
             >
@@ -439,10 +441,11 @@ export function MediaPickerModal({
               ) : (
                 'Select'
               )}
-            </PremiumButton>
+            </Button>
           </div>
         </div>
       </div>
-    </PremiumModal>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { PremiumCard } from '@/components/ui/premium-card';
-import { PremiumButton } from '@/components/ui/premium-button';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Loader2, RotateCcw, Clock, User, GitCompare, ChevronDown, ChevronUp, Filter } from 'lucide-react';
 import { ScrollReveal } from '@/components/ui/scroll-reveal';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -219,7 +219,7 @@ export function RevisionHistory({ entityType, entityId, onRollback }: RevisionHi
           <button
             onClick={() => setFilterAction('all')}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-              filterAction === 'all' ? 'bg-white shadow-premium-sm' : 'bg-muted/50 hover:bg-muted'
+              filterAction === 'all' ? 'bg-white shadow-sm' : 'bg-muted/50 hover:bg-muted'
             }`}
           >
             All
@@ -227,7 +227,7 @@ export function RevisionHistory({ entityType, entityId, onRollback }: RevisionHi
           <button
             onClick={() => setFilterAction('create')}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-              filterAction === 'create' ? 'bg-white shadow-premium-sm' : 'bg-muted/50 hover:bg-muted'
+              filterAction === 'create' ? 'bg-white shadow-sm' : 'bg-muted/50 hover:bg-muted'
             }`}
           >
             Created
@@ -235,7 +235,7 @@ export function RevisionHistory({ entityType, entityId, onRollback }: RevisionHi
           <button
             onClick={() => setFilterAction('update')}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-              filterAction === 'update' ? 'bg-white shadow-premium-sm' : 'bg-muted/50 hover:bg-muted'
+              filterAction === 'update' ? 'bg-white shadow-sm' : 'bg-muted/50 hover:bg-muted'
             }`}
           >
             Updated
@@ -243,7 +243,7 @@ export function RevisionHistory({ entityType, entityId, onRollback }: RevisionHi
           <button
             onClick={() => setFilterAction('delete')}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-              filterAction === 'delete' ? 'bg-white shadow-premium-sm' : 'bg-muted/50 hover:bg-muted'
+              filterAction === 'delete' ? 'bg-white shadow-sm' : 'bg-muted/50 hover:bg-muted'
             }`}
           >
             Deleted
@@ -271,7 +271,7 @@ export function RevisionHistory({ entityType, entityId, onRollback }: RevisionHi
 
             return (
               <ScrollReveal key={revision.id} delay={index * 50}>
-                <PremiumCard className="overflow-hidden">
+                <Card className="overflow-hidden">
                   <div className="p-6">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1">
@@ -310,7 +310,7 @@ export function RevisionHistory({ entityType, entityId, onRollback }: RevisionHi
 
                       <div className="flex items-center gap-2">
                         {revision.action !== 'delete' && (
-                          <PremiumButton
+                          <Button
                             onClick={() => handleRollback(revision.id)}
                             disabled={rollingBack === revision.id}
                             size="sm"
@@ -328,10 +328,10 @@ export function RevisionHistory({ entityType, entityId, onRollback }: RevisionHi
                                 Rollback
                               </>
                             )}
-                          </PremiumButton>
+                          </Button>
                         )}
 
-                        <PremiumButton
+                        <Button
                           onClick={() => setExpandedId(isExpanded ? null : revision.id)}
                           size="sm"
                           variant="outline"
@@ -347,7 +347,7 @@ export function RevisionHistory({ entityType, entityId, onRollback }: RevisionHi
                               Details
                             </>
                           )}
-                        </PremiumButton>
+                        </Button>
                       </div>
                     </div>
 
@@ -392,7 +392,7 @@ export function RevisionHistory({ entityType, entityId, onRollback }: RevisionHi
                       )}
                     </AnimatePresence>
                   </div>
-                </PremiumCard>
+                </Card>
               </ScrollReveal>
             );
           })

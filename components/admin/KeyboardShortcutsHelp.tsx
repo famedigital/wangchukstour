@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { PremiumCard } from '@/components/ui/premium-card';
-import { PremiumButton } from '@/components/ui/premium-button';
+import { Button } from '@/components/ui/button';
 import { X, Keyboard, Command, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
@@ -68,7 +67,7 @@ export function KeyboardShortcutsHelp({ isOpen, onClose, shortcuts }: KeyboardSh
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="bg-background rounded-2xl shadow-premium-xl max-w-2xl w-full max-h-[80vh] overflow-hidden"
+          className="bg-background rounded-2xl shadow-lg max-w-2xl w-full max-h-[80vh] overflow-hidden"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
@@ -156,9 +155,9 @@ export function KeyboardShortcutsHelp({ isOpen, onClose, shortcuts }: KeyboardSh
               <p className="text-sm text-muted-foreground">
                 Press <kbd className="px-2 py-1 text-xs bg-white border rounded">?</kbd> anytime to open this help
               </p>
-              <PremiumButton onClick={onClose} className="min-w-[100px]">
+              <Button onClick={onClose} className="min-w-[100px]">
                 Got it!
-              </PremiumButton>
+              </Button>
             </div>
           </div>
         </motion.div>

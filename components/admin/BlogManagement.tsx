@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { Plus, Search, Filter, Edit, Trash2, Eye, Calendar, Clock, Star, Loader2, FileText } from 'lucide-react';
 import { RichTextEditor } from './RichTextEditor';
 import { BlogEditor } from './BlogEditor';
-import { PremiumModal } from '@/components/ui/premium-modal';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -382,13 +382,11 @@ export function BlogManagement() {
       )}
 
       {/* Create Post Modal */}
-      <PremiumModal
-        isOpen={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
-        title="Create New Blog Post"
-        size="full"
-        showCloseButton={true}
-      >
+      <Dialog open={showCreateModal} onOpenChange={(open) => { if (!open) setShowCreateModal(false); }}>
+        <DialogContent className="sm:max-w-6xl max-h-[90vh] overflow-y-auto w-full" showCloseButton>
+          <DialogHeader>
+            <DialogTitle>Create New Blog Post</DialogTitle>
+          </DialogHeader>
         <div className="h-full overflow-y-auto">
           <BlogEditor
             isNewPost={true}
@@ -423,19 +421,23 @@ export function BlogManagement() {
             onCancel={() => setShowCreateModal(false)}
           />
         </div>
-      </PremiumModal>
+        </DialogContent>
+      </Dialog>
 
       {/* Edit Post Modal */}
-      <PremiumModal
-        isOpen={showEditModal}
-        onClose={() => {
-          setShowEditModal(false);
-          setEditingPost(null);
+      <Dialog
+        open={showEditModal}
+        onOpenChange={(open) => {
+          if (!open) {
+            setShowEditModal(false);
+            setEditingPost(null);
+          }
         }}
-        title="Edit Blog Post"
-        size="full"
-        showCloseButton={true}
       >
+        <DialogContent className="sm:max-w-6xl max-h-[90vh] overflow-y-auto w-full" showCloseButton>
+          <DialogHeader>
+            <DialogTitle>Edit Blog Post</DialogTitle>
+          </DialogHeader>
         <div className="h-full overflow-y-auto">
           {editingPost && (
             <BlogEditor
@@ -478,7 +480,8 @@ export function BlogManagement() {
             />
           )}
         </div>
-      </PremiumModal>
+        </DialogContent>
+      </Dialog>
       </CardContent>
     </Card>
   );

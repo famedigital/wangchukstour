@@ -1,6 +1,10 @@
 'use client'
 
-import { forwardRef, type InputHTMLAttributes, type TextareaHTMLAttributes, type SelectHTMLAttributes } from 'react'
+/**
+ * FormField — Label + bordered stock Input/Textarea/select.
+ * Canonical shadcn composition helper (not a custom visual skin).
+ */
+import { forwardRef, type InputHTMLAttributes, type TextareaHTMLAttributes } from 'react'
 import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -11,29 +15,22 @@ interface SelectOption {
   label: string
 }
 
-interface PremiumInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
+export interface FormFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
   label?: string
   error?: string
   icon?: React.ReactNode
   iconPosition?: 'left' | 'right'
-  value?: string
+  value?: string | number
   onChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void
-  placeholder?: string
-  required?: boolean
-  type?: string
-  name?: string
-  id?: string
-  className?: string
   textarea?: boolean
   rows?: number
   select?: boolean
   options?: SelectOption[]
 }
 
-/** @deprecated Use Label + Input/Textarea/Select from @/components/ui */
-export const PremiumInput = forwardRef<
+export const FormField = forwardRef<
   HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement,
-  PremiumInputProps
+  FormFieldProps
 >(
   (
     {
@@ -97,7 +94,7 @@ export const PremiumInput = forwardRef<
               disabled={disabled}
               aria-invalid={!!error}
               className={cn(className)}
-              value={props.value}
+              value={props.value as string | undefined}
               onChange={props.onChange as React.ChangeEventHandler<HTMLTextAreaElement>}
               name={props.name}
               placeholder={props.placeholder}
@@ -111,11 +108,15 @@ export const PremiumInput = forwardRef<
               disabled={disabled}
               aria-invalid={!!error}
               className={cn(icon && iconPosition === 'left' && 'pl-8', className)}
-              value={props.value}
+              value={props.value as string | number | undefined}
               onChange={props.onChange as React.ChangeEventHandler<HTMLInputElement>}
               name={props.name}
               placeholder={props.placeholder}
               required={props.required}
+              min={props.min}
+              max={props.max}
+              step={props.step}
+              maxLength={props.maxLength}
             />
           )}
           {icon && iconPosition === 'right' && !textarea && !select && (
@@ -130,15 +131,14 @@ export const PremiumInput = forwardRef<
   }
 )
 
-PremiumInput.displayName = 'PremiumInput'
+FormField.displayName = 'FormField'
 
-interface PremiumTextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
+export interface FormTextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string
   error?: string
 }
 
-/** @deprecated Use Label + Textarea from @/components/ui */
-export const PremiumTextarea = forwardRef<HTMLTextAreaElement, PremiumTextareaProps>(
+export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
   ({ className = '', label, error, id, ...props }, ref) => {
     const fieldId = id || props.name
     return (
@@ -148,17 +148,11 @@ export const PremiumTextarea = forwardRef<HTMLTextAreaElement, PremiumTextareaPr
             {label}
           </Label>
         )}
-        <Textarea
-          ref={ref}
-          id={fieldId}
-          aria-invalid={!!error}
-          className={className}
-          {...props}
-        />
+        <Textarea ref={ref} id={fieldId} aria-invalid={!!error} className={className} {...props} />
         {error && <p className="text-xs text-destructive">{error}</p>}
       </div>
     )
   }
 )
 
-PremiumTextarea.displayName = 'PremiumTextarea'
+FormTextarea.displayName = 'FormTextarea'

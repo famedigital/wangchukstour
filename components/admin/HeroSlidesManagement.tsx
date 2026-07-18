@@ -8,8 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { PremiumButton } from '@/components/ui/premium-button';
-import { PremiumInput, PremiumTextarea } from '@/components/ui/premium-input';
+import { FormField, FormTextarea } from '@/components/ui/form-field';
 import { MediaPickerModal } from '@/components/admin/MediaPickerModal';
 
 interface HeroSlide {
@@ -115,13 +114,13 @@ export function HeroSlidesManagement() {
           <h2 className="text-xl font-bold">Hero Slides</h2>
           <p className="text-muted-foreground mt-1">{slides.length} slides</p>
         </div>
-        <PremiumButton
+        <Button
           onClick={() => openEditModal()}
-          icon={<Plus className="h-4 w-4" />}
           className="w-full sm:w-auto"
         >
+          <Plus className="h-4 w-4" />
           Add New Slide
-        </PremiumButton>
+        </Button>
       </div>
 
       {/* Slides Grid */}
@@ -132,9 +131,10 @@ export function HeroSlidesManagement() {
               <ImageIcon className="h-16 w-16 mx-auto mb-4 opacity-50" />
               <p className="text-lg font-medium mb-2">No Hero Slides Yet</p>
               <p className="text-sm mb-4">Create your first hero slide to get started</p>
-              <PremiumButton onClick={() => openEditModal()} icon={<Plus className="h-4 w-4" />}>
+              <Button onClick={() => openEditModal()}>
+                <Plus className="h-4 w-4" />
                 Add First Slide
-              </PremiumButton>
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -169,25 +169,29 @@ export function HeroSlidesManagement() {
 
                 {/* Actions */}
                 <div className="flex items-center gap-2">
-                  <PremiumButton
+                  <Button
                     variant="secondary"
                     onClick={() => openEditModal(slide)}
-                    icon={<Edit className="h-4 w-4" />}
                     className="flex-1"
                   >
+                    <Edit className="h-4 w-4" />
                     Edit
-                  </PremiumButton>
-                  <PremiumButton
+                  </Button>
+                  <Button
                     variant="secondary"
+                    size="icon"
                     onClick={() => handleToggleActive(slide)}
-                    icon={slide.is_active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  />
-                  <PremiumButton
+                  >
+                    {slide.is_active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                  <Button
                     variant="secondary"
+                    size="icon"
                     onClick={() => handleDelete(slide.id)}
-                    icon={<Trash2 className="h-4 w-4" />}
                     className="text-destructive hover:text-destructive"
-                  />
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -292,13 +296,13 @@ function HeroSlideForm({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <PremiumInput
+        <FormField
           label="Title"
           value={formData.title}
           onChange={(e) => handleChange('title', e.target.value)}
           placeholder="Slide title"
         />
-        <PremiumInput
+        <FormField
           label="Subtitle"
           value={formData.subtitle}
           onChange={(e) => handleChange('subtitle', e.target.value)}
@@ -306,7 +310,7 @@ function HeroSlideForm({
         />
       </div>
 
-      <PremiumTextarea
+      <FormTextarea
         label="Description"
         value={formData.description}
         onChange={(e) => handleChange('description', e.target.value)}
@@ -315,13 +319,13 @@ function HeroSlideForm({
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <PremiumInput
+        <FormField
           label="CTA Button Text"
           value={formData.cta_text}
           onChange={(e) => handleChange('cta_text', e.target.value)}
           placeholder="e.g., 'Book Now'"
         />
-        <PremiumInput
+        <FormField
           label="CTA Link"
           value={formData.cta_link}
           onChange={(e) => handleChange('cta_link', e.target.value)}
@@ -329,7 +333,7 @@ function HeroSlideForm({
         />
       </div>
 
-      <PremiumInput
+      <FormField
         label="Slide Order"
         type="number"
         value={formData.slide_order?.toString() || '0'}
@@ -363,17 +367,18 @@ function HeroSlideForm({
       </div>
 
       <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-3 justify-end pt-4 sticky bottom-0 bg-card">
-        <PremiumButton
+        <Button
           type="button"
           variant="secondary"
           onClick={onCancel}
           disabled={loading}
         >
           Cancel
-        </PremiumButton>
-        <PremiumButton type="submit" loading={loading}>
+        </Button>
+        <Button type="submit" disabled={loading}>
+          {loading && <Loader2 className="h-4 w-4 animate-spin" />}
           {slide ? 'Update' : 'Create'} Slide
-        </PremiumButton>
+        </Button>
       </div>
 
       <MediaPickerModal

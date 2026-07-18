@@ -17,7 +17,7 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Content */}
-        <Card className="shadow-premium-md hover:shadow-premium-lg transition-shadow duration-300">
+        <Card className="shadow-sm hover:shadow-md transition-shadow duration-300">
           <CardContent className="p-6">
             <div className="text-center py-12 text-gray-500">
               <BarChart3 className="h-16 w-16 mx-auto mb-4 opacity-50" />

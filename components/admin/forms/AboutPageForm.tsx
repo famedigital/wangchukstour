@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { PremiumCard } from '@/components/ui/premium-card';
-import { PremiumButton } from '@/components/ui/premium-button';
-import { PremiumInput } from '@/components/ui/premium-input';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { FormField } from '@/components/ui/form-field';
 import { Loader2, Save, Plus, Trash2, Image as ImageIcon, GripVertical } from 'lucide-react';
 import { ScrollReveal } from '@/components/ui/scroll-reveal';
 import { StaggerChildren } from '@/components/ui/scroll-reveal';
@@ -214,7 +214,7 @@ export function AboutPageForm() {
           <h2 className="font-heading text-2xl font-bold">About Page Content</h2>
           <p className="text-muted-foreground">Manage your About page content and information</p>
         </div>
-        <PremiumButton
+        <Button
           onClick={handleSave}
           disabled={saving}
           className="min-w-[140px]"
@@ -230,27 +230,27 @@ export function AboutPageForm() {
               Save Changes
             </>
           )}
-        </PremiumButton>
+        </Button>
       </div>
 
       <StaggerChildren>
         {/* Hero Section */}
         <ScrollReveal>
-          <PremiumCard className="p-6">
+          <Card className="p-6">
             <div className="mb-6">
               <h3 className="font-heading text-xl font-bold mb-2">Hero Section</h3>
               <p className="text-muted-foreground text-sm">Main banner content and background image</p>
             </div>
 
             <div className="space-y-4">
-              <PremiumInput
+              <FormField
                 label="Title"
                 value={content.hero.title}
                 onChange={(e) => updateSection('hero', { ...content.hero, title: e.target.value })}
                 placeholder="Hero title"
               />
 
-              <PremiumInput
+              <FormField
                 label="Subtitle"
                 value={content.hero.subtitle}
                 onChange={(e) => updateSection('hero', { ...content.hero, subtitle: e.target.value })}
@@ -284,7 +284,7 @@ export function AboutPageForm() {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <PremiumInput
+                <FormField
                   label="CTA Button Text"
                   value={content.hero.cta.text}
                   onChange={(e) => updateSection('hero', {
@@ -294,7 +294,7 @@ export function AboutPageForm() {
                   placeholder="e.g., Explore Our Tours"
                 />
 
-                <PremiumInput
+                <FormField
                   label="CTA Button Link"
                   value={content.hero.cta.link}
                   onChange={(e) => updateSection('hero', {
@@ -305,26 +305,26 @@ export function AboutPageForm() {
                 />
               </div>
             </div>
-          </PremiumCard>
+          </Card>
         </ScrollReveal>
 
         {/* Story Section */}
         <ScrollReveal>
-          <PremiumCard className="p-6">
+          <Card className="p-6">
             <div className="mb-6">
               <h3 className="font-heading text-xl font-bold mb-2">Our Story</h3>
               <p className="text-muted-foreground text-sm">Company story and founding information</p>
             </div>
 
             <div className="space-y-4">
-              <PremiumInput
+              <FormField
                 label="Section Title"
                 value={content.story.title}
                 onChange={(e) => updateSection('story', { ...content.story, title: e.target.value })}
                 placeholder="e.g., Our Story"
               />
 
-              <PremiumInput
+              <FormField
                 label="Story Content"
                 value={content.story.content}
                 onChange={(e) => updateSection('story', { ...content.story, content: e.target.value })}
@@ -333,31 +333,31 @@ export function AboutPageForm() {
                 rows={6}
               />
 
-              <PremiumInput
+              <FormField
                 label="Founded Year"
                 value={content.story.founded}
                 onChange={(e) => updateSection('story', { ...content.story, founded: e.target.value })}
                 placeholder="e.g., 2010"
               />
             </div>
-          </PremiumCard>
+          </Card>
         </ScrollReveal>
 
         {/* Values Section */}
         <ScrollReveal>
-          <PremiumCard className="p-6">
+          <Card className="p-6">
             <div className="mb-6 flex items-center justify-between">
               <div>
                 <h3 className="font-heading text-xl font-bold mb-2">Our Values</h3>
                 <p className="text-muted-foreground text-sm">Core values and principles</p>
               </div>
-              <PremiumButton
+              <Button
                 onClick={() => addArrayItem('values', { title: '', description: '' })}
                 className="min-w-[120px]"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Value
-              </PremiumButton>
+              </Button>
             </div>
 
             <div className="space-y-4">
@@ -372,14 +372,14 @@ export function AboutPageForm() {
                   <div className="flex items-start gap-3">
                     <GripVertical className="h-5 w-5 text-muted-foreground mt-1" />
                     <div className="flex-1 space-y-3">
-                      <PremiumInput
+                      <FormField
                         label="Value Title"
                         value={value.title}
                         onChange={(e) => updateArrayItem('values', index, 'title', e.target.value)}
                         placeholder="e.g., Authentic Experiences"
                       />
 
-                      <PremiumInput
+                      <FormField
                         label="Description"
                         value={value.description}
                         onChange={(e) => updateArrayItem('values', index, 'description', e.target.value)}
@@ -398,24 +398,24 @@ export function AboutPageForm() {
                 </motion.div>
               ))}
             </div>
-          </PremiumCard>
+          </Card>
         </ScrollReveal>
 
         {/* Statistics Section */}
         <ScrollReveal>
-          <PremiumCard className="p-6">
+          <Card className="p-6">
             <div className="mb-6 flex items-center justify-between">
               <div>
                 <h3 className="font-heading text-xl font-bold mb-2">Statistics</h3>
                 <p className="text-muted-foreground text-sm">Key numbers and achievements</p>
               </div>
-              <PremiumButton
+              <Button
                 onClick={() => addArrayItem('statistics', { number: '', label: '' })}
                 className="min-w-[120px]"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Stat
-              </PremiumButton>
+              </Button>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -434,14 +434,14 @@ export function AboutPageForm() {
                     <Trash2 className="h-3 w-3" />
                   </button>
 
-                  <PremiumInput
+                  <FormField
                     label="Number"
                     value={stat.number}
                     onChange={(e) => updateArrayItem('statistics', index, 'number', e.target.value)}
                     placeholder="e.g., 500+"
                   />
 
-                  <PremiumInput
+                  <FormField
                     label="Label"
                     value={stat.label}
                     onChange={(e) => updateArrayItem('statistics', index, 'label', e.target.value)}
@@ -450,24 +450,24 @@ export function AboutPageForm() {
                 </motion.div>
               ))}
             </div>
-          </PremiumCard>
+          </Card>
         </ScrollReveal>
 
         {/* Timeline Section */}
         <ScrollReveal>
-          <PremiumCard className="p-6">
+          <Card className="p-6">
             <div className="mb-6 flex items-center justify-between">
               <div>
                 <h3 className="font-heading text-xl font-bold mb-2">Timeline</h3>
                 <p className="text-muted-foreground text-sm">Company milestones and history</p>
               </div>
-              <PremiumButton
+              <Button
                 onClick={() => addArrayItem('timeline', { year: '', title: '', description: '' })}
                 className="min-w-[120px]"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Event
-              </PremiumButton>
+              </Button>
             </div>
 
             <div className="space-y-4">
@@ -482,21 +482,21 @@ export function AboutPageForm() {
                   <div className="flex items-start gap-3">
                     <GripVertical className="h-5 w-5 text-muted-foreground mt-1" />
                     <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <PremiumInput
+                    <FormField
                       label="Year"
                       value={event.year}
                       onChange={(e) => updateArrayItem('timeline', index, 'year', e.target.value)}
                       placeholder="e.g., 2010"
                     />
 
-                    <PremiumInput
+                    <FormField
                       label="Title"
                       value={event.title}
                       onChange={(e) => updateArrayItem('timeline', index, 'title', e.target.value)}
                       placeholder="e.g., Company Founded"
                     />
 
-                    <PremiumInput
+                    <FormField
                       label="Description"
                       value={event.description}
                       onChange={(e) => updateArrayItem('timeline', index, 'description', e.target.value)}
@@ -515,24 +515,24 @@ export function AboutPageForm() {
                 </motion.div>
               ))}
             </div>
-          </PremiumCard>
+          </Card>
         </ScrollReveal>
 
         {/* Team Section */}
         <ScrollReveal>
-          <PremiumCard className="p-6">
+          <Card className="p-6">
             <div className="mb-6 flex items-center justify-between">
               <div>
                 <h3 className="font-heading text-xl font-bold mb-2">Team Members</h3>
                 <p className="text-muted-foreground text-sm">Your team and leadership</p>
               </div>
-              <PremiumButton
+              <Button
                 onClick={() => addArrayItem('team', { name: '', role: '', bio: '', image: '' })}
                 className="min-w-[120px]"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Member
-              </PremiumButton>
+              </Button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -575,21 +575,21 @@ export function AboutPageForm() {
                     </button>
                   </div>
 
-                  <PremiumInput
+                  <FormField
                     label="Name"
                     value={member.name}
                     onChange={(e) => updateArrayItem('team', index, 'name', e.target.value)}
                     placeholder="e.g., Wangchuk Dorji"
                   />
 
-                  <PremiumInput
+                  <FormField
                     label="Role"
                     value={member.role}
                     onChange={(e) => updateArrayItem('team', index, 'role', e.target.value)}
                     placeholder="e.g., Founder & Director"
                   />
 
-                  <PremiumInput
+                  <FormField
                     label="Bio"
                     value={member.bio}
                     onChange={(e) => updateArrayItem('team', index, 'bio', e.target.value)}
@@ -600,7 +600,7 @@ export function AboutPageForm() {
                 </motion.div>
               ))}
             </div>
-          </PremiumCard>
+          </Card>
         </ScrollReveal>
       </StaggerChildren>
 
