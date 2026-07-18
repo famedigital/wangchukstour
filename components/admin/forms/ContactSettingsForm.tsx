@@ -188,7 +188,7 @@ export function ContactSettingsForm() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-prayer-red" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -259,7 +259,7 @@ export function ContactSettingsForm() {
 
             <div className="space-y-4">
               <div className="flex items-start gap-3">
-                <Mail className="h-5 w-5 text-prayer-red mt-1" />
+                <Mail className="h-5 w-5 text-primary mt-1" />
                 <div className="flex-1">
                   <PremiumInput
                     label="Email Address"
@@ -274,7 +274,7 @@ export function ContactSettingsForm() {
               </div>
 
               <div className="flex items-start gap-3">
-                <Phone className="h-5 w-5 text-prayer-red mt-1" />
+                <Phone className="h-5 w-5 text-primary mt-1" />
                 <div className="flex-1">
                   <PremiumInput
                     label="Phone Number"
@@ -289,7 +289,7 @@ export function ContactSettingsForm() {
               </div>
 
               <div className="flex items-start gap-3">
-                <MapPin className="h-5 w-5 text-prayer-red mt-1" />
+                <MapPin className="h-5 w-5 text-primary mt-1" />
                 <div className="flex-1">
                   <PremiumInput
                     label="Address"
@@ -304,7 +304,7 @@ export function ContactSettingsForm() {
               </div>
 
               <div className="flex items-start gap-3">
-                <MessageSquare className="h-5 w-5 text-prayer-red mt-1" />
+                <MessageSquare className="h-5 w-5 text-primary mt-1" />
                 <div className="flex-1">
                   <PremiumInput
                     label="WhatsApp Number (optional)"
@@ -331,7 +331,7 @@ export function ContactSettingsForm() {
 
             <div className="space-y-4">
               <div className="flex items-start gap-3">
-                <Clock className="h-5 w-5 text-prayer-red mt-1" />
+                <Clock className="h-5 w-5 text-primary mt-1" />
                 <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
                   <PremiumInput
                     label="Weekdays"
@@ -378,7 +378,7 @@ export function ContactSettingsForm() {
 
             <div className="space-y-4">
               <div className="flex items-start gap-3">
-                <Share2 className="h-5 w-5 text-prayer-red mt-1" />
+                <Share2 className="h-5 w-5 text-primary mt-1" />
                 <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
                   <PremiumInput
                     label="Facebook"
@@ -457,7 +457,7 @@ export function ContactSettingsForm() {
                       onClick={() => toggleRequiredField(field.key.replace('show', '').toLowerCase())}
                       className={`text-sm font-medium px-3 py-1 rounded-lg transition-colors ${
                         content.formFields.requiredFields.includes(field.key.replace('show', '').toLowerCase())
-                          ? 'bg-prayer-red text-white'
+                          ? 'bg-primary text-primary-foreground'
                           : 'bg-muted text-muted-foreground hover:bg-muted/80'
                       }`}
                       disabled={!content.formFields[field.key]}

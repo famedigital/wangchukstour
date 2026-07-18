@@ -9,6 +9,8 @@ import { BlogEditor } from './BlogEditor';
 import { PremiumModal } from '@/components/ui/premium-modal';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 interface BlogPost {
   id: string;
@@ -188,32 +190,33 @@ export function BlogManagement() {
   };
 
   const getStatusColor = (isPublished: boolean) => {
-    return isPublished ? 'text-green-600 bg-green-50' : 'text-amber-600 bg-amber-50';
+    return isPublished
+      ? 'text-green-700 bg-green-500/10 dark:text-green-400'
+      : 'text-amber-700 bg-amber-500/10 dark:text-amber-400';
   };
 
+  const selectClassName =
+    'flex h-9 rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30';
+
   return (
-    <Card className="shadow-premium-md hover:shadow-premium-lg transition-shadow duration-300">
+        <Card className="transition-shadow">
       <CardContent className="p-4 md:p-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div>
             <h2 className="text-xl font-bold">Blog Posts</h2>
-            <p className="text-gray-500 mt-1">{posts.length} posts</p>
+            <p className="text-muted-foreground mt-1">{posts.length} posts</p>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
-            <button className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg shadow-premium-sm hover:shadow-premium-md transition-shadow duration-300 bg-white">
+            <Button type="button" variant="outline" className="hidden sm:flex">
               <Filter className="h-4 w-4" />
               Filter
-            </button>
-            <button
-              onClick={() => router.push('/admin/blog/new')}
-              className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-white text-sm sm:text-base"
-              style={{ background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)' }}
-            >
+            </Button>
+            <Button type="button" onClick={() => router.push('/admin/blog/new')}>
               <Plus className="h-4 w-4" />
               <span className="hidden sm:inline">New Post</span>
               <span className="sm:hidden">New</span>
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -221,13 +224,13 @@ export function BlogManagement() {
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-6">
           {/* Search */}
           <div className="relative flex-1 w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <Input
               type="text"
               placeholder="Search posts..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-100 transition-all duration-200"
+              className="pl-10"
             />
           </div>
 
@@ -235,7 +238,7 @@ export function BlogManagement() {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-3 sm:px-4 py-2 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-100 transition-all duration-200 text-sm"
+            className={selectClassName}
           >
             <option value="all">All Status</option>
             <option value="published">Published</option>
@@ -246,7 +249,7 @@ export function BlogManagement() {
           <select
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}
-            className="px-3 sm:px-4 py-2 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-100 transition-all duration-200 text-sm"
+            className={selectClassName}
           >
             <option value="all">All Categories</option>
             <option value="travel">Travel</option>
@@ -257,48 +260,47 @@ export function BlogManagement() {
 
           {/* Actions */}
           {selectedPosts.size > 0 && (
-            <button
+            <Button
+              type="button"
+              variant="destructive"
               onClick={handleDeleteSelected}
-              className="flex items-center gap-2 px-3 sm:px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200 text-sm"
             >
               <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
               <span className="hidden sm:inline">Delete ({selectedPosts.size})</span>
               <span className="sm:hidden">Del ({selectedPosts.size})</span>
-            </button>
+            </Button>
           )}
         </div>
 
         {/* Posts Grid */}
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
-            <span className="ml-3 text-gray-600">Loading blog posts...</span>
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            <span className="ml-3 text-muted-foreground">Loading blog posts...</span>
           </div>
         ) : error ? (
-          <div className="bg-red-50 rounded-xl p-6">
-            <p className="text-red-600">{error}</p>
-            <button
-              onClick={() => fetchPosts()}
-              className="mt-4 px-4 py-2 rounded-lg bg-white hover:bg-gray-50 shadow-sm"
-            >
+          <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-6">
+            <p className="text-destructive">{error}</p>
+            <Button type="button" variant="outline" className="mt-4" onClick={() => fetchPosts()}>
               Try Again
-            </button>
+            </Button>
           </div>
       ) : posts.length > 0 ? (
         <div className="space-y-3 sm:space-y-4">
           {posts.map((post) => (
-            <div
+            <Card
               key={post.id}
-              className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer gap-3 sm:gap-4"
+              className="cursor-pointer transition-shadow hover:shadow-md py-0"
               onClick={() => window.location.href = `/admin/blog/${post.id}`}
             >
+              <CardContent className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 gap-3 sm:gap-4">
               <div className="flex items-center gap-3 sm:gap-4">
-                <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-xl flex-shrink-0" style={{ background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)' }}>
-                  <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+                <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-xl flex-shrink-0 bg-primary">
+                  <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-primary-foreground" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="font-bold text-sm sm:text-base truncate">{post.title}</div>
-                  <div className="text-xs sm:text-sm text-gray-500 truncate">{post.excerpt}</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground truncate">{post.excerpt}</div>
                   <div className="flex items-center gap-2 mt-1 flex-wrap">
                     <Badge className={`${getStatusColor(post.is_published)} text-xs`}>
                       {post.is_published ? 'Published' : 'Draft'}
@@ -308,7 +310,7 @@ export function BlogManagement() {
                 </div>
               </div>
               <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4">
-                <div className="text-xs sm:text-sm text-gray-500">
+                <div className="text-xs sm:text-sm text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
                     <span className="hidden xs:inline">{formatDate(post.published_date || post.created_at || 'No date')}</span>
@@ -320,33 +322,40 @@ export function BlogManagement() {
                   </div>
                 </div>
                 <div className="flex items-center gap-1 sm:gap-2">
-                  <button
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
                     onClick={(e) => {
                       e.stopPropagation();
                       window.location.href = `/admin/blog/${post.id}`;
                     }}
-                    className="p-1.5 sm:p-2 hover:bg-gray-200 rounded-lg"
                     title="View"
                   >
                     <Eye className="h-4 w-4" />
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
                     onClick={(e) => {
                       e.stopPropagation();
                       window.location.href = `/admin/blog/${post.id}`;
                     }}
-                    className="p-1.5 sm:p-2 hover:bg-gray-200 rounded-lg"
                     title="Edit"
                   >
                     <Edit className="h-4 w-4" />
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleDeletePost(post.id);
                     }}
                     disabled={deleting.has(post.id)}
-                    className="p-2 hover:bg-red-100 text-red-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="text-destructive hover:text-destructive"
                     title="Delete"
                   >
                     {deleting.has(post.id) ? (
@@ -354,24 +363,21 @@ export function BlogManagement() {
                     ) : (
                       <Trash2 className="h-4 w-4" />
                     )}
-                  </button>
+                  </Button>
                 </div>
               </div>
-            </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
       ) : (
-        <div className="text-center py-12 text-gray-500">
+        <div className="text-center py-12 text-muted-foreground">
           <FileText className="h-16 w-16 mx-auto mb-4 opacity-50" />
           <p>No blog posts yet. Create your first blog post to get started!</p>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="mt-4 flex items-center gap-2 px-4 py-2 rounded-lg text-white mx-auto"
-            style={{ background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)' }}
-          >
+          <Button type="button" className="mt-4 mx-auto" onClick={() => setShowCreateModal(true)}>
             <Plus className="h-4 w-4" />
             Create Your First Post
-          </button>
+          </Button>
         </div>
       )}
 

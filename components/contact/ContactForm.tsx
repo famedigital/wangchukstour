@@ -2,7 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { PremiumInput, PremiumTextarea } from '@/components/ui/premium-input';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
 import { Send, Check } from 'lucide-react';
 
 export function ContactForm() {
@@ -111,11 +114,11 @@ export function ContactForm() {
 
   if (submitted) {
     return (
-      <div className="text-center py-8">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
-          <Check className="h-8 w-8 text-green-600" />
+      <div className="py-8 text-center">
+        <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+          <Check className="h-8 w-8 text-primary" />
         </div>
-        <h3 className="text-xl font-bold mb-2">
+        <h3 className="mb-2 font-heading text-xl font-semibold">
           {isBooking ? 'Booking request sent!' : 'Message sent!'}
         </h3>
         <p className="text-muted-foreground">
@@ -129,7 +132,7 @@ export function ContactForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="rounded-xl border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+      <div className="rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
         {isBooking ? (
           <p>
             <span className="font-medium text-foreground">Booking request</span>
@@ -144,37 +147,40 @@ export function ContactForm() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <div>
-          <label className="block text-sm font-medium mb-2">Name *</label>
-          <PremiumInput
+        <div className="grid gap-2">
+          <Label htmlFor="name">Name *</Label>
+          <Input
+            id="name"
             type="text"
             name="name"
             value={formState.name}
             onChange={handleChange}
             placeholder="Your full name"
-            error={formErrors.name}
+            aria-invalid={!!formErrors.name}
           />
-          {formErrors.name && <p className="text-destructive text-sm mt-1">{formErrors.name}</p>}
+          {formErrors.name && <p className="text-sm text-destructive">{formErrors.name}</p>}
         </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-2">Email *</label>
-          <PremiumInput
+        <div className="grid gap-2">
+          <Label htmlFor="email">Email *</Label>
+          <Input
+            id="email"
             type="email"
             name="email"
             value={formState.email}
             onChange={handleChange}
             placeholder="you@email.com"
-            error={formErrors.email}
+            aria-invalid={!!formErrors.email}
           />
-          {formErrors.email && <p className="text-destructive text-sm mt-1">{formErrors.email}</p>}
+          {formErrors.email && <p className="text-sm text-destructive">{formErrors.email}</p>}
         </div>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <div>
-          <label className="block text-sm font-medium mb-2">Phone</label>
-          <PremiumInput
+        <div className="grid gap-2">
+          <Label htmlFor="phone">Phone</Label>
+          <Input
+            id="phone"
             type="tel"
             name="phone"
             value={formState.phone}
@@ -182,9 +188,10 @@ export function ContactForm() {
             placeholder="+975 ..."
           />
         </div>
-        <div>
-          <label className="block text-sm font-medium mb-2">Group size</label>
-          <PremiumInput
+        <div className="grid gap-2">
+          <Label htmlFor="groupSize">Group size</Label>
+          <Input
+            id="groupSize"
             type="text"
             name="groupSize"
             value={formState.groupSize}
@@ -194,9 +201,10 @@ export function ContactForm() {
         </div>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium mb-2">Preferred travel dates</label>
-        <PremiumInput
+      <div className="grid gap-2">
+        <Label htmlFor="travelDates">Preferred travel dates</Label>
+        <Input
+          id="travelDates"
           type="text"
           name="travelDates"
           value={formState.travelDates}
@@ -205,27 +213,24 @@ export function ContactForm() {
         />
       </div>
 
-      <div>
-        <label className="block text-sm font-medium mb-2">Message *</label>
-        <PremiumTextarea
+      <div className="grid gap-2">
+        <Label htmlFor="message">Message *</Label>
+        <Textarea
+          id="message"
           name="message"
           value={formState.message}
           onChange={handleChange}
           placeholder="Tell us about your trip..."
           rows={5}
-          error={formErrors.message}
+          aria-invalid={!!formErrors.message}
         />
-        {formErrors.message && <p className="text-destructive text-sm mt-1">{formErrors.message}</p>}
+        {formErrors.message && <p className="text-sm text-destructive">{formErrors.message}</p>}
       </div>
 
-      <button
-        type="submit"
-        disabled={submitting}
-        className="w-full min-h-11 inline-flex items-center justify-center gap-2 rounded-xl bg-primary text-primary-foreground px-6 py-3 font-medium hover:bg-primary/90 disabled:opacity-50"
-      >
+      <Button type="submit" disabled={submitting} className="w-full gap-2" size="lg">
         <Send className="h-4 w-4" />
         {submitting ? 'Sending...' : isBooking ? 'Submit booking request' : 'Send inquiry'}
-      </button>
+      </Button>
     </form>
   );
 }

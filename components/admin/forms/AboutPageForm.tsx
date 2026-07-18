@@ -201,7 +201,7 @@ export function AboutPageForm() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-prayer-red" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -276,7 +276,7 @@ export function AboutPageForm() {
                   )}
                   <button
                     onClick={() => openMediaPicker('hero', 'backgroundImage')}
-                    className="absolute top-4 right-4 bg-white/90 hover:bg-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                    className="absolute top-4 right-4 bg-card/90 hover:bg-card px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                   >
                     Change Image
                   </button>
@@ -562,7 +562,7 @@ export function AboutPageForm() {
                       </div>
                       <button
                         onClick={() => openMediaPicker('team', 'image', index)}
-                        className="text-sm text-prayer-red hover:underline"
+                        className="text-sm text-primary hover:underline"
                       >
                         {member.image ? 'Change Photo' : 'Add Photo'}
                       </button>

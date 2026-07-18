@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Inter, Playfair_Display, Geist } from "next/font/google";
 import { Toaster } from "sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
@@ -66,7 +67,9 @@ export default function RootLayout({
       )}
     >
       <body className="flex min-h-full flex-col font-sans">
-        {children}
+        <TooltipProvider>
+          {children}
+        </TooltipProvider>
         <Toaster richColors position="top-right" />
       </body>
     </html>

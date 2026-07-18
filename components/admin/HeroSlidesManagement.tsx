@@ -6,6 +6,8 @@ import { toast } from 'sonner';
 import { Plus, Edit, Trash2, Image as ImageIcon, Loader2, Eye, EyeOff, GripVertical } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { PremiumButton } from '@/components/ui/premium-button';
 import { PremiumInput, PremiumTextarea } from '@/components/ui/premium-input';
 import { MediaPickerModal } from '@/components/admin/MediaPickerModal';
@@ -99,8 +101,8 @@ export function HeroSlidesManagement() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
-        <span className="ml-3 text-gray-600">Loading hero slides...</span>
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <span className="ml-3 text-muted-foreground">Loading hero slides...</span>
       </div>
     );
   }
@@ -111,7 +113,7 @@ export function HeroSlidesManagement() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-xl font-bold">Hero Slides</h2>
-          <p className="text-gray-500 mt-1">{slides.length} slides</p>
+          <p className="text-muted-foreground mt-1">{slides.length} slides</p>
         </div>
         <PremiumButton
           onClick={() => openEditModal()}
@@ -124,9 +126,9 @@ export function HeroSlidesManagement() {
 
       {/* Slides Grid */}
       {slides.length === 0 ? (
-        <Card className="shadow-premium-md">
+        <Card>
           <CardContent className="p-6">
-            <div className="text-center py-12 text-gray-500">
+            <div className="text-center py-12 text-muted-foreground">
               <ImageIcon className="h-16 w-16 mx-auto mb-4 opacity-50" />
               <p className="text-lg font-medium mb-2">No Hero Slides Yet</p>
               <p className="text-sm mb-4">Create your first hero slide to get started</p>
@@ -139,7 +141,7 @@ export function HeroSlidesManagement() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {slides.map((slide) => (
-            <Card key={slide.id} className="shadow-premium-sm hover:shadow-premium-md transition-shadow">
+            <Card key={slide.id} className="transition-shadow">
               <CardContent className="p-4">
                 {/* Slide Image */}
                 <div className="relative aspect-video rounded-lg overflow-hidden mb-3">
@@ -149,7 +151,7 @@ export function HeroSlidesManagement() {
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute top-2 right-2 flex gap-2">
-                    <Badge className={slide.is_active ? 'bg-green-600' : 'bg-gray-600'}>
+                    <Badge variant={slide.is_active ? 'default' : 'secondary'}>
                       {slide.is_active ? 'Active' : 'Inactive'}
                     </Badge>
                     <Badge variant="secondary">Order: {slide.slide_order}</Badge>
@@ -159,9 +161,9 @@ export function HeroSlidesManagement() {
                 {/* Slide Details */}
                 <div className="mb-3">
                   <h3 className="font-bold text-lg truncate">{slide.title || 'Untitled'}</h3>
-                  <p className="text-sm text-gray-600 truncate">{slide.subtitle || slide.description || 'No description'}</p>
+                  <p className="text-sm text-muted-foreground truncate">{slide.subtitle || slide.description || 'No description'}</p>
                   {slide.cta_text && (
-                    <p className="text-xs text-blue-600 mt-1">CTA: {slide.cta_text}</p>
+                    <p className="text-xs text-primary mt-1">CTA: {slide.cta_text}</p>
                   )}
                 </div>
 
@@ -184,7 +186,7 @@ export function HeroSlidesManagement() {
                     variant="secondary"
                     onClick={() => handleDelete(slide.id)}
                     icon={<Trash2 className="h-4 w-4" />}
-                    className="text-red-600 hover:text-red-700"
+                    className="text-destructive hover:text-destructive"
                   />
                 </div>
               </CardContent>
@@ -196,7 +198,7 @@ export function HeroSlidesManagement() {
       {/* Edit Modal */}
       {showEditModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <Card className="max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <HeroSlideForm
               slide={editingSlide}
               onSave={async (slideData) => {
@@ -228,7 +230,7 @@ export function HeroSlidesManagement() {
               onCancel={() => setShowEditModal(false)}
               loading={saving}
             />
-          </div>
+          </Card>
         </div>
       )}
     </div>
@@ -278,13 +280,15 @@ function HeroSlideForm({
     <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 max-h-[85vh] overflow-y-auto">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-xl font-bold">{slide ? 'Edit Slide' : 'New Slide'}</h3>
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="icon-lg"
           onClick={onCancel}
-          className="min-h-11 min-w-11 text-gray-400 hover:text-gray-600 text-2xl"
+          className="text-2xl"
         >
           ×
-        </button>
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -334,38 +338,31 @@ function HeroSlideForm({
       />
 
       <div className="flex items-center gap-2 min-h-11">
-        <input
-          type="checkbox"
+        <Checkbox
           id="is_active"
           checked={formData.is_active}
-          onChange={(e) => handleChange('is_active', e.target.checked)}
-          className="rounded h-4 w-4"
+          onCheckedChange={(checked) => handleChange('is_active', checked === true)}
         />
         <label htmlFor="is_active" className="text-sm font-medium">
           Active (show on homepage)
         </label>
       </div>
 
-      <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center space-y-3">
+      <div className="border-2 border-dashed border-border rounded-lg p-4 text-center space-y-3">
         {formData.image_url ? (
           <img src={formData.image_url} alt="Preview" className="max-h-40 mx-auto rounded-lg object-cover" />
         ) : (
-          <ImageIcon className="h-12 w-12 text-gray-400 mx-auto" />
+          <ImageIcon className="h-12 w-12 text-muted-foreground mx-auto" />
         )}
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-muted-foreground">
           {formData.image_url ? 'Hero image selected' : 'Select a hero image from Media Library'}
         </p>
-        <button
-          type="button"
-          onClick={() => setShowMediaPicker(true)}
-          className="min-h-11 px-4 py-2 rounded-xl text-white text-sm"
-          style={{ background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)' }}
-        >
+        <Button type="button" onClick={() => setShowMediaPicker(true)}>
           {formData.image_url ? 'Change Image' : 'Choose Image'}
-        </button>
+        </Button>
       </div>
 
-      <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-3 justify-end pt-4 sticky bottom-0 bg-white">
+      <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-3 justify-end pt-4 sticky bottom-0 bg-card">
         <PremiumButton
           type="button"
           variant="secondary"

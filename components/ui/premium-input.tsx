@@ -1,176 +1,164 @@
-import { forwardRef, InputHTMLAttributes, TextareaHTMLAttributes } from 'react';
-import { cn } from '@/lib/utils';
+'use client'
+
+import { forwardRef, type InputHTMLAttributes, type TextareaHTMLAttributes, type SelectHTMLAttributes } from 'react'
+import { cn } from '@/lib/utils'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
 
 interface SelectOption {
-  value: string;
-  label: string;
+  value: string
+  label: string
 }
 
 interface PremiumInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
-  label?: string;
-  error?: string;
-  icon?: React.ReactNode;
-  iconPosition?: 'left' | 'right';
-  value?: string;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
-  placeholder?: string;
-  required?: boolean;
-  type?: string;
-  name?: string;
-  id?: string;
-  className?: string;
-  textarea?: boolean;
-  rows?: number;
-  select?: boolean;
-  options?: SelectOption[];
+  label?: string
+  error?: string
+  icon?: React.ReactNode
+  iconPosition?: 'left' | 'right'
+  value?: string
+  onChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void
+  placeholder?: string
+  required?: boolean
+  type?: string
+  name?: string
+  id?: string
+  className?: string
+  textarea?: boolean
+  rows?: number
+  select?: boolean
+  options?: SelectOption[]
 }
 
-/**
- * PremiumInput with subtle shadows, smooth focus states, and integrated icons
- * No harsh borders - uses shadow system for depth
- */
-export const PremiumInput = forwardRef<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement, PremiumInputProps>(
-  ({
-    className = '',
-    label,
-    error,
-    icon,
-    iconPosition = 'left',
-    disabled,
-    textarea = false,
-    rows = 4,
-    select = false,
-    options = [],
-    ...props
-  }, ref) => {
-    const inputWrapper = 'relative';
-    const inputBase = 'w-full px-4 py-3 rounded-xl outline-none transition-all duration-300';
-    const inputStyles = `${inputBase} shadow-premium-sm focus:shadow-premium-md`;
-    const inputDisabled = 'opacity-50 cursor-not-allowed';
-    const inputError = 'shadow-red-200 focus:shadow-red-300';
-
-    const iconStyles = 'absolute top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none';
+/** @deprecated Use Label + Input/Textarea/Select from @/components/ui */
+export const PremiumInput = forwardRef<
+  HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement,
+  PremiumInputProps
+>(
+  (
+    {
+      className = '',
+      label,
+      error,
+      icon,
+      iconPosition = 'left',
+      disabled,
+      textarea = false,
+      rows = 4,
+      select = false,
+      options = [],
+      id,
+      ...props
+    },
+    ref
+  ) => {
+    const fieldId = id || props.name
 
     return (
-      <div className="space-y-2">
+      <div className="grid gap-2">
         {label && (
-          <label className="block text-sm font-medium text-gray-700">
+          <Label htmlFor={fieldId} className={error ? 'text-destructive' : undefined}>
             {label}
-          </label>
+            {props.required && <span className="text-destructive">*</span>}
+          </Label>
         )}
-        <div className={inputWrapper}>
+        <div className="relative">
           {icon && iconPosition === 'left' && !textarea && !select && (
-            <div className="left-4 pl-2 iconStyles">{icon}</div>
+            <div className="pointer-events-none absolute top-1/2 left-2.5 z-10 -translate-y-1/2 text-muted-foreground [&_svg]:size-4">
+              {icon}
+            </div>
           )}
           {select ? (
             <select
               ref={ref as React.RefObject<HTMLSelectElement>}
-              className={cn(
-                inputStyles,
-                disabled && inputDisabled,
-                error && inputError,
-                icon && (iconPosition === 'left' ? 'pl-12' : 'pr-12'),
-                className
-              )}
+              id={fieldId}
               disabled={disabled}
               value={props.value}
               onChange={props.onChange}
               name={props.name}
-              id={props.id}
               required={props.required}
+              aria-invalid={!!error}
+              className={cn(
+                'flex h-8 w-full rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-input/30',
+                className
+              )}
             >
-              {options.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
+              {options.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
                 </option>
               ))}
             </select>
           ) : textarea ? (
-            <textarea
+            <Textarea
               ref={ref as React.RefObject<HTMLTextAreaElement>}
+              id={fieldId}
               rows={rows}
-              className={cn(
-                inputStyles,
-                disabled && inputDisabled,
-                error && inputError,
-                icon && 'pl-12',
-                className
-              )}
               disabled={disabled}
+              aria-invalid={!!error}
+              className={cn(className)}
               value={props.value}
-              onChange={props.onChange}
+              onChange={props.onChange as React.ChangeEventHandler<HTMLTextAreaElement>}
               name={props.name}
-              id={props.id}
               placeholder={props.placeholder}
               required={props.required}
             />
           ) : (
-            <input
+            <Input
               ref={ref as React.RefObject<HTMLInputElement>}
-              className={cn(
-                inputStyles,
-                disabled && inputDisabled,
-                error && inputError,
-                icon && (iconPosition === 'left' ? 'pl-12' : 'pr-12'),
-                className
-              )}
+              id={fieldId}
+              type={props.type || 'text'}
               disabled={disabled}
-              {...props}
+              aria-invalid={!!error}
+              className={cn(icon && iconPosition === 'left' && 'pl-8', className)}
+              value={props.value}
+              onChange={props.onChange as React.ChangeEventHandler<HTMLInputElement>}
+              name={props.name}
+              placeholder={props.placeholder}
+              required={props.required}
             />
           )}
           {icon && iconPosition === 'right' && !textarea && !select && (
-            <div className="right-4 pr-2 iconStyles">{icon}</div>
+            <div className="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 text-muted-foreground [&_svg]:size-4">
+              {icon}
+            </div>
           )}
         </div>
-        {error && (
-          <p className="text-sm text-red-600">{error}</p>
-        )}
+        {error && <p className="text-xs text-destructive">{error}</p>}
       </div>
-    );
+    )
   }
-);
+)
 
-PremiumInput.displayName = 'PremiumInput';
+PremiumInput.displayName = 'PremiumInput'
 
-// Premium Textarea component
 interface PremiumTextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
-  label?: string;
-  error?: string;
-  rows?: number;
-  value?: string;
-  onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  placeholder?: string;
-  required?: boolean;
-  name?: string;
-  id?: string;
-  className?: string;
+  label?: string
+  error?: string
 }
 
+/** @deprecated Use Label + Textarea from @/components/ui */
 export const PremiumTextarea = forwardRef<HTMLTextAreaElement, PremiumTextareaProps>(
-  ({ className = '', label, error, rows = 4, ...props }, ref) => {
+  ({ className = '', label, error, id, ...props }, ref) => {
+    const fieldId = id || props.name
     return (
-      <div className="space-y-2">
+      <div className="grid gap-2">
         {label && (
-          <label className="block text-sm font-medium text-gray-700">
+          <Label htmlFor={fieldId} className={error ? 'text-destructive' : undefined}>
             {label}
-          </label>
+          </Label>
         )}
-        <textarea
+        <Textarea
           ref={ref}
-          rows={rows}
-          className={cn(
-            'w-full px-4 py-3 rounded-xl outline-none transition-all duration-300 shadow-premium-sm focus:shadow-premium-md resize-none',
-            error && 'shadow-red-200 focus:shadow-red-300',
-            className
-          )}
+          id={fieldId}
+          aria-invalid={!!error}
+          className={className}
           {...props}
         />
-        {error && (
-          <p className="text-sm text-red-600">{error}</p>
-        )}
+        {error && <p className="text-xs text-destructive">{error}</p>}
       </div>
-    );
+    )
   }
-);
+)
 
-PremiumTextarea.displayName = 'PremiumTextarea';
+PremiumTextarea.displayName = 'PremiumTextarea'

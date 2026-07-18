@@ -12,7 +12,24 @@ import {
   MapPin,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { PremiumModal } from '@/components/ui/premium-modal';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { TourForm } from '@/components/admin/TourForm';
 
 interface Tour {
@@ -46,6 +63,8 @@ export function TourManagement() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [deleteTarget, setDeleteTarget] = useState<'single' | 'bulk' | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const [categories, setCategories] = useState<TourCategory[]>([
     { slug: 'international', name: 'International Tour' },
     { slug: 'regional', name: 'Regional Tour' },
@@ -142,38 +161,28 @@ export function TourManagement() {
     }
   };
 
-  const handleDeleteSelected = async () => {
-    if (selectedTours.size === 0) return;
-    if (!confirm(`Are you sure you want to delete ${selectedTours.size} tour(s)?`)) {
-      return;
-    }
-
+  const confirmDelete = async () => {
     try {
-      await Promise.all(
-        Array.from(selectedTours).map((id) =>
-          fetch(`/api/admin/tours/${id}`, { method: 'DELETE' })
-        )
-      );
-      setSelectedTours(new Set());
+      if (deleteTarget === 'bulk') {
+        await Promise.all(
+          Array.from(selectedTours).map((id) =>
+            fetch(`/api/admin/tours/${id}`, { method: 'DELETE' })
+          )
+        );
+        setSelectedTours(new Set());
+        toast.success('Tours deleted');
+      } else if (deleteId) {
+        const response = await fetch(`/api/admin/tours/${deleteId}`, { method: 'DELETE' });
+        if (!response.ok) throw new Error('Delete failed');
+        toast.success('Tour deleted');
+      }
       await fetchTours();
-      toast.success('Tours deleted');
     } catch (error) {
       console.error('Delete failed:', error);
-      toast.error('Failed to delete tours');
-    }
-  };
-
-  const handleDeleteTour = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this tour?')) return;
-
-    try {
-      const response = await fetch(`/api/admin/tours/${id}`, { method: 'DELETE' });
-      if (!response.ok) throw new Error('Delete failed');
-      await fetchTours();
-      toast.success('Tour deleted');
-    } catch (error) {
-      console.error('Delete failed:', error);
-      toast.error('Failed to delete tour');
+      toast.error('Failed to delete');
+    } finally {
+      setDeleteTarget(null);
+      setDeleteId(null);
     }
   };
 
@@ -196,36 +205,32 @@ export function TourManagement() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h2 className="font-heading text-xl font-bold text-foreground">Tour packages</h2>
+          <h2 className="font-heading text-xl font-semibold text-foreground">Tour packages</h2>
           <p className="mt-1 text-sm text-muted-foreground">{tours.length} tours</p>
         </div>
-        <button
-          type="button"
-          onClick={() => setShowCreateModal(true)}
-          className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-        >
+        <Button onClick={() => setShowCreateModal(true)}>
           <Plus className="size-4" />
           Add New Tour
-        </button>
+        </Button>
       </div>
 
-      <div className="rounded-lg border border-border bg-card p-4">
+      <div className="rounded-xl border border-border bg-card p-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-center">
           <div className="relative flex-1">
-            <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-            <input
+            <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
               type="text"
               placeholder="Search tours..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-10 w-full rounded-md border border-input bg-background pr-4 pl-10 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+              className="pl-8"
             />
           </div>
 
           <select
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}
-            className="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+            className="flex h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
           >
             <option value="all">All Categories</option>
             {categories.map((c) => (
@@ -238,7 +243,7 @@ export function TourManagement() {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+            className="flex h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
           >
             <option value="all">All Status</option>
             <option value="active">Active</option>
@@ -246,14 +251,14 @@ export function TourManagement() {
           </select>
 
           {selectedTours.size > 0 && (
-            <button
-              type="button"
-              onClick={handleDeleteSelected}
-              className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => setDeleteTarget('bulk')}
             >
               <Trash2 className="size-4" />
               Delete ({selectedTours.size})
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -269,7 +274,7 @@ export function TourManagement() {
               type="checkbox"
               checked={selectedTours.size === tours.length && tours.length > 0}
               onChange={selectAll}
-              className="size-4 rounded"
+              className="size-4 rounded border-input"
             />
             <span className="text-sm text-muted-foreground">Select All</span>
           </div>
@@ -277,7 +282,7 @@ export function TourManagement() {
           {tours.map((tour) => (
             <div
               key={tour.id}
-              className={`relative overflow-hidden rounded-lg border border-border bg-card transition-shadow hover:shadow-md ${
+              className={`relative overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10 transition-shadow hover:shadow-md ${
                 selectedTours.has(tour.id) ? 'ring-2 ring-primary' : ''
               }`}
             >
@@ -286,7 +291,7 @@ export function TourManagement() {
                   type="checkbox"
                   checked={selectedTours.has(tour.id)}
                   onChange={() => toggleSelectTour(tour.id)}
-                  className="size-4 rounded"
+                  className="size-4 rounded border-input"
                 />
               </div>
 
@@ -299,16 +304,16 @@ export function TourManagement() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
 
                 <div className="absolute top-3 right-3 flex flex-col items-end gap-1.5">
-                  <span className="rounded-full bg-white/90 px-2.5 py-1 text-xs font-semibold text-foreground backdrop-blur-sm">
+                  <span className="rounded-md bg-background/90 px-2.5 py-1 text-xs font-medium ring-1 ring-border backdrop-blur-sm">
                     {categoryLabel(tour.category)}
                   </span>
                   {tour.is_featured && (
-                    <span className="rounded-full bg-accent px-2.5 py-1 text-xs font-semibold text-accent-foreground">
+                    <span className="rounded-md bg-accent px-2.5 py-1 text-xs font-medium text-accent-foreground">
                       Featured
                     </span>
                   )}
                   <span
-                    className={`rounded-full px-2.5 py-1 text-xs font-semibold text-white ${
+                    className={`rounded-md px-2.5 py-1 text-xs font-medium text-white ${
                       tour.is_active ? 'bg-emerald-600' : 'bg-muted-foreground'
                     }`}
                   >
@@ -316,8 +321,8 @@ export function TourManagement() {
                   </span>
                 </div>
 
-                <div className="absolute right-3 bottom-3 rounded-md bg-card px-3 py-1 shadow">
-                  <div className="text-lg font-bold text-primary">${tour.price}</div>
+                <div className="absolute right-3 bottom-3 rounded-md bg-card px-3 py-1 ring-1 ring-border">
+                  <div className="text-lg font-semibold text-primary">${tour.price}</div>
                   <div className="text-xs text-muted-foreground">per person</div>
                 </div>
               </div>
@@ -342,76 +347,81 @@ export function TourManagement() {
                 </div>
 
                 <div className="flex items-center gap-2 border-t border-border pt-4">
-                  <button
-                    type="button"
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="flex-1"
                     onClick={() => window.open(`/tours/${tour.slug}`, '_blank')}
-                    className="flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-muted"
                   >
                     <Eye className="size-4" />
                     View
-                  </button>
-                  <button
-                    type="button"
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="flex-1"
                     onClick={() => openEditModal(tour)}
-                    className="flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-muted"
                   >
                     <Edit className="size-4" />
                     Edit
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteTour(tour.id)}
-                    className="inline-flex items-center justify-center rounded-md px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                    onClick={() => {
+                      setDeleteId(tour.id);
+                      setDeleteTarget('single');
+                    }}
                   >
                     <Trash2 className="size-4" />
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <div className="rounded-lg border border-border bg-card py-12 text-center">
+        <div className="rounded-xl bg-card py-12 text-center ring-1 ring-foreground/10">
           <MapPin className="mx-auto mb-4 size-12 text-muted-foreground/40" />
           <h3 className="mb-2 font-heading text-lg font-medium">No tours found</h3>
           <p className="mb-6 text-sm text-muted-foreground">Create your first tour to get started</p>
-          <button
-            type="button"
-            onClick={() => setShowCreateModal(true)}
-            className="inline-flex items-center gap-2 rounded-md bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-          >
+          <Button onClick={() => setShowCreateModal(true)}>
             <Plus className="size-4" />
             Create Tour
-          </button>
+          </Button>
         </div>
       )}
 
-      <PremiumModal
-        isOpen={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
-        title="Create New Tour"
-        size="full"
-        showCloseButton
-      >
-        <div className="max-h-[80vh] overflow-y-auto">
+      <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
+        <DialogContent
+          className="max-h-[90vh] w-full overflow-y-auto sm:max-w-6xl"
+          showCloseButton
+        >
+          <DialogHeader>
+            <DialogTitle>Create New Tour</DialogTitle>
+          </DialogHeader>
           <TourForm
             onSubmit={handleCreate}
             onCancel={() => setShowCreateModal(false)}
           />
-        </div>
-      </PremiumModal>
+        </DialogContent>
+      </Dialog>
 
-      <PremiumModal
-        isOpen={showEditModal}
-        onClose={() => {
-          setShowEditModal(false);
-          setEditingTour(null);
+      <Dialog
+        open={showEditModal}
+        onOpenChange={(open) => {
+          setShowEditModal(open);
+          if (!open) setEditingTour(null);
         }}
-        title="Edit Tour"
-        size="full"
-        showCloseButton
       >
-        <div className="max-h-[80vh] overflow-y-auto">
+        <DialogContent
+          className="max-h-[90vh] w-full overflow-y-auto sm:max-w-6xl"
+          showCloseButton
+        >
+          <DialogHeader>
+            <DialogTitle>Edit Tour</DialogTitle>
+          </DialogHeader>
           {editLoading || !editingTour ? (
             <div className="flex h-48 items-center justify-center">
               <div className="size-10 animate-spin rounded-full border-2 border-primary border-t-transparent" />
@@ -427,8 +437,35 @@ export function TourManagement() {
               }}
             />
           )}
-        </div>
-      </PremiumModal>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDeleteTarget(null);
+            setDeleteId(null);
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete tour{deleteTarget === 'bulk' ? 's' : ''}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteTarget === 'bulk'
+                ? `This will permanently delete ${selectedTours.size} selected tour(s).`
+                : 'This will permanently delete this tour. This action cannot be undone.'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" onClick={confirmDelete}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

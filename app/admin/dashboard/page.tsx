@@ -138,7 +138,7 @@ export default function AdminDashboardPage() {
       case 'cancelled':
         return 'text-red-600 bg-red-50';
       default:
-        return 'text-gray-600 bg-gray-50';
+        return 'text-gray-600 bg-muted';
     }
   };
 
@@ -155,8 +155,8 @@ export default function AdminDashboardPage() {
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
-            <span className="ml-3 text-gray-600">Loading dashboard data...</span>
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            <span className="ml-3 text-muted-foreground">Loading dashboard data...</span>
           </div>
         ) : error ? (
           <div className="bg-red-50 border border-red-200 rounded-xl p-6">
@@ -166,20 +166,20 @@ export default function AdminDashboardPage() {
           <>
             {/* Stats Grid */}
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
-              <Card className="shadow-premium-sm hover:shadow-premium-md transition-shadow duration-300">
+              <Card className="transition-shadow duration-300">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)' }}>
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: 'var(--primary)' }}>
                       <Calendar className="h-6 w-6 text-white" />
                     </div>
                     <span className="text-green-600 text-sm font-medium">{stats?.totalBookings || 0}</span>
                   </div>
-                  <div className="text-3xl font-bold text-gray-900">{stats?.totalBookings || 0}</div>
-                  <div className="text-sm text-gray-500">Total Bookings</div>
+                  <div className="text-3xl font-bold text-foreground">{stats?.totalBookings || 0}</div>
+                  <div className="text-sm text-muted-foreground">Total Bookings</div>
                 </CardContent>
               </Card>
 
-              <Card className="shadow-premium-sm hover:shadow-premium-md transition-shadow duration-300">
+              <Card className="transition-shadow duration-300">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500">
@@ -187,12 +187,12 @@ export default function AdminDashboardPage() {
                     </div>
                     <span className="text-amber-600 text-sm font-medium">{stats?.pendingBookings || 0} pending</span>
                   </div>
-                  <div className="text-3xl font-bold text-gray-900">{stats?.pendingBookings || 0}</div>
-                  <div className="text-sm text-gray-500">Pending</div>
+                  <div className="text-3xl font-bold text-foreground">{stats?.pendingBookings || 0}</div>
+                  <div className="text-sm text-muted-foreground">Pending</div>
                 </CardContent>
               </Card>
 
-              <Card className="shadow-premium-sm hover:shadow-premium-md transition-shadow duration-300">
+              <Card className="transition-shadow duration-300">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-500">
@@ -200,12 +200,12 @@ export default function AdminDashboardPage() {
                     </div>
                     <span className="text-green-600 text-sm font-medium">${stats?.monthlyRevenue?.toLocaleString() || 0}</span>
                   </div>
-                  <div className="text-3xl font-bold text-gray-900">${stats?.monthlyRevenue?.toLocaleString() || 0}</div>
-                  <div className="text-sm text-gray-500">Monthly Revenue</div>
+                  <div className="text-3xl font-bold text-foreground">${stats?.monthlyRevenue?.toLocaleString() || 0}</div>
+                  <div className="text-sm text-muted-foreground">Monthly Revenue</div>
                 </CardContent>
               </Card>
 
-              <Card className="shadow-premium-sm hover:shadow-premium-md transition-shadow duration-300">
+              <Card className="transition-shadow duration-300">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500">
@@ -213,18 +213,18 @@ export default function AdminDashboardPage() {
                     </div>
                     <span className="text-blue-600 text-sm font-medium">{stats?.activeTours || 0} tours</span>
                   </div>
-                  <div className="text-3xl font-bold text-gray-900">{stats?.activeTours || 0}</div>
-                  <div className="text-sm text-gray-500">Active Tours</div>
+                  <div className="text-3xl font-bold text-foreground">{stats?.activeTours || 0}</div>
+                  <div className="text-sm text-muted-foreground">Active Tours</div>
                 </CardContent>
               </Card>
             </div>
 
             {/* Recent Bookings */}
-            <Card className="shadow-premium-md hover:shadow-premium-lg transition-shadow duration-300">
+            <Card className="transition-shadow duration-300">
               <CardContent className="p-6">
                 <h2 className="text-xl font-bold mb-6">Recent Bookings</h2>
                 {bookings.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
+                  <div className="text-center py-8 text-muted-foreground">
                     No bookings found. Start promoting your tours to get bookings!
                   </div>
                 ) : (
@@ -232,13 +232,13 @@ export default function AdminDashboardPage() {
                     <table className="w-full">
                       <thead>
                         <tr className="border-b">
-                          <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Booking ID</th>
-                          <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Client</th>
-                          <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Tour</th>
-                          <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Date</th>
-                          <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Amount</th>
-                          <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Status</th>
-                          <th className="text-right py-3 px-4 text-sm font-semibold text-gray-600">Actions</th>
+                          <th className="text-left py-3 px-4 text-sm font-semibold text-muted-foreground">Booking ID</th>
+                          <th className="text-left py-3 px-4 text-sm font-semibold text-muted-foreground">Client</th>
+                          <th className="text-left py-3 px-4 text-sm font-semibold text-muted-foreground">Tour</th>
+                          <th className="text-left py-3 px-4 text-sm font-semibold text-muted-foreground">Date</th>
+                          <th className="text-left py-3 px-4 text-sm font-semibold text-muted-foreground">Amount</th>
+                          <th className="text-left py-3 px-4 text-sm font-semibold text-muted-foreground">Status</th>
+                          <th className="text-right py-3 px-4 text-sm font-semibold text-muted-foreground">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -250,7 +250,7 @@ export default function AdminDashboardPage() {
                             <td className="py-4 px-4">
                               <div>
                                 <div className="font-medium">{booking.clientName}</div>
-                                <div className="text-sm text-gray-500">{booking.email}</div>
+                                <div className="text-sm text-muted-foreground">{booking.email}</div>
                               </div>
                             </td>
                             <td className="py-4 px-4">{booking.tour}</td>

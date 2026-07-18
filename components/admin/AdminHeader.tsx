@@ -5,6 +5,15 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Search, Bell, User, Settings, LogOut, Menu, Moon, Sun } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Button, buttonVariants } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 
 interface AdminHeaderProps {
@@ -27,15 +36,16 @@ type NotificationItem = {
   unread: boolean;
 };
 
+const THEME_STORAGE_KEY = 'admin-theme';
+
 export function AdminHeader({ onMobileMenuOpen, user }: AdminHeaderProps) {
   const router = useRouter();
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [showUserMenu, setShowUserMenu] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loadingNotifications, setLoadingNotifications] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   const loadNotifications = useCallback(async () => {
     try {
@@ -53,19 +63,34 @@ export function AdminHeader({ onMobileMenuOpen, user }: AdminHeaderProps) {
   }, []);
 
   useEffect(() => {
+    const stored = localStorage.getItem(THEME_STORAGE_KEY);
+    const prefersDark =
+      stored === 'dark' ||
+      (stored !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    document.documentElement.classList.toggle('dark', prefersDark);
+    setIsDarkMode(prefersDark);
+  }, []);
+
+  useEffect(() => {
     loadNotifications();
     const interval = setInterval(loadNotifications, 60_000);
     return () => clearInterval(interval);
   }, [loadNotifications]);
 
   useEffect(() => {
-    if (showNotifications) loadNotifications();
-  }, [showNotifications, loadNotifications]);
+    if (notificationsOpen) loadNotifications();
+  }, [notificationsOpen, loadNotifications]);
+
+  const toggleDarkMode = () => {
+    const next = !isDarkMode;
+    document.documentElement.classList.toggle('dark', next);
+    localStorage.setItem(THEME_STORAGE_KEY, next ? 'dark' : 'light');
+    setIsDarkMode(next);
+  };
 
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true);
-      setShowUserMenu(false);
       await fetch('/api/auth/logout', { method: 'POST' });
       router.push('/admin/login');
       router.refresh();
@@ -84,7 +109,6 @@ export function AdminHeader({ onMobileMenuOpen, user }: AdminHeaderProps) {
         body: JSON.stringify({ action: 'mark_inquiries_read' }),
       });
       await loadNotifications();
-      // Notify sidebar to refresh badges
       window.dispatchEvent(new Event('admin-badges-refresh'));
     } catch {
       // ignore
@@ -92,7 +116,7 @@ export function AdminHeader({ onMobileMenuOpen, user }: AdminHeaderProps) {
   };
 
   const openNotification = async (n: NotificationItem) => {
-    setShowNotifications(false);
+    setNotificationsOpen(false);
     if (n.type === 'inquiry') {
       await fetch('/api/admin/notifications', {
         method: 'PATCH',
@@ -108,14 +132,16 @@ export function AdminHeader({ onMobileMenuOpen, user }: AdminHeaderProps) {
     <header className="sticky top-0 z-30 border-b border-border bg-card/95 backdrop-blur-md">
       <div className="flex h-14 items-center justify-between gap-3 px-4 md:h-16 md:px-6">
         <div className="flex min-w-0 flex-1 items-center gap-3">
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon-lg"
             onClick={onMobileMenuOpen}
-            className="inline-flex size-10 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground lg:hidden"
+            className="lg:hidden"
             aria-label="Open menu"
           >
             <Menu className="size-5" />
-          </button>
+          </Button>
 
           <div className="relative hidden w-full max-w-md md:block">
             <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -128,21 +154,20 @@ export function AdminHeader({ onMobileMenuOpen, user }: AdminHeaderProps) {
         </div>
 
         <div className="flex shrink-0 items-center gap-1.5">
-          <button
+          <Button
             type="button"
-            onClick={() => setIsDarkMode(!isDarkMode)}
-            className="inline-flex size-9 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+            variant="ghost"
+            size="icon"
+            onClick={toggleDarkMode}
             title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
           >
             {isDarkMode ? <Sun className="size-4" /> : <Moon className="size-4" />}
-          </button>
+          </Button>
 
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setShowNotifications(!showNotifications)}
-              className="relative inline-flex size-9 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+          <DropdownMenu open={notificationsOpen} onOpenChange={setNotificationsOpen}>
+            <DropdownMenuTrigger
               aria-label="Notifications"
+              className={cn(buttonVariants({ variant: 'ghost', size: 'icon' }), 'relative')}
             >
               <Bell className="size-4" />
               {unreadCount > 0 && (
@@ -150,71 +175,64 @@ export function AdminHeader({ onMobileMenuOpen, user }: AdminHeaderProps) {
                   {unreadCount > 99 ? '99+' : unreadCount}
                 </span>
               )}
-            </button>
-
-            {showNotifications && (
-              <>
-                <div className="fixed inset-0 z-10" onClick={() => setShowNotifications(false)} />
-                <div className="absolute right-0 z-20 mt-2 w-80 overflow-hidden rounded-lg border border-border bg-card shadow-lg sm:w-96">
-                  <div className="border-b border-border p-4">
-                    <h3 className="font-heading text-sm font-semibold">Notifications</h3>
-                    <p className="text-xs text-muted-foreground">
-                      {unreadCount > 0
-                        ? `${unreadCount} pending booking${unreadCount === 1 ? '' : 's'} / new inquir${unreadCount === 1 ? 'y' : 'ies'}`
-                        : 'You\'re all caught up'}
-                    </p>
-                  </div>
-                  <div className="max-h-80 overflow-y-auto">
-                    {loadingNotifications && notifications.length === 0 ? (
-                      <p className="p-4 text-sm text-muted-foreground">Loading…</p>
-                    ) : notifications.length === 0 ? (
-                      <p className="p-4 text-sm text-muted-foreground">No new notifications</p>
-                    ) : (
-                      notifications.map((notification) => (
-                        <button
-                          key={notification.id}
-                          type="button"
-                          onClick={() => openNotification(notification)}
-                          className={cn(
-                            'w-full border-b border-border/60 p-4 text-left last:border-0 hover:bg-muted/60',
-                            notification.unread && 'bg-primary/5'
-                          )}
-                        >
-                          <p className="text-sm font-medium text-foreground">{notification.title}</p>
-                          <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">
-                            {notification.message}
-                          </p>
-                          <p className="mt-1 text-xs text-muted-foreground">{notification.time}</p>
-                        </button>
-                      ))
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2 border-t border-border bg-muted/40 p-3">
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-80 p-0 sm:w-96">
+              <div className="border-b border-border p-4">
+                <DropdownMenuLabel className="p-0 text-sm font-semibold">Notifications</DropdownMenuLabel>
+                <p className="text-xs text-muted-foreground">
+                  {unreadCount > 0
+                    ? `${unreadCount} pending booking${unreadCount === 1 ? '' : 's'} / new inquir${unreadCount === 1 ? 'y' : 'ies'}`
+                    : "You're all caught up"}
+                </p>
+              </div>
+              <div className="max-h-80 overflow-y-auto">
+                {loadingNotifications && notifications.length === 0 ? (
+                  <p className="p-4 text-sm text-muted-foreground">Loading…</p>
+                ) : notifications.length === 0 ? (
+                  <p className="p-4 text-sm text-muted-foreground">No new notifications</p>
+                ) : (
+                  notifications.map((notification) => (
                     <button
+                      key={notification.id}
                       type="button"
-                      onClick={markAllRead}
-                      className="flex-1 text-center text-sm font-medium text-primary hover:underline"
+                      onClick={() => openNotification(notification)}
+                      className={cn(
+                        'w-full border-b border-border/60 p-4 text-left last:border-0 hover:bg-muted/60',
+                        notification.unread && 'bg-primary/5'
+                      )}
                     >
-                      Mark inquiries read
+                      <p className="text-sm font-medium text-foreground">{notification.title}</p>
+                      <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">
+                        {notification.message}
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">{notification.time}</p>
                     </button>
-                    <Link
-                      href="/admin/bookings"
-                      onClick={() => setShowNotifications(false)}
-                      className="flex-1 text-center text-sm font-medium text-muted-foreground hover:text-foreground"
-                    >
-                      View bookings
-                    </Link>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
+                  ))
+                )}
+              </div>
+              <div className="flex items-center gap-2 border-t border-border bg-muted/40 p-3">
+                <Button
+                  type="button"
+                  variant="link"
+                  className="h-auto flex-1 p-0"
+                  onClick={markAllRead}
+                >
+                  Mark inquiries read
+                </Button>
+                <Link
+                  href="/admin/bookings"
+                  onClick={() => setNotificationsOpen(false)}
+                  className="flex-1 text-center text-sm font-medium text-muted-foreground hover:text-foreground"
+                >
+                  View bookings
+                </Link>
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setShowUserMenu(!showUserMenu)}
-              className="flex items-center gap-2.5 rounded-md p-1.5 hover:bg-muted"
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              className={cn(buttonVariants({ variant: 'ghost' }), 'h-auto gap-2.5 px-1.5 py-1.5')}
             >
               {user?.avatar_url ? (
                 <img src={user.avatar_url} alt={user.name} className="size-8 rounded-full object-cover" />
@@ -227,53 +245,35 @@ export function AdminHeader({ onMobileMenuOpen, user }: AdminHeaderProps) {
                 <p className="text-sm font-medium leading-none">{user?.name || 'Admin User'}</p>
                 <p className="mt-1 text-xs capitalize text-muted-foreground">{user?.role || 'Admin'}</p>
               </div>
-            </button>
-
-            {showUserMenu && (
-              <>
-                <div className="fixed inset-0 z-10" onClick={() => setShowUserMenu(false)} />
-                <div className="absolute right-0 z-20 mt-2 w-56 overflow-hidden rounded-lg border border-border bg-card shadow-lg">
-                  <div className="border-b border-border p-3">
-                    <p className="text-sm font-medium">{user?.name || 'Admin User'}</p>
-                    <p className="truncate text-xs text-muted-foreground">
-                      {user?.email || 'admin@wangchuktour.com'}
-                    </p>
-                  </div>
-                  <div className="p-1">
-                    <button
-                      type="button"
-                      className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm hover:bg-muted"
-                    >
-                      <User className="size-4 text-muted-foreground" />
-                      My Profile
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowUserMenu(false);
-                        router.push('/admin/settings/general');
-                      }}
-                      className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm hover:bg-muted"
-                    >
-                      <Settings className="size-4 text-muted-foreground" />
-                      Settings
-                    </button>
-                  </div>
-                  <div className="border-t border-border p-1">
-                    <button
-                      type="button"
-                      onClick={handleLogout}
-                      disabled={isLoggingOut}
-                      className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm text-destructive hover:bg-destructive/10 disabled:opacity-50"
-                    >
-                      <LogOut className="size-4" />
-                      {isLoggingOut ? 'Logging out…' : 'Log out'}
-                    </button>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <div className="border-b border-border px-2 py-2">
+                <p className="text-sm font-medium">{user?.name || 'Admin User'}</p>
+                <p className="truncate text-xs text-muted-foreground">
+                  {user?.email || 'admin@wangchuktour.com'}
+                </p>
+              </div>
+              <DropdownMenuItem>
+                <User className="size-4 text-muted-foreground" />
+                My Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => router.push('/admin/settings/general')}
+              >
+                <Settings className="size-4 text-muted-foreground" />
+                Settings
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+              >
+                <LogOut className="size-4" />
+                {isLoggingOut ? 'Logging out…' : 'Log out'}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>

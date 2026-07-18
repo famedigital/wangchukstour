@@ -5,6 +5,7 @@ import { AdminSidebar } from './AdminSidebar';
 import { AdminHeader } from './AdminHeader';
 import { useRouter } from 'next/navigation';
 import type { AdminUser } from '@/lib/auth/rbac';
+import { Button } from '@/components/ui/button';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -74,13 +75,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             <h2 className="mb-2 font-heading text-lg font-semibold text-destructive">Authentication Error</h2>
             <p className="text-sm text-destructive/80">{authError}</p>
           </div>
-          <button
-            type="button"
-            onClick={() => router.push('/admin/login')}
-            className="inline-flex min-h-11 items-center justify-center rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-          >
+          <Button type="button" size="lg" onClick={() => router.push('/admin/login')}>
             Go to Login
-          </button>
+          </Button>
         </div>
       </div>
     );

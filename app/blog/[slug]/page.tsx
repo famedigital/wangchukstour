@@ -2,13 +2,14 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Navigation } from '@/components/public/Navigation';
 import { Footer } from '@/components/public/Footer';
-import { MagneticButton } from '@/components/ui/magnetic-button';
+import { buttonVariants } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, User, Clock, Tag, ArrowLeft, Mail, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { getBlogPostBySlug, getPublishedBlogPosts } from '@/lib/database';
 import { BlogMarkdown } from '@/components/public/BlogMarkdown';
+import { cn } from '@/lib/utils';
 
 const optimizeImageUrl = (url: string | null | undefined, width: number, height: number) => {
   if (!url) return '/placeholder.jpg';
@@ -21,18 +22,15 @@ const optimizeImageUrl = (url: string | null | undefined, width: number, height:
 
 export default async function BlogDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-
-  // Fetch blog post directly from database - instant loading!
   const blog = await getBlogPostBySlug(slug);
 
   if (!blog) {
     notFound();
   }
 
-  // Fetch related posts by category - also from database
   const allPosts = await getPublishedBlogPosts();
   const relatedPosts = allPosts
-    .filter(post => post.category === blog.category && post.id !== blog.id)
+    .filter((post) => post.category === blog.category && post.id !== blog.id)
     .slice(0, 3);
 
   return (
@@ -40,103 +38,73 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
       <Navigation />
 
       <main className="flex-1">
-        {/* Hero Section */}
         <section className="relative overflow-hidden">
           <div className="absolute inset-0">
             <img
               src={optimizeImageUrl(blog.featured_image_url, 1920, 1080)}
               alt={blog.title}
-              className="w-full h-full object-cover"
+              className="h-full w-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/70 to-black/60" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/35" />
           </div>
 
-          <div className="relative container pt-32 pb-16 md:pt-40 md:pb-20">
+          <div className="relative container pt-32 pb-16 md:pt-40 md:pb-24">
             <Link
               href="/blog"
-              className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors mb-6 font-medium"
+              className="mb-6 inline-flex items-center gap-2 font-medium text-white/75 transition-colors hover:text-white"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="size-4" />
               Back to Blog
             </Link>
             <div className="mx-auto max-w-4xl">
-              <Badge
-                className="mb-6 px-5 py-2 text-sm font-semibold tracking-wider uppercase border-0"
-                style={{
-                  background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)',
-                  color: '#FFFFFF'
-                }}
-              >
+              <p className="mb-4 text-sm font-medium uppercase tracking-[0.2em] text-white/70">
                 {blog.category}
-              </Badge>
-              <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold mb-8 text-white">
+              </p>
+              <h1 className="font-accent mb-8 text-4xl font-medium text-white md:text-5xl lg:text-6xl">
                 {blog.title}
               </h1>
-              <div className="flex flex-wrap items-center gap-6 text-white/90 text-lg">
-                <div className="flex items-center gap-3 font-medium">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)' }}>
-                    <User className="h-5 w-5 text-white" />
-                  </div>
-                  <span>{blog.author_name}</span>
-                </div>
-                <div className="flex items-center gap-3 font-medium">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: 'linear-gradient(135deg, #D4A017 0%, #B8860B 100%)' }}>
-                    <Calendar className="h-5 w-5 text-white" />
-                  </div>
-                  <span>{format(new Date(blog.published_at || blog.created_at || new Date()), 'MMMM d, yyyy')}</span>
-                </div>
-                <div className="flex items-center gap-3 font-medium">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: 'linear-gradient(135deg, #B91C1C 0%, #8B0000 100%)' }}>
-                    <Clock className="h-5 w-5 text-white" />
-                  </div>
-                  <span>{Math.ceil(blog.content.length / 1000)} min read</span>
-                </div>
+              <div className="flex flex-wrap items-center gap-6 text-white/85">
+                <span className="inline-flex items-center gap-2">
+                  <User className="size-4 text-accent" />
+                  {blog.author_name}
+                </span>
+                <span className="inline-flex items-center gap-2">
+                  <Calendar className="size-4 text-accent" />
+                  {format(new Date(blog.published_at || blog.created_at || new Date()), 'MMMM d, yyyy')}
+                </span>
+                <span className="inline-flex items-center gap-2">
+                  <Clock className="size-4 text-accent" />
+                  {Math.ceil(blog.content.length / 1000)} min read
+                </span>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Article Content */}
         <article className="py-16 md:py-24">
           <div className="container">
             <div className="mx-auto max-w-4xl">
-              {/* Tags */}
               {blog.tags.length > 0 && (
-                <div className="mb-10 flex flex-wrap gap-3">
+                <div className="mb-10 flex flex-wrap gap-2">
                   {blog.tags.map((tag) => (
-                    <Badge
-                      key={tag}
-                      variant="secondary"
-                      className="px-4 py-2 text-sm font-semibold"
-                    >
-                      <Tag className="mr-2 h-4 w-4" />
+                    <Badge key={tag} variant="secondary" className="px-3 py-1.5 text-sm">
+                      <Tag className="mr-2 size-3.5" />
                       {tag}
                     </Badge>
                   ))}
                 </div>
               )}
 
-              {/* Content */}
               <BlogMarkdown content={blog.content || ''} />
 
-              {/* Share */}
-              <div className="mt-16 pt-10 shadow-lg">
-                <div className="flex items-center justify-between flex-wrap gap-6">
+              <div className="mt-16 border-t border-border pt-10">
+                <div className="flex flex-wrap items-center justify-between gap-6">
                   <div>
-                    <p className="font-bold text-xl mb-2">Share this article</p>
-                    <p className="text-muted-foreground">
-                      Help others discover Bhutan
-                    </p>
+                    <p className="mb-1 font-heading text-lg font-semibold">Share this article</p>
+                    <p className="text-muted-foreground">Help others discover Bhutan</p>
                   </div>
-                  <Link
-                    href="/contact"
-                    className="inline-flex items-center justify-center rounded-xl px-8 py-4 text-base font-semibold text-white transition-all hover:scale-105"
-                    style={{
-                      background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)',
-                      border: 'none'
-                    }}
-                  >
-                    <Mail className="w-5 h-5 mr-2" />
+                  <Link href="/contact" className={cn(buttonVariants(), 'gap-2')}>
+                    <Mail className="size-4" />
                     Share
                   </Link>
                 </div>
@@ -145,25 +113,25 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
           </div>
         </article>
 
-        {/* Author Bio */}
-        <section className="py-16 md:py-20 bg-muted/30">
+        <section className="bg-muted/30 py-16 md:py-20">
           <div className="container">
             <div className="mx-auto max-w-4xl">
-              <Card className="shadow-lg">
-                <CardContent className="p-10">
-                  <div className="flex gap-6 items-start">
-                    <div className="relative h-28 w-28 overflow-hidden rounded-2xl shadow-lg shrink-0">
-                      <img
-                        src={optimizeImageUrl('https://res.cloudinary.com/hckgrdeh/image/upload/q_auto,f_auto/v1782912162/thimphu-moonsoon_dftrcz.jpg', 200, 200)}
-                        alt={blog.author_name}
-                        className="h-full w-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-br from-prayer-red/20 to-monastery-red/20" />
-                    </div>
-                    <div>
-                      <p className="font-bold text-xl mb-2">Written by {blog.author_name}</p>
-                      <p className="text-muted-foreground text-lg leading-relaxed">{blog.author_bio}</p>
-                    </div>
+              <Card className="border-border shadow-none">
+                <CardContent className="flex gap-6 p-8 md:p-10">
+                  <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-muted md:h-28 md:w-28">
+                    <img
+                      src={optimizeImageUrl(
+                        'https://res.cloudinary.com/hckgrdeh/image/upload/q_auto,f_auto/v1782912162/thimphu-moonsoon_dftrcz.jpg',
+                        200,
+                        200
+                      )}
+                      alt={blog.author_name}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                  <div>
+                    <p className="mb-2 font-heading text-lg font-semibold">Written by {blog.author_name}</p>
+                    <p className="leading-relaxed text-muted-foreground">{blog.author_bio}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -171,40 +139,30 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
           </div>
         </section>
 
-        {/* Related Posts */}
         {relatedPosts.length > 0 && (
           <section className="py-16 md:py-20">
             <div className="container">
               <div className="mx-auto max-w-5xl">
-                <h2 className="font-heading text-2xl md:text-3xl font-bold mb-10">Related Articles</h2>
+                <h2 className="font-accent mb-10 text-2xl font-medium md:text-3xl">Related articles</h2>
                 <div className="grid gap-8 md:grid-cols-3">
                   {relatedPosts.map((post) => (
                     <Link key={post.id} href={`/blog/${post.slug}`} className="group">
-                      <Card className="overflow-hidden hover:shadow-2xl transition-all duration-300 group-hover:-translate-y-3 h-full">
-                        <div className="relative h-48 overflow-hidden">
+                      <Card className="h-full overflow-hidden border-border py-0 shadow-none transition-shadow hover:shadow-md">
+                        <div className="relative h-44 overflow-hidden bg-muted">
                           <img
                             src={optimizeImageUrl(post.featured_image_url, 600, 400)}
                             alt={post.title}
-                            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-                          <Badge
-                            className="absolute top-5 right-5 border-0 font-semibold"
-                            style={{
-                              background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)',
-                              color: '#FFFFFF'
-                            }}
-                          >
-                            {post.category}
-                          </Badge>
                         </div>
-                        <CardContent className="p-6">
-                          <h3 className="font-heading font-bold text-lg mb-3 line-clamp-2 group-hover:text-prayer-red transition-colors">
+                        <CardContent className="space-y-2 p-5">
+                          <p className="text-xs font-medium uppercase tracking-[0.15em] text-muted-foreground">
+                            {post.category}
+                          </p>
+                          <h3 className="line-clamp-2 font-heading font-semibold transition-colors group-hover:text-primary">
                             {post.title}
                           </h3>
-                          <p className="text-sm text-muted-foreground line-clamp-3">
-                            {post.excerpt}
-                          </p>
+                          <p className="line-clamp-2 text-sm text-muted-foreground">{post.excerpt}</p>
                         </CardContent>
                       </Card>
                     </Link>
@@ -215,50 +173,47 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
           </section>
         )}
 
-        {/* CTA Section */}
-        <section className="py-20 md:py-28 relative overflow-hidden">
+        <section className="relative overflow-hidden py-20 md:py-28">
           <div className="absolute inset-0">
             <img
-              src={optimizeImageUrl('https://res.cloudinary.com/hckgrdeh/image/upload/q_auto,f_auto/v1782911256/buddhapoint_z2kucc.jpg', 1920, 1080)}
+              src={optimizeImageUrl(
+                'https://res.cloudinary.com/hckgrdeh/image/upload/q_auto,f_auto/v1782911256/buddhapoint_z2kucc.jpg',
+                1920,
+                1080
+              )}
               alt="Buddha Point"
-              className="w-full h-full object-cover"
+              className="h-full w-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/75 to-black/85" />
+            <div className="absolute inset-0 bg-black/70" />
           </div>
 
           <div className="relative container text-center">
-            <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
-              Inspired to Visit Bhutan?
+            <h2 className="font-accent mb-5 text-3xl font-medium text-white md:text-4xl">
+              Inspired to visit Bhutan?
             </h2>
-            <p className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto mb-12 leading-relaxed">
+            <p className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-white/85">
               Let us help you plan your journey through the Land of the Thunder Dragon.
             </p>
-            <div className="flex flex-col sm:flex-row gap-6 justify-center">
-              <Link href="/tours">
-                <MagneticButton
-                  className="rounded-xl px-10 py-6 text-lg font-semibold"
-                  style={{
-                    background: '#FFFFFF',
-                    color: 'var(--prayer-red)',
-                    border: 'none'
-                  }}
-                >
-                  Explore Our Tours
-                  <ArrowRight className="w-5 h-5" />
-                </MagneticButton>
+            <div className="flex flex-col justify-center gap-3 sm:flex-row">
+              <Link
+                href="/tours"
+                className={cn(
+                  buttonVariants({ size: 'lg' }),
+                  'bg-white text-primary hover:bg-white/90'
+                )}
+              >
+                Explore Our Tours
+                <ArrowRight className="size-4" />
               </Link>
-              <Link href="/contact">
-                <MagneticButton
-                  className="rounded-xl px-10 py-6 text-lg font-semibold border-2"
-                  style={{
-                    background: 'transparent',
-                    color: '#FFFFFF',
-                    borderColor: '#FFFFFF'
-                  }}
-                >
-                  <Mail className="w-5 h-5" />
-                  Get in Touch
-                </MagneticButton>
+              <Link
+                href="/contact"
+                className={cn(
+                  buttonVariants({ variant: 'outline', size: 'lg' }),
+                  'border-white/30 bg-white/10 text-white hover:bg-white/15 hover:text-white'
+                )}
+              >
+                <Mail className="size-4" />
+                Get in Touch
               </Link>
             </div>
           </div>

@@ -3,6 +3,11 @@
 import { useEffect, useState } from 'react';
 import { Plus, Trash2, Loader2, Save } from 'lucide-react';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 type TourCategory = {
   id: string;
@@ -85,76 +90,76 @@ export function TourCategoryManager() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-2xl border p-6 flex items-center gap-2 text-gray-500">
-        <Loader2 className="h-5 w-5 animate-spin" /> Loading categories...
-      </div>
+      <Card>
+        <CardContent className="flex items-center gap-2 py-6 text-muted-foreground">
+          <Loader2 className="size-5 animate-spin" /> Loading categories...
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-4 md:p-6 space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <Card>
+      <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-lg font-semibold">Tour Categories</h2>
-          <p className="text-sm text-gray-500">Shown as submenu under Tours on the public site</p>
+          <CardTitle>Tour Categories</CardTitle>
+          <CardDescription>Shown as submenu under Tours on the public site</CardDescription>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={addCategory}
-            className="min-h-11 inline-flex items-center gap-2 px-4 py-2 rounded-xl border hover:bg-gray-50"
-          >
-            <Plus className="h-4 w-4" /> Add
-          </button>
-          <button
-            type="button"
-            onClick={save}
-            disabled={saving}
-            className="min-h-11 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-white"
-            style={{ background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)' }}
-          >
-            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+          <Button type="button" variant="outline" onClick={addCategory}>
+            <Plus className="size-4" /> Add
+          </Button>
+          <Button type="button" onClick={save} disabled={saving}>
+            {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
             Save Categories
-          </button>
+          </Button>
         </div>
-      </div>
-
-      <div className="space-y-3">
+      </CardHeader>
+      <CardContent className="space-y-3">
         {categories.map((cat, index) => (
           <div
             key={cat.id}
-            className="grid grid-cols-1 md:grid-cols-12 gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100"
+            className="grid grid-cols-1 items-end gap-3 rounded-lg border border-border bg-muted/30 p-3 md:grid-cols-12"
           >
-            <input
-              className="md:col-span-4 min-h-11 px-3 rounded-lg border border-gray-200"
-              value={cat.name}
-              onChange={(e) => update(index, { name: e.target.value })}
-              placeholder="Category name"
-            />
-            <input
-              className="md:col-span-3 min-h-11 px-3 rounded-lg border border-gray-200"
-              value={cat.slug}
-              onChange={(e) => update(index, { slug: slugify(e.target.value) })}
-              placeholder="slug"
-            />
-            <label className="md:col-span-3 min-h-11 flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={cat.is_active}
-                onChange={(e) => update(index, { is_active: e.target.checked })}
+            <div className="grid gap-2 md:col-span-4">
+              <Label htmlFor={`cat-name-${cat.id}`}>Name</Label>
+              <Input
+                id={`cat-name-${cat.id}`}
+                value={cat.name}
+                onChange={(e) => update(index, { name: e.target.value })}
+                placeholder="Category name"
               />
-              Active in public menu
-            </label>
-            <button
+            </div>
+            <div className="grid gap-2 md:col-span-3">
+              <Label htmlFor={`cat-slug-${cat.id}`}>Slug</Label>
+              <Input
+                id={`cat-slug-${cat.id}`}
+                value={cat.slug}
+                onChange={(e) => update(index, { slug: slugify(e.target.value) })}
+                placeholder="slug"
+              />
+            </div>
+            <div className="flex items-center gap-2 md:col-span-3 md:pb-1">
+              <Switch
+                id={`cat-active-${cat.id}`}
+                checked={cat.is_active}
+                onCheckedChange={(v) => update(index, { is_active: v })}
+              />
+              <Label htmlFor={`cat-active-${cat.id}`} className="cursor-pointer font-normal">
+                Active in menu
+              </Label>
+            </div>
+            <Button
               type="button"
+              variant="ghost"
+              className="text-destructive hover:bg-destructive/10 hover:text-destructive md:col-span-2"
               onClick={() => removeCategory(index)}
-              className="md:col-span-2 min-h-11 inline-flex items-center justify-center gap-2 rounded-lg text-red-600 hover:bg-red-50"
             >
-              <Trash2 className="h-4 w-4" /> Remove
-            </button>
+              <Trash2 className="size-4" /> Remove
+            </Button>
           </div>
         ))}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

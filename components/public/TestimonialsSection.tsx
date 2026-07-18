@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Star, MapPin } from 'lucide-react';
 import { ScrollReveal } from '@/components/ui/scroll-reveal';
-import { Badge } from '@/components/ui/badge';
 
 interface Testimonial {
   name: string;
@@ -25,19 +24,12 @@ export function TestimonialsSection({ testimonials }: TestimonialsSectionProps) 
     <section className="py-24 relative overflow-hidden bg-background">
       <div className="container relative z-10">
         <ScrollReveal>
-          <div className="text-center mb-16">
-            <Badge
-              className="mb-6"
-              style={{
-                background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)',
-                color: '#FFFFFF',
-                border: 'none'
-              }}
-            >
+          <div className="mb-16 text-center">
+            <p className="mb-3 text-sm font-medium tracking-widest text-primary uppercase">
               Testimonials
-            </Badge>
-            <h2 className="font-heading text-4xl md:text-5xl font-bold mb-4">
-              What Travelers <span style={{ color: '#DC143C' }}>Say</span>
+            </p>
+            <h2 className="font-heading text-4xl font-semibold tracking-tight md:text-5xl">
+              What Travelers <span className="font-accent text-primary italic">Say</span>
             </h2>
           </div>
         </ScrollReveal>
@@ -52,51 +44,35 @@ export function TestimonialsSection({ testimonials }: TestimonialsSectionProps) 
               transition={{ duration: 0.5 }}
               className="text-center"
             >
-              {/* Premium Card Design */}
-              <div
-                className="rounded-3xl p-10 md:p-14 shadow-2xl relative overflow-hidden"
-                style={{
-                  background: 'linear-gradient(135deg, #FEFEFE 0%, #F8F8F8 100%)',
-                  border: '1px solid rgba(220, 20, 60, 0.1)'
-                }}
-              >
-                {/* Decorative Quote Mark */}
-                <div className="absolute top-6 left-8 text-8xl font-serif opacity-5" style={{ color: '#DC143C' }}>
+              <div className="relative overflow-hidden rounded-xl bg-card p-10 ring-1 ring-foreground/10 md:p-14">
+                <div className="pointer-events-none absolute top-6 left-8 font-accent text-8xl text-primary/10">
                   "
                 </div>
 
-                {/* Stars */}
-                <div className="flex justify-center gap-2 mb-8">
+                <div className="mb-8 flex justify-center gap-2">
                   {[...Array(testimonials[activeTestimonial].rating)].map((_, i) => (
-                    <Star key={i} className="w-6 h-6 fill-current" style={{ color: '#FFD700' }} />
+                    <Star key={i} className="size-5 fill-accent text-accent" />
                   ))}
                 </div>
 
-                {/* Quote */}
-                <blockquote className="text-xl md:text-2xl leading-relaxed mb-10 font-medium" style={{ color: '#1C1917', lineHeight: '1.8' }}>
+                <blockquote className="mb-10 text-xl leading-relaxed font-medium text-foreground md:text-2xl">
                   "{testimonials[activeTestimonial].text}"
                 </blockquote>
 
-                {/* Author */}
                 <div className="flex items-center justify-center gap-5">
-                  <div className="relative">
-                    <div
-                      className="w-16 h-16 rounded-full p-1"
-                      style={{ background: 'linear-gradient(135deg, #DC143C 0%, #FFD700 100%)' }}
-                    >
-                      <img
-                        src={testimonials[activeTestimonial].image}
-                        alt={testimonials[activeTestimonial].name}
-                        className="w-full h-full rounded-full object-cover"
-                      />
-                    </div>
+                  <div className="size-16 overflow-hidden rounded-full ring-2 ring-primary/30">
+                    <img
+                      src={testimonials[activeTestimonial].image}
+                      alt={testimonials[activeTestimonial].name}
+                      className="size-full object-cover"
+                    />
                   </div>
                   <div className="text-left">
-                    <div className="font-heading font-bold text-lg" style={{ color: '#DC143C' }}>
+                    <div className="font-heading text-lg font-semibold text-primary">
                       {testimonials[activeTestimonial].name}
                     </div>
-                    <div className="flex items-center gap-2 mt-1" style={{ color: '#78716C' }}>
-                      <MapPin className="w-4 h-4" />
+                    <div className="mt-1 flex items-center gap-2 text-muted-foreground">
+                      <MapPin className="size-4" />
                       <span className="text-sm">{testimonials[activeTestimonial].location}</span>
                     </div>
                   </div>
@@ -105,17 +81,16 @@ export function TestimonialsSection({ testimonials }: TestimonialsSectionProps) 
             </motion.div>
           </AnimatePresence>
 
-          {/* Navigation Dots */}
-          <div className="flex justify-center gap-3 mt-12">
+          <div className="mt-12 flex justify-center gap-3">
             {testimonials.map((_, index) => (
               <button
                 key={index}
+                type="button"
                 onClick={() => setActiveTestimonial(index)}
-                className="w-3 h-3 rounded-full transition-all duration-300"
-                style={{
-                  backgroundColor: activeTestimonial === index ? '#DC143C' : '#E5E5E5',
-                  transform: activeTestimonial === index ? 'scale(1.3)' : 'scale(1)',
-                }}
+                className={`size-2.5 rounded-full transition-all duration-300 ${
+                  activeTestimonial === index ? 'scale-125 bg-primary' : 'bg-border'
+                }`}
+                aria-label={`Show testimonial ${index + 1}`}
               />
             ))}
           </div>

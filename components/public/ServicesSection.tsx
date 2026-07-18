@@ -51,14 +51,14 @@ export function ServicesSection() {
           <div
             className="inline-block mb-6 px-5 py-2 text-sm font-semibold tracking-wider uppercase border-0 rounded"
             style={{
-              background: 'linear-gradient(135deg, #E63946 0%, #DC143C 100%)',
+              background: 'var(--primary)',
               color: '#FFFFFF'
             }}
           >
             Our Services
           </div>
           <h2 className="font-heading text-5xl md:text-6xl font-bold mb-6">
-            What We <span style={{ color: '#DC143C' }}>Offer</span>
+            What We <span style={{ color: 'var(--primary)' }}>Offer</span>
           </h2>
           <p className="text-xl max-w-3xl mx-auto" style={{ color: 'var(--muted-foreground)' }}>
             From cultural immersions to high-altitude adventures, we craft experiences

@@ -4,11 +4,11 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Brand theme — shared by public site + admin (shadcn Base UI) */
+/* Luxury Himalayan theme — brand via CSS vars only (stock shadcn chrome) */
 :root {
   --radius: 0.625rem;
 
-  --background: #fafaf9;
+  --background: #f7f5f2;
   --foreground: #1c1917;
 
   --card: #ffffff;
@@ -17,50 +17,50 @@
   --popover: #ffffff;
   --popover-foreground: #1c1917;
 
-  /* Monastery red — primary CTAs & active states */
-  --primary: #b91c1c;
+  /* Deep monastery red */
+  --primary: #9f1239;
   --primary-foreground: #fafaf9;
 
-  /* Himalayan navy */
-  --secondary: #1e3a5f;
+  /* Charcoal */
+  --secondary: #0c1222;
   --secondary-foreground: #fafaf9;
 
-  --muted: #f5f5f4;
+  --muted: #f0eeea;
   --muted-foreground: #78716c;
 
-  /* Prayer-flag gold */
-  --accent: #d4a017;
+  /* Antique gold */
+  --accent: #c4a35a;
   --accent-foreground: #1c1917;
 
   --destructive: #dc2626;
   --destructive-foreground: #fafaf9;
 
-  --border: #e7e5e4;
-  --input: #e7e5e4;
-  --ring: #b91c1c;
+  --border: #e4e0d9;
+  --input: #e4e0d9;
+  --ring: #9f1239;
 
-  --chart-1: #b91c1c;
-  --chart-2: #d4a017;
-  --chart-3: #1e3a5f;
+  --chart-1: #9f1239;
+  --chart-2: #c4a35a;
+  --chart-3: #0c1222;
   --chart-4: #78716c;
-  --chart-5: #c41e3a;
+  --chart-5: #be123c;
 
   --sidebar: #ffffff;
   --sidebar-foreground: #1c1917;
-  --sidebar-primary: #b91c1c;
+  --sidebar-primary: #9f1239;
   --sidebar-primary-foreground: #fafaf9;
-  --sidebar-accent: #f5f5f4;
+  --sidebar-accent: #f0eeea;
   --sidebar-accent-foreground: #1c1917;
-  --sidebar-border: #e7e5e4;
-  --sidebar-ring: #b91c1c;
+  --sidebar-border: #e4e0d9;
+  --sidebar-ring: #9f1239;
 
-  /* Legacy brand aliases */
-  --prayer-red: #c41e3a;
-  --monastery-red: #b91c1c;
-  --crimson: #dc143c;
-  --color-crimson: #dc143c;
-  --color-monastery-red: #b91c1c;
-  --color-prayer-red: #c41e3a;
+  /* Legacy brand aliases → new tokens */
+  --prayer-red: #9f1239;
+  --monastery-red: #9f1239;
+  --crimson: #9f1239;
+  --color-crimson: #9f1239;
+  --color-monastery-red: #9f1239;
+  --color-prayer-red: #9f1239;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
@@ -70,38 +70,38 @@
 }
 
 .dark {
-  --background: #1c1917;
+  --background: #0c1222;
   --foreground: #fafaf9;
-  --card: #292524;
+  --card: #151b2b;
   --card-foreground: #fafaf9;
-  --popover: #292524;
+  --popover: #151b2b;
   --popover-foreground: #fafaf9;
-  --primary: #f87171;
-  --primary-foreground: #1c1917;
-  --secondary: #334155;
+  --primary: #e11d48;
+  --primary-foreground: #fafaf9;
+  --secondary: #1e293b;
   --secondary-foreground: #fafaf9;
-  --muted: #292524;
+  --muted: #1a2234;
   --muted-foreground: #a8a29e;
-  --accent: #fbbf24;
-  --accent-foreground: #1c1917;
+  --accent: #c4a35a;
+  --accent-foreground: #0c1222;
   --destructive: #ef4444;
   --destructive-foreground: #fafaf9;
-  --border: rgba(255, 255, 255, 0.14);
-  --input: rgba(255, 255, 255, 0.18);
-  --ring: #f87171;
-  --chart-1: #f87171;
-  --chart-2: #fbbf24;
+  --border: rgba(255, 255, 255, 0.12);
+  --input: rgba(255, 255, 255, 0.16);
+  --ring: #e11d48;
+  --chart-1: #e11d48;
+  --chart-2: #c4a35a;
   --chart-3: #94a3b8;
   --chart-4: #a8a29e;
-  --chart-5: #e63946;
-  --sidebar: #292524;
+  --chart-5: #fb7185;
+  --sidebar: #151b2b;
   --sidebar-foreground: #fafaf9;
-  --sidebar-primary: #f87171;
-  --sidebar-primary-foreground: #1c1917;
-  --sidebar-accent: #44403c;
+  --sidebar-primary: #e11d48;
+  --sidebar-primary-foreground: #fafaf9;
+  --sidebar-accent: #1a2234;
   --sidebar-accent-foreground: #fafaf9;
-  --sidebar-border: rgba(255, 255, 255, 0.14);
-  --sidebar-ring: #f87171;
+  --sidebar-border: rgba(255, 255, 255, 0.12);
+  --sidebar-ring: #e11d48;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -109,9 +109,9 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-primary: var(--primary);
   --color-border: var(--border);
-  --color-crimson: #f0565d;
-  --color-monastery-red: #f87171;
-  --color-prayer-red: #e63946;
+  --color-crimson: #e11d48;
+  --color-monastery-red: #e11d48;
+  --color-prayer-red: #e11d48;
 }
 
 @theme inline {

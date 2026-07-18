@@ -61,7 +61,7 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
 
     // Return a custom error page instead of crashing
     return (
-      <div className="flex min-h-screen flex-col bg-white">
+      <div className="flex min-h-screen flex-col bg-background">
         <Navigation />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center px-6 py-20">
@@ -70,18 +70,18 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 mb-4">
                   <span className="text-3xl">⚠️</span>
                 </div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-4">
+                <h1 className="text-3xl font-bold text-foreground mb-4">
                   Unable to Load Tour
                 </h1>
-                <p className="text-lg text-gray-600 mb-8">
+                <p className="text-lg text-muted-foreground mb-8">
                   We encountered an issue while loading this tour. This might be a temporary problem.
                 </p>
                 <div className="space-y-4">
-                  <div className="bg-gray-50 rounded-lg p-4 text-left">
-                    <p className="text-sm text-gray-600 mb-2">
+                  <div className="bg-muted rounded-lg p-4 text-left">
+                    <p className="text-sm text-muted-foreground mb-2">
                       <strong>Error details:</strong>
                     </p>
-                    <p className="text-xs text-gray-500 font-mono">
+                    <p className="text-xs text-muted-foreground font-mono">
                       {error instanceof Error ? error.message : 'Unknown error occurred'}
                     </p>
                   </div>
@@ -90,7 +90,7 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
                       <MagneticButton
                         className="rounded-lg px-6 py-3 text-sm font-medium"
                         style={{
-                          background: 'var(--color-crimson, #DC143C)',
+                          background: 'var(--primary)',
                           color: '#FFFFFF'
                         }}
                       >
@@ -128,7 +128,7 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
           <section className="py-32 bg-background">
             <div className="container">
               <div className="mx-auto max-w-3xl text-center">
-                <div className="mx-auto mb-8 flex h-24 w-24 items-center justify-center rounded-2xl" style={{ background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)' }}>
+                <div className="mx-auto mb-8 flex h-24 w-24 items-center justify-center rounded-2xl" style={{ background: 'var(--primary)' }}>
                   <Users className="h-12 w-12 text-white" />
                 </div>
                 <h1 className="font-heading text-4xl md:text-5xl font-bold mb-6">{tour.title}</h1>
@@ -143,7 +143,7 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
                     <ul className="grid gap-3 text-left">
                       {tour.inclusions?.map((inclusion, i) => (
                         <li key={i} className="flex items-start gap-3">
-                          <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full" style={{ background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)' }}>
+                          <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full" style={{ background: 'var(--primary)' }}>
                             <Check className="h-3 w-3 text-white" />
                           </div>
                           <span className="text-muted-foreground">{inclusion}</span>
@@ -157,7 +157,7 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
                     <MagneticButton
                       className="rounded-xl px-10 py-6 text-lg font-semibold"
                       style={{
-                        background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)',
+                        background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary) 100%)',
                         border: 'none',
                         color: '#FFFFFF'
                       }}
@@ -186,7 +186,7 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-white">
+    <div className="flex min-h-screen flex-col bg-background">
       <Navigation />
 
       <main className="flex-1">
@@ -215,7 +215,7 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
               <Badge
                 className="mb-4 px-4 py-1.5 text-xs font-medium"
                 style={{
-                  background: 'var(--color-crimson, #DC143C)',
+                  background: 'var(--primary)',
                   color: '#FFFFFF'
                 }}
               >
@@ -234,13 +234,13 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
         </section>
 
         {/* Mobile Booking Card - Top on mobile */}
-        <div className="lg:hidden sticky top-0 z-40 bg-white/95 backdrop-blur-md px-4 md:px-6 py-3 border-b border-gray-200 shadow-sm">
+        <div className="lg:hidden sticky top-0 z-40 bg-background/95 backdrop-blur-md px-4 md:px-6 py-3 border-b border-border shadow-sm">
           <div className="flex flex-row items-center justify-between gap-3">
             {/* Price Info */}
             <div className="flex flex-col">
-              <div className="text-xs text-gray-500">Starting from</div>
-              <div className="text-base font-bold" style={{ color: 'var(--color-crimson, #DC143C)' }}>${tour.price || 'Contact us'}</div>
-              <div className="text-xs text-gray-600">{tour.duration || 'N/A'} days • {tour.difficulty_level || 'N/A'}</div>
+              <div className="text-xs text-muted-foreground">Starting from</div>
+              <div className="text-base font-bold" style={{ color: 'var(--primary)' }}>${tour.price || 'Contact us'}</div>
+              <div className="text-xs text-muted-foreground">{tour.duration || 'N/A'} days • {tour.difficulty_level || 'N/A'}</div>
             </div>
 
             {/* Action Buttons */}
@@ -249,7 +249,7 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
                 <MagneticButton
                   className="rounded-lg px-4 py-2 text-sm font-medium"
                   style={{
-                    background: 'var(--color-crimson, #DC143C)',
+                    background: 'var(--primary)',
                     color: '#FFFFFF'
                   }}
                 >
@@ -269,17 +269,17 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
         </div>
 
         {/* Main Content - Two Column Layout */}
-        <section className="py-16 bg-gray-50">
+        <section className="py-16 bg-muted">
           <div className="container mx-auto px-6 md:px-12 lg:px-16">
             <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
               {/* Left Column - Journey Overview and Content */}
               <div className="w-full lg:w-[80%] space-y-12" style={{ width: '80%' }}>
                 {/* Overview */}
                 <div>
-                  <h2 className="font-heading text-2xl md:text-3xl font-bold mb-4 text-gray-900">
+                  <h2 className="font-heading text-2xl md:text-3xl font-bold mb-4 text-foreground">
                     Journey Overview
                   </h2>
-                  <p className="text-base text-gray-700 leading-relaxed">
+                  <p className="text-base text-foreground/80 leading-relaxed">
                     {tour.description || 'Experience the magic of Bhutan with this unforgettable journey.'}
                   </p>
                 </div>
@@ -287,16 +287,16 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
               {/* Highlights */}
               {tour.highlights && tour.highlights.length > 0 && (
                 <div>
-                  <h2 className="font-heading text-2xl md:text-3xl font-bold mb-6 text-gray-900">
+                  <h2 className="font-heading text-2xl md:text-3xl font-bold mb-6 text-foreground">
                     Tour Highlights
                   </h2>
                   <div className="grid gap-4 md:grid-cols-2">
                     {tour.highlights.map((highlight, i) => (
                       <div key={i} className="flex items-start gap-3">
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg mt-0.5" style={{ background: 'var(--color-crimson, #DC143C)' }}>
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg mt-0.5" style={{ background: 'var(--primary)' }}>
                           <Star className="h-4 w-4 text-white" />
                         </div>
-                        <p className="text-sm text-gray-700">{highlight}</p>
+                        <p className="text-sm text-foreground/80">{highlight}</p>
                       </div>
                     ))}
                   </div>
@@ -306,15 +306,15 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
               {/* Itinerary */}
               {tour.itinerary && tour.itinerary.length > 0 && (
                 <div>
-                  <h2 className="font-heading text-2xl md:text-3xl font-bold mb-8 text-gray-900">
+                  <h2 className="font-heading text-2xl md:text-3xl font-bold mb-8 text-foreground">
                     Day-by-Day Itinerary
                   </h2>
                   <div className="space-y-10">
                     {tour.itinerary.map((day, i) => {
                       const itineraryLength = tour.itinerary?.length || 1;
                       const progress = i / (itineraryLength - 1);
-                      const borderColor = progress === 0 ? '#DC143C' :
-                                        progress < 0.5 ? '#B91C1C' :
+                      const borderColor = progress === 0 ? 'var(--primary)' :
+                                        progress < 0.5 ? 'var(--primary)' :
                                         progress < 0.75 ? '#8B0000' :
                                         '#660000';
 
@@ -326,16 +326,16 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
 
                           <div className="space-y-4">
                             <div>
-                              <h3 className="font-heading font-semibold text-xl mb-2 text-gray-900">{day.title}</h3>
+                              <h3 className="font-heading font-semibold text-xl mb-2 text-foreground">{day.title}</h3>
                               {day.location && (
-                                <p className="text-sm text-gray-500 flex items-center gap-2">
+                                <p className="text-sm text-muted-foreground flex items-center gap-2">
                                   <MapPin className="h-4 w-4" style={{ color: borderColor }} />
                                   {day.location}
                                 </p>
                               )}
                             </div>
 
-                            <p className="text-base text-gray-700 leading-relaxed">{day.description}</p>
+                            <p className="text-base text-foreground/80 leading-relaxed">{day.description}</p>
 
                           {day.activities && day.activities.length > 0 && (
                             <div className="flex flex-wrap gap-2">
@@ -347,7 +347,7 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
                             </div>
                           )}
 
-                          <div className="flex flex-wrap gap-6 text-sm text-gray-600 pt-2">
+                          <div className="flex flex-wrap gap-6 text-sm text-muted-foreground pt-2">
                             {day.meals && (
                               <div className="flex items-center gap-2">
                                 <Utensils className="h-5 w-5" style={{ color: borderColor }} />
@@ -373,8 +373,8 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
               {(tour.inclusions || tour.exclusions) && (
                 <div className="grid gap-6 md:grid-cols-2">
                   {tour.inclusions && tour.inclusions.length > 0 && (
-                    <div className="bg-gray-50 rounded-xl p-6">
-                      <h3 className="font-heading font-semibold text-lg mb-4 flex items-center gap-2 text-gray-900">
+                    <div className="bg-muted rounded-xl p-6">
+                      <h3 className="font-heading font-semibold text-lg mb-4 flex items-center gap-2 text-foreground">
                         <Check className="h-5 w-5" style={{ color: '#10B981' }} />
                         What's Included
                       </h3>
@@ -382,7 +382,7 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
                         {tour.inclusions.map((item, i) => (
                           <li key={i} className="flex items-start gap-2 text-sm">
                             <Check className="h-4 w-4 shrink-0 mt-0.5" style={{ color: '#10B981' }} />
-                            <span className="text-gray-700">{item}</span>
+                            <span className="text-foreground/80">{item}</span>
                           </li>
                         ))}
                       </ul>
@@ -390,16 +390,16 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
                   )}
 
                   {tour.exclusions && tour.exclusions.length > 0 && (
-                    <div className="bg-gray-50 rounded-xl p-6">
-                      <h3 className="font-heading font-semibold text-lg mb-4 flex items-center gap-2 text-gray-900">
-                        <X className="h-5 w-5 text-gray-400" />
+                    <div className="bg-muted rounded-xl p-6">
+                      <h3 className="font-heading font-semibold text-lg mb-4 flex items-center gap-2 text-foreground">
+                        <X className="h-5 w-5 text-muted-foreground" />
                         What's Excluded
                       </h3>
                       <ul className="space-y-2">
                         {tour.exclusions.map((item, i) => (
                           <li key={i} className="flex items-start gap-2 text-sm">
-                            <X className="h-4 w-4 text-gray-400 shrink-0 mt-0.5" />
-                            <span className="text-gray-700">{item}</span>
+                            <X className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                            <span className="text-foreground/80">{item}</span>
                           </li>
                         ))}
                       </ul>
@@ -411,12 +411,12 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
               {/* Best Season */}
               {tour.best_season && tour.best_season.length > 0 && (
                 <div>
-                  <h2 className="font-heading text-2xl md:text-3xl font-bold mb-4 text-gray-900">
+                  <h2 className="font-heading text-2xl md:text-3xl font-bold mb-4 text-foreground">
                     Best Time to Visit
                   </h2>
                   <div className="flex flex-wrap gap-2">
                     {tour.best_season.map((season) => (
-                      <Badge key={season} className="capitalize px-4 py-1.5 text-sm font-medium" style={{ background: 'var(--color-crimson, #DC143C)', color: '#FFFFFF', border: 'none' }}>
+                      <Badge key={season} className="capitalize px-4 py-1.5 text-sm font-medium" style={{ background: 'var(--primary)', color: '#FFFFFF', border: 'none' }}>
                         {season}
                         </Badge>
                       ))}
@@ -427,14 +427,14 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
                 {/* Altitude */}
                 {tour.altitude_range && tour.altitude_range !== 'Variable' && (
                   <div>
-                    <h2 className="font-heading text-2xl md:text-3xl font-bold mb-4 text-gray-900">
+                    <h2 className="font-heading text-2xl md:text-3xl font-bold mb-4 text-foreground">
                       Altitude Range
                     </h2>
-                    <div className="flex items-center gap-4 bg-gray-50 rounded-xl p-4">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg" style={{ background: 'var(--color-crimson, #DC143C)' }}>
+                    <div className="flex items-center gap-4 bg-muted rounded-xl p-4">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg" style={{ background: 'var(--primary)' }}>
                         <Mountain className="h-5 w-5 text-white" />
                       </div>
-                      <span className="text-lg font-semibold text-gray-900">{tour.altitude_range}</span>
+                      <span className="text-lg font-semibold text-foreground">{tour.altitude_range}</span>
                     </div>
                   </div>
                 )}
@@ -442,25 +442,25 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
 
               {/* Right Column - Booking Card - Desktop only */}
               <div className="hidden lg:block lg:w-[20%] shrink-0" style={{ width: '20%' }}>
-                <div className="lg:sticky lg:top-8 backdrop-blur-md bg-white/90 rounded-2xl shadow-xl p-8">
-                  <h3 className="font-heading font-bold text-xl mb-1 text-gray-900">Book This Tour</h3>
-                  <p className="text-sm text-gray-600 mb-6">Reserve your spot on this amazing journey</p>
+                <div className="lg:sticky lg:top-8 backdrop-blur-md bg-background/90 rounded-2xl shadow-xl p-8">
+                  <h3 className="font-heading font-bold text-xl mb-1 text-foreground">Book This Tour</h3>
+                  <p className="text-sm text-muted-foreground mb-6">Reserve your spot on this amazing journey</p>
 
                   <div className="space-y-3 pb-6 mb-6" style={{ borderBottom: '1px solid #e5e7eb' }}>
                     <div className="flex justify-between items-center text-sm">
-                      <span className="text-gray-600">Price per person</span>
+                      <span className="text-muted-foreground">Price per person</span>
                       <div className="text-right">
-                        <div className="text-xs text-gray-500 mb-1">Starting from</div>
-                        <span className="text-lg font-bold" style={{ color: 'var(--color-crimson, #DC143C)' }}>${tour.price || 'Contact us'}</span>
+                        <div className="text-xs text-muted-foreground mb-1">Starting from</div>
+                        <span className="text-lg font-bold" style={{ color: 'var(--primary)' }}>${tour.price || 'Contact us'}</span>
                       </div>
                     </div>
                     <div className="flex justify-between items-center text-sm">
-                      <span className="text-gray-600">Duration</span>
-                      <span className="font-medium text-gray-900">{tour.duration || 'N/A'} days</span>
+                      <span className="text-muted-foreground">Duration</span>
+                      <span className="font-medium text-foreground">{tour.duration || 'N/A'} days</span>
                     </div>
                     <div className="flex justify-between items-center text-sm">
-                      <span className="text-gray-600">Difficulty</span>
-                      <span className="font-medium capitalize text-gray-900">{tour.difficulty_level || 'N/A'}</span>
+                      <span className="text-muted-foreground">Difficulty</span>
+                      <span className="font-medium capitalize text-foreground">{tour.difficulty_level || 'N/A'}</span>
                     </div>
                   </div>
 
@@ -468,7 +468,7 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
                     <MagneticButton
                       className="w-full rounded-lg px-6 py-3 text-sm font-medium"
                       style={{
-                        background: 'var(--color-crimson, #DC143C)',
+                        background: 'var(--primary)',
                         color: '#FFFFFF'
                       }}
                     >
@@ -504,7 +504,7 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
                 <MagneticButton
                   className="rounded-lg px-6 py-3 text-sm font-medium"
                   style={{
-                    background: 'var(--color-crimson, #DC143C)',
+                    background: 'var(--primary)',
                     color: '#FFFFFF'
                   }}
                 >
@@ -513,7 +513,7 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
               </Link>
               <Link href="/contact">
                 <MagneticButton
-                  className="rounded-lg px-6 py-3 text-sm font-medium bg-white/10 backdrop-blur-sm border border-white/20 text-white"
+                  className="rounded-lg px-6 py-3 text-sm font-medium bg-background/10 backdrop-blur-sm border border-white/20 text-white"
                 >
                   Plan Custom Trip
                 </MagneticButton>

@@ -13,10 +13,10 @@ export default function PrivacyPage() {
         <section className="relative py-20 bg-gradient-to-br from-gray-50 to-gray-100">
           <div className="container mx-auto px-6 md:px-12 lg:px-16">
             <div className="max-w-4xl mx-auto text-center">
-              <h1 className="font-heading text-4xl md:text-5xl font-bold mb-4 text-gray-900">
+              <h1 className="font-heading text-4xl md:text-5xl font-bold mb-4 text-foreground">
                 Privacy Policy
               </h1>
-              <p className="text-lg text-gray-600">
+              <p className="text-lg text-muted-foreground">
                 Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
               </p>
             </div>
@@ -31,12 +31,12 @@ export default function PrivacyPage() {
                 <div className="space-y-8">
                   {/* Introduction */}
                   <div>
-                    <h2 className="font-heading text-2xl font-bold mb-4 text-gray-900">Information We Collect</h2>
+                    <h2 className="font-heading text-2xl font-bold mb-4 text-foreground">Information We Collect</h2>
                     <p className="text-gray-700 leading-relaxed">
                       Wangchuks Tours & Treks collects personal information to provide and improve our services.
                       This includes:
                     </p>
-                    <ul className="mt-3 space-y-2 text-gray-700">
+                    <ul className="mt-3 space-y-2 text-foreground/80">
                       <li>• Name and contact details (email, phone, address)</li>
                       <li>• Passport information for visa processing</li>
                       <li>• Travel preferences and requirements</li>
@@ -47,11 +47,11 @@ export default function PrivacyPage() {
 
                   {/* How We Use Information */}
                   <div>
-                    <h2 className="font-heading text-2xl font-bold mb-4 text-gray-900">How We Use Your Information</h2>
+                    <h2 className="font-heading text-2xl font-bold mb-4 text-foreground">How We Use Your Information</h2>
                     <p className="text-gray-700 leading-relaxed">
                       We use your information to:
                     </p>
-                    <ul className="mt-3 space-y-2 text-gray-700">
+                    <ul className="mt-3 space-y-2 text-foreground/80">
                       <li>• Process bookings and travel arrangements</li>
                       <li>• Arrange Bhutan visas and permits</li>
                       <li>• Communicate about your tour and updates</li>
@@ -62,11 +62,11 @@ export default function PrivacyPage() {
 
                   {/* Data Protection */}
                   <div>
-                    <h2 className="font-heading text-2xl font-bold mb-4 text-gray-900">Data Protection & Security</h2>
+                    <h2 className="font-heading text-2xl font-bold mb-4 text-foreground">Data Protection & Security</h2>
                     <p className="text-gray-700 leading-relaxed">
                       We implement appropriate security measures to protect your personal information:
                     </p>
-                    <ul className="mt-3 space-y-2 text-gray-700">
+                    <ul className="mt-3 space-y-2 text-foreground/80">
                       <li>• Secure data storage and transmission</li>
                       <li>• Limited access to personal information</li>
                       <li>• Regular security assessments</li>
@@ -76,28 +76,28 @@ export default function PrivacyPage() {
 
                   {/* Information Sharing */}
                   <div>
-                    <h2 className="font-heading text-2xl font-bold mb-4 text-gray-900">Information Sharing</h2>
+                    <h2 className="font-heading text-2xl font-bold mb-4 text-foreground">Information Sharing</h2>
                     <p className="text-gray-700 leading-relaxed">
                       We may share your information with:
                     </p>
-                    <ul className="mt-3 space-y-2 text-gray-700">
+                    <ul className="mt-3 space-y-2 text-foreground/80">
                       <li>• Bhutan tourism authorities for permits and visas</li>
                       <li>• Hotels and transport providers for bookings</li>
                       <li>• Travel insurance providers (if applicable)</li>
                       <li>• Payment processors for transactions</li>
                     </ul>
-                    <p className="mt-3 text-gray-700 leading-relaxed">
+                    <p className="mt-3 text-foreground/80 leading-relaxed">
                       We never sell your personal information to third parties.
                     </p>
                   </div>
 
                   {/* Your Rights */}
                   <div>
-                    <h2 className="font-heading text-2xl font-bold mb-4 text-gray-900">Your Rights</h2>
+                    <h2 className="font-heading text-2xl font-bold mb-4 text-foreground">Your Rights</h2>
                     <p className="text-gray-700 leading-relaxed">
                       You have the right to:
                     </p>
-                    <ul className="mt-3 space-y-2 text-gray-700">
+                    <ul className="mt-3 space-y-2 text-foreground/80">
                       <li>• Access your personal information</li>
                       <li>• Correct inaccurate information</li>
                       <li>• Request deletion of your data</li>
@@ -108,7 +108,7 @@ export default function PrivacyPage() {
 
                   {/* Contact */}
                   <div>
-                    <h2 className="font-heading text-2xl font-bold mb-4 text-gray-900">Contact Us</h2>
+                    <h2 className="font-heading text-2xl font-bold mb-4 text-foreground">Contact Us</h2>
                     <p className="text-gray-700 leading-relaxed">
                       For privacy concerns or requests, please contact us at:
                     </p>
@@ -138,7 +138,7 @@ export default function PrivacyPage() {
                 <MagneticButton
                   className="rounded-lg px-6 py-3 text-sm font-medium"
                   style={{
-                    background: 'var(--color-crimson, #DC143C)',
+                    background: 'var(--primary)',
                     color: '#FFFFFF'
                   }}
                 >

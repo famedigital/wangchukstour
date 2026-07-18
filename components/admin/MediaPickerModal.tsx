@@ -1,10 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Search, Upload, Image as ImageIcon, X, Check, Loader2, FolderOpen, Grid, List } from 'lucide-react';
+import { Search, Upload, Image as ImageIcon, Check, Loader2, FolderOpen, Grid, List } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PremiumModal } from '@/components/ui/premium-modal';
 import { PremiumButton } from '@/components/ui/premium-button';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
 interface MediaItem {
   public_id: string;
@@ -245,57 +248,56 @@ export function MediaPickerModal({
         <div className="flex items-center justify-between gap-4">
           {/* Search */}
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <input
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
               type="text"
               placeholder="Search media..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-xl shadow-premium-sm focus:shadow-premium-md outline-none transition-all duration-300"
+              className="pl-10"
             />
           </div>
 
           {/* View Toggle */}
           <div className="flex items-center gap-2">
-            <button
+            <Button
+              type="button"
+              variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
+              size="icon-sm"
               onClick={() => setViewMode('grid')}
-              className={`p-2 rounded-lg transition-colors ${
-                viewMode === 'grid' ? 'bg-red-50 text-red-600' : 'hover:bg-gray-100'
-              }`}
             >
               <Grid className="h-4 w-4" />
-            </button>
-            <button
+            </Button>
+            <Button
+              type="button"
+              variant={viewMode === 'list' ? 'secondary' : 'ghost'}
+              size="icon-sm"
               onClick={() => setViewMode('list')}
-              className={`p-2 rounded-lg transition-colors ${
-                viewMode === 'list' ? 'bg-red-50 text-red-600' : 'hover:bg-gray-100'
-              }`}
             >
               <List className="h-4 w-4" />
-            </button>
+            </Button>
           </div>
         </div>
 
         {/* Folder Filter */}
         <div className="flex items-center gap-2 overflow-x-auto pb-2">
-          <FolderOpen className="h-4 w-4 text-gray-400 shrink-0" />
+          <FolderOpen className="h-4 w-4 text-muted-foreground shrink-0" />
           {folders.map((folder) => (
-            <button
+            <Button
               key={folder}
+              type="button"
+              size="sm"
+              variant={currentFolderFilter === folder ? 'default' : 'outline'}
               onClick={() => setCurrentFolderFilter(folder)}
-              className={`px-3 py-1.5 rounded-lg text-sm whitespace-nowrap transition-colors ${
-                currentFolderFilter === folder
-                  ? 'bg-red-50 text-red-600 shadow-premium-sm'
-                  : 'bg-white text-gray-600 hover:bg-gray-50 shadow-premium-sm'
-              }`}
+              className="whitespace-nowrap"
             >
               {folder === '/' ? 'All Files' : folder}
-            </button>
+            </Button>
           ))}
         </div>
 
         {/* Upload Area */}
-        <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-red-300 transition-colors">
+        <div className="border-2 border-dashed border-border rounded-xl p-6 text-center hover:border-primary/50 transition-colors">
           <input
             type="file"
             multiple
@@ -311,16 +313,16 @@ export function MediaPickerModal({
           >
             {uploading ? (
               <>
-                <Loader2 className="h-8 w-8 text-red-600 animate-spin" />
-                <p className="text-sm text-gray-600">Uploading... {uploadProgress}%</p>
+                <Loader2 className="h-8 w-8 text-primary animate-spin" />
+                <p className="text-sm text-muted-foreground">Uploading... {uploadProgress}%</p>
               </>
             ) : (
               <>
-                <Upload className="h-8 w-8 text-gray-400" />
-                <p className="text-sm text-gray-600">
-                  <span className="font-medium text-red-600">Click to upload</span> or drag and drop
+                <Upload className="h-8 w-8 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">
+                  <span className="font-medium text-primary">Click to upload</span> or drag and drop
                 </p>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-muted-foreground">
                   {allowedTypes.join(', ')} • Max {maxSize / 1024 / 1024}MB
                 </p>
               </>
@@ -331,11 +333,11 @@ export function MediaPickerModal({
         {/* Media Grid/List */}
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 text-red-600 animate-spin" />
-            <span className="ml-3 text-gray-600">Loading media...</span>
+            <Loader2 className="h-8 w-8 text-primary animate-spin" />
+            <span className="ml-3 text-muted-foreground">Loading media...</span>
           </div>
         ) : filteredMedia.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">
+          <div className="text-center py-12 text-muted-foreground">
             <ImageIcon className="h-16 w-16 mx-auto mb-4 opacity-50" />
             <p>No media found. Upload some files to get started!</p>
           </div>
@@ -353,11 +355,12 @@ export function MediaPickerModal({
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.15 }}
                   onClick={() => toggleSelection(item.public_id)}
-                  className={`relative group cursor-pointer rounded-xl overflow-hidden transition-all duration-300 ${
+                  className={cn(
+                    'relative group cursor-pointer rounded-xl overflow-hidden transition-all duration-300',
                     selectedMedia.has(item.public_id)
-                      ? 'shadow-premium-md ring-2 ring-red-500'
-                      : 'shadow-premium-sm hover:shadow-premium-md'
-                  }`}
+                      ? 'ring-2 ring-primary shadow-md'
+                      : 'border border-border hover:shadow-md'
+                  )}
                 >
                   {viewMode === 'grid' ? (
                     <>
@@ -375,29 +378,29 @@ export function MediaPickerModal({
                         </div>
                       </div>
                       {selectedMedia.has(item.public_id) && (
-                        <div className="absolute top-2 right-2 bg-red-600 rounded-full p-1">
-                          <Check className="h-3 w-3 text-white" />
+                        <div className="absolute top-2 right-2 bg-primary rounded-full p-1">
+                          <Check className="h-3 w-3 text-primary-foreground" />
                         </div>
                       )}
                     </>
                   ) : (
-                    <div className="flex items-center gap-4 p-3 bg-white rounded-xl">
+                    <div className="flex items-center gap-4 p-3 bg-card rounded-xl border border-border">
                       <img
                         src={item.secure_url}
                         alt={item.alt_text || item.public_id}
                         className="w-16 h-16 object-cover rounded-lg"
                       />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">
+                        <p className="text-sm font-medium text-foreground truncate">
                           {item.public_id.split('/').pop()}
                         </p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-muted-foreground">
                           {item.width} × {item.height} • {item.format.toUpperCase()}
                         </p>
                       </div>
                       {selectedMedia.has(item.public_id) && (
-                        <div className="bg-red-600 rounded-full p-1">
-                          <Check className="h-4 w-4 text-white" />
+                        <div className="bg-primary rounded-full p-1">
+                          <Check className="h-4 w-4 text-primary-foreground" />
                         </div>
                       )}
                     </div>
@@ -409,8 +412,8 @@ export function MediaPickerModal({
         )}
 
         {/* Footer Actions */}
-        <div className="flex items-center justify-between pt-4" style={{ borderTop: '1px solid rgba(220, 20, 60, 0.1)' }}>
-          <p className="text-sm text-gray-500">
+        <div className="flex items-center justify-between pt-4 border-t border-border">
+          <p className="text-sm text-muted-foreground">
             {selectedMedia.size > 0 && (
               <>
                 {selectedMedia.size} {selectedMedia.size === 1 ? 'item' : 'items'} selected

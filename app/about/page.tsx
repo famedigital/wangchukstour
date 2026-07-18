@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Navigation } from '@/components/public/Navigation';
 import { Footer } from '@/components/public/Footer';
-import { MagneticButton } from '@/components/ui/magnetic-button';
+import { buttonVariants } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { ScrollReveal, StaggerChildren } from '@/components/ui/scroll-reveal';
 import { Loader2 } from 'lucide-react';
 import {
@@ -22,6 +22,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import Image from 'next/image';
+import { cn } from '@/lib/utils';
 
 const iconMap = {
   Heart, Mountain, Users, Shield, Award, Sparkles, Mail, Phone, MapPin
@@ -74,8 +75,8 @@ export default function AboutPage() {
         <Navigation />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <Loader2 className="h-12 w-12 text-prayer-red animate-spin mx-auto mb-4" />
-            <p className="text-gray-600">Loading About page...</p>
+            <Loader2 className="mx-auto mb-4 h-12 w-12 animate-spin text-primary" />
+            <p className="text-muted-foreground">Loading About page...</p>
           </div>
         </main>
         <Footer />
@@ -89,14 +90,8 @@ export default function AboutPage() {
         <Navigation />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <p className="text-red-600 mb-4">{error || 'Failed to load content'}</p>
-            <button
-              onClick={fetchAboutContent}
-              className="inline-flex items-center justify-center rounded-xl px-6 py-3 text-lg font-semibold text-white transition-all hover:scale-105"
-              style={{ background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)' }}
-            >
-              Try Again
-            </button>
+            <p className="mb-4 text-destructive">{error || 'Failed to load content'}</p>
+            <Button onClick={fetchAboutContent}>Try Again</Button>
           </div>
         </main>
         <Footer />
@@ -120,41 +115,31 @@ export default function AboutPage() {
               fill
               className="object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/60 to-black/80" />
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-prayer-red/20 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/45 to-black/30" />
           </div>
 
-          <div className="relative container pt-32 pb-16 md:pt-40 md:pb-20">
+          <div className="relative container pt-32 pb-16 md:pt-40 md:pb-24">
             <ScrollReveal direction="down">
               <div className="mx-auto max-w-3xl text-center">
-                <Badge
-                  className="mb-6 px-5 py-2 text-sm font-semibold tracking-wider uppercase border-0"
-                  style={{
-                    background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)',
-                    color: '#FFFFFF'
-                  }}
-                >
-                  About Us
-                </Badge>
-                <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight mb-8 text-white">
+                <p className="mb-4 text-sm font-medium uppercase tracking-[0.2em] text-white/70">
+                  About us
+                </p>
+                <h1 className="font-accent mb-6 text-4xl font-medium tracking-tight text-white md:text-5xl lg:text-6xl">
                   {hero?.title || 'Discover the Last Shangri-La'}
                 </h1>
-                <p className="text-lg md:text-xl text-white/90 leading-relaxed max-w-2xl mx-auto mb-10">
+                <p className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-white/85 md:text-xl">
                   {hero?.subtitle || 'Experience authentic Bhutanese culture and breathtaking Himalayan landscapes'}
                 </p>
                 {hero?.cta && (
-                  <Link href={hero.cta.link || '/tours'}>
-                    <MagneticButton
-                      className="rounded-xl px-10 py-6 text-lg font-semibold"
-                      style={{
-                        background: '#FFFFFF',
-                        color: 'var(--prayer-red)',
-                        border: 'none'
-                      }}
-                    >
-                      {hero.cta.text || 'Explore Our Tours'}
-                      <ArrowRight className="w-5 h-5" />
-                    </MagneticButton>
+                  <Link
+                    href={hero.cta.link || '/tours'}
+                    className={cn(
+                      buttonVariants({ size: 'lg' }),
+                      'inline-flex gap-2 bg-white text-primary hover:bg-white/90'
+                    )}
+                  >
+                    {hero.cta.text || 'Explore Our Tours'}
+                    <ArrowRight className="size-4" />
                   </Link>
                 )}
               </div>
@@ -163,20 +148,14 @@ export default function AboutPage() {
         </section>
 
         {/* Our Story Section */}
-        <section className="py-16 md:py-20">
+        <section className="py-20 md:py-28">
           <div className="container">
             <ScrollReveal>
-              <div className="mx-auto max-w-3xl text-center mb-12">
-                <Badge
-                  className="mb-3 px-4 py-2 text-sm font-semibold tracking-wider uppercase border-0"
-                  style={{
-                    background: 'linear-gradient(135deg, #D4A017 0%, #B8860B 100%)',
-                    color: '#FFFFFF'
-                  }}
-                >
-                  Our Story
-                </Badge>
-                <h2 className="font-heading text-2xl md:text-3xl font-bold mb-6">
+              <div className="mx-auto mb-12 max-w-3xl text-center">
+                <p className="mb-3 text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                  Our story
+                </p>
+                <h2 className="font-accent mb-6 text-2xl font-medium md:text-3xl">
                   {story?.title || 'Our Journey'}
                 </h2>
                 <p className="text-lg text-muted-foreground leading-relaxed">
@@ -194,13 +173,11 @@ export default function AboutPage() {
 
         {/* Values Section */}
         {values && values.length > 0 && (
-          <section className="py-16 md:py-20 bg-muted/30">
+          <section className="bg-muted/30 py-20 md:py-28">
             <div className="container">
               <ScrollReveal>
-                <div className="mx-auto max-w-3xl text-center mb-12">
-                  <h2 className="font-heading text-2xl md:text-3xl font-bold mb-4">
-                    Our Core Values
-                  </h2>
+                <div className="mx-auto mb-12 max-w-3xl text-center">
+                  <h2 className="font-accent mb-4 text-2xl font-medium md:text-3xl">Our core values</h2>
                   <p className="text-muted-foreground text-lg">
                     The principles that guide every journey we create
                   </p>
@@ -213,14 +190,10 @@ export default function AboutPage() {
                     const IconComponent = getIcon(value.icon);
                     return (
                       <ScrollReveal key={index} delay={index * 100}>
-                        <Card className="text-center hover:shadow-premium-lg transition-all duration-300 group-hover:-translate-y-2">
+                        <Card className="border-border text-center shadow-none transition-shadow hover:shadow-sm">
                           <CardContent className="p-6">
-                            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl"
-                              style={{
-                                background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)'
-                              }}
-                            >
-                              <IconComponent className="h-8 w-8 text-white" />
+                            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
+                              <IconComponent className="h-8 w-8 text-primary" />
                             </div>
                             <h3 className="font-heading font-bold text-xl mb-3">
                               {value.title}
@@ -241,7 +214,7 @@ export default function AboutPage() {
 
         {/* Statistics Section */}
         {statistics && statistics.length > 0 && (
-          <section className="py-16 md:py-20">
+          <section className="py-20 md:py-28">
             <div className="container">
               <StaggerChildren>
                 <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
@@ -249,9 +222,7 @@ export default function AboutPage() {
                     <ScrollReveal key={index} delay={index * 100}>
                       <div className="text-center">
                         <div className="mb-2">
-                          <span className="font-heading text-4xl md:text-5xl font-bold"
-                            style={{ color: 'var(--prayer-red)' }}
-                          >
+                          <span className="font-accent text-4xl font-medium text-primary md:text-5xl">
                             {stat.number}
                           </span>
                         </div>
@@ -269,13 +240,11 @@ export default function AboutPage() {
 
         {/* Timeline Section */}
         {timeline && timeline.length > 0 && (
-          <section className="py-16 md:py-20 bg-muted/30">
+          <section className="bg-muted/30 py-20 md:py-28">
             <div className="container">
               <ScrollReveal>
-                <div className="mx-auto max-w-3xl text-center mb-12">
-                  <h2 className="font-heading text-2xl md:text-3xl font-bold mb-4">
-                    Our Journey
-                  </h2>
+                <div className="mx-auto mb-12 max-w-3xl text-center">
+                  <h2 className="font-accent mb-4 text-2xl font-medium md:text-3xl">Our journey</h2>
                   <p className="text-muted-foreground text-lg">
                     Key milestones in our story
                   </p>
@@ -288,11 +257,7 @@ export default function AboutPage() {
                     <ScrollReveal key={index} delay={index * 100}>
                       <div className="flex gap-6">
                         <div className="flex-shrink-0">
-                          <div className="flex h-12 w-12 items-center justify-center rounded-full text-lg font-bold text-white"
-                            style={{
-                              background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)'
-                            }}
-                          >
+                          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
                             {event.year}
                           </div>
                         </div>
@@ -315,14 +280,12 @@ export default function AboutPage() {
 
         {/* Team Section */}
         {team && team.length > 0 && (
-          <section className="py-16 md:py-20">
+          <section className="py-20 md:py-28">
             <div className="container">
               <ScrollReveal>
-                <div className="mx-auto max-w-3xl text-center mb-12">
-                  <h2 className="font-heading text-2xl md:text-3xl font-bold mb-4">
-                    Meet Our Team
-                  </h2>
-                  <p className="text-muted-foreground text-lg">
+                <div className="mx-auto mb-12 max-w-3xl text-center">
+                  <h2 className="font-accent mb-4 text-2xl font-medium md:text-3xl">Meet our team</h2>
+                  <p className="text-lg text-muted-foreground">
                     The passionate people behind your journeys
                   </p>
                 </div>
@@ -332,9 +295,9 @@ export default function AboutPage() {
                 <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                   {team.map((member: any, index: number) => (
                     <ScrollReveal key={index} delay={index * 100}>
-                      <Card className="hover:shadow-premium-lg transition-all duration-300">
+                      <Card className="border-border shadow-none transition-shadow hover:shadow-sm">
                         <CardContent className="p-6 text-center">
-                          <div className="relative w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden">
+                          <div className="relative mx-auto mb-4 h-32 w-32 overflow-hidden rounded-full">
                             {member.image ? (
                               <Image
                                 src={optimizeImageUrl(member.image, 400, 400)}
@@ -343,20 +306,14 @@ export default function AboutPage() {
                                 className="object-cover"
                               />
                             ) : (
-                              <div className="w-full h-full bg-muted flex items-center justify-center">
+                              <div className="flex h-full w-full items-center justify-center bg-muted">
                                 <Users className="h-16 w-16 text-muted-foreground" />
                               </div>
                             )}
                           </div>
-                          <h3 className="font-heading font-bold text-xl mb-1">
-                            {member.name}
-                          </h3>
-                          <p className="text-sm font-medium mb-3" style={{ color: 'var(--prayer-red)' }}>
-                            {member.role}
-                          </p>
-                          <p className="text-muted-foreground text-sm leading-relaxed">
-                            {member.bio}
-                          </p>
+                          <h3 className="mb-1 font-heading text-xl font-semibold">{member.name}</h3>
+                          <p className="mb-3 text-sm font-medium text-primary">{member.role}</p>
+                          <p className="text-sm leading-relaxed text-muted-foreground">{member.bio}</p>
                         </CardContent>
                       </Card>
                     </ScrollReveal>

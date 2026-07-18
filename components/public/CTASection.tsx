@@ -3,67 +3,49 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
+import { buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 export function CTASection() {
   return (
-    <section className="py-24 md:py-32 relative overflow-hidden">
-      {/* Background Image with Punakha Dzong */}
+    <section className="relative overflow-hidden py-24 md:py-32">
       <div className="absolute inset-0">
         <img
           src="https://res.cloudinary.com/hckgrdeh/image/upload/q_auto,f_auto,w_1920,h_1080,c_limit/v1782965945/punakhadzong_xkcrcu.jpg"
           alt="Punakha Dzong"
-          className="w-full h-full object-cover"
+          className="h-full w-full object-cover"
           loading="lazy"
         />
-        {/* Dark gradient overlay - balanced for image visibility */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background: 'linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.3), rgba(0,0,0,0.5))'
-          }}
-        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/45 to-black/35" />
       </div>
 
-      <div className="container relative z-10 text-center px-6">
+      <div className="container relative z-10 px-6 text-center">
         <motion.div
-          className="max-w-3xl mx-auto"
-          initial={{ opacity: 0, y: 30 }}
+          className="mx-auto max-w-3xl"
+          initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 0.6 }}
         >
-          <motion.h2
-            className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.8 }}
-          >
-            Ready to Explore Bhutan?
-          </motion.h2>
+          <h2 className="font-accent mb-5 text-4xl font-medium leading-tight text-white md:text-5xl lg:text-6xl">
+            Ready to explore Bhutan?
+          </h2>
 
-          <motion.p
-            className="text-lg md:text-xl text-white/90 mb-10 leading-relaxed"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.8 }}
-          >
-            With <span className="font-semibold text-white">15+ years</span> of crafting journeys through the Land of the Thunder Dragon,
-            we'll create your transformational Himalayan experience.
-          </motion.p>
+          <p className="mb-10 text-lg leading-relaxed text-white/85 md:text-xl">
+            With 15+ years crafting journeys through the Land of the Thunder Dragon,
+            we&apos;ll create your transformational Himalayan experience.
+          </p>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.8 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center"
+          <Link
+            href="/contact"
+            className={cn(
+              buttonVariants({ size: 'lg' }),
+              'inline-flex h-11 gap-2 bg-primary px-8 text-primary-foreground hover:bg-primary/90'
+            )}
           >
-            <Link href="/contact">
-              <button className="group px-8 py-4 bg-white text-black font-semibold rounded-none hover:bg-gray-100 transition-all duration-300 text-base">
-                Start Your Journey
-                <ArrowRight className="inline-block ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </button>
-            </Link>
-          </motion.div>
+            Start Your Journey
+            <ArrowRight className="size-4" />
+          </Link>
         </motion.div>
       </div>
     </section>

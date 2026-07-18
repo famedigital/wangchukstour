@@ -5,6 +5,10 @@ import { toast } from 'sonner';
 import { MediaPickerModal } from './MediaPickerModal';
 import { PremiumButton } from '@/components/ui/premium-button';
 import { PremiumInput, PremiumTextarea } from '@/components/ui/premium-input';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Save,
   Eye,
@@ -294,28 +298,30 @@ export function BlogEditor({ post, postId, isNewPost, onSave, onCancel }: BlogEd
 
   // SEO Preview
   const SEOPreview = () => (
-    <div className="bg-white rounded-xl p-4 shadow-premium-sm space-y-3">
+    <Card>
+      <CardContent className="p-4 space-y-3">
       <div className="flex items-start gap-3">
-        <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center shrink-0">
+        <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center shrink-0">
           {formData.featured_image ? (
             <img src={formData.featured_image} alt="" className="w-full h-full object-cover rounded-lg" />
           ) : (
-            <ImageIcon className="h-6 w-6 text-gray-400" />
+            <ImageIcon className="h-6 w-6 text-muted-foreground" />
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-blue-600 text-xs hover:underline truncate">
+          <p className="text-primary text-xs hover:underline truncate">
             wangchuktour.com/blog/{formData.slug || 'your-post-slug'}
           </p>
-          <p className="font-medium text-gray-900 truncate">
+          <p className="font-medium text-foreground truncate">
             {formData.meta_title || formData.title || 'Your Post Title'}
           </p>
-          <p className="text-sm text-gray-600 line-clamp-2">
+          <p className="text-sm text-muted-foreground line-clamp-2">
             {formData.meta_description || formData.excerpt || 'Your post description will appear here...'}
           </p>
         </div>
       </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 
   return (
@@ -326,7 +332,7 @@ export function BlogEditor({ post, postId, isNewPost, onSave, onCancel }: BlogEd
           <span className={`text-sm flex items-center gap-1 ${
             autoSaveStatus === 'saved' ? 'text-green-600' :
             autoSaveStatus === 'saving' ? 'text-amber-600' :
-            'text-gray-400'
+            'text-muted-foreground'
           }`}>
             {autoSaveStatus === 'saved' && <CheckCircle className="h-4 w-4" />}
             {autoSaveStatus === 'saving' && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -400,36 +406,21 @@ export function BlogEditor({ post, postId, isNewPost, onSave, onCancel }: BlogEd
             </div>
 
             {/* Content Editor Toolbar */}
-            <div className="bg-white rounded-xl p-4 shadow-premium-sm">
-              <div className="flex items-center gap-2 mb-4 pb-4" style={{ borderBottom: '1px solid rgba(220, 20, 60, 0.1)' }}>
-                <button
-                  onClick={() => insertBlock('image')}
-                  className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-                  title="Insert Image"
-                >
+            <Card>
+              <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-4 pb-4 border-b border-border">
+                <Button type="button" variant="ghost" size="icon-sm" onClick={() => insertBlock('image')} title="Insert Image">
                   <ImageIcon className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => insertBlock('video')}
-                  className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-                  title="Insert Video"
-                >
+                </Button>
+                <Button type="button" variant="ghost" size="icon-sm" onClick={() => insertBlock('video')} title="Insert Video">
                   <Video className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => insertBlock('code')}
-                  className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-                  title="Insert Code Block"
-                >
+                </Button>
+                <Button type="button" variant="ghost" size="icon-sm" onClick={() => insertBlock('code')} title="Insert Code Block">
                   <Code className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => insertBlock('table')}
-                  className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-                  title="Insert Table"
-                >
+                </Button>
+                <Button type="button" variant="ghost" size="icon-sm" onClick={() => insertBlock('table')} title="Insert Table">
                   <Table className="h-4 w-4" />
-                </button>
+                </Button>
               </div>
 
               <PremiumTextarea
@@ -439,17 +430,20 @@ export function BlogEditor({ post, postId, isNewPost, onSave, onCancel }: BlogEd
                 rows={20}
                 className="font-mono text-sm"
               />
-            </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Featured Image */}
-            <div className="bg-white rounded-xl p-4 shadow-premium-sm">
+            <Card>
+              <CardContent className="p-4">
               <label className="block text-sm font-medium mb-3">Featured Image</label>
               <button
+                type="button"
                 onClick={openFeaturedPicker}
-                className="w-full h-32 rounded-lg border-2 border-dashed border-gray-200 hover:border-red-300 transition-colors flex flex-col items-center justify-center gap-2"
+                className="w-full h-32 rounded-lg border-2 border-dashed border-border hover:border-primary/50 transition-colors flex flex-col items-center justify-center gap-2"
               >
                 {formData.featured_image ? (
                   <img
@@ -459,15 +453,17 @@ export function BlogEditor({ post, postId, isNewPost, onSave, onCancel }: BlogEd
                   />
                 ) : (
                   <>
-                    <ImageIcon className="h-8 w-8 text-gray-400" />
-                    <span className="text-sm text-gray-600">Click to add image</span>
+                    <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">Click to add image</span>
                   </>
                 )}
               </button>
-            </div>
+              </CardContent>
+            </Card>
 
             {/* Category */}
-            <div className="bg-white rounded-xl p-4 shadow-premium-sm">
+            <Card>
+              <CardContent className="p-4">
               <label className="block text-sm font-medium mb-3 flex items-center gap-2">
                 <FileText className="h-4 w-4" />
                 Category
@@ -475,32 +471,35 @@ export function BlogEditor({ post, postId, isNewPost, onSave, onCancel }: BlogEd
               <select
                 value={formData.category}
                 onChange={(e) => handleChange('category', e.target.value)}
-                className="w-full px-3 py-2 rounded-lg shadow-premium-sm focus:shadow-premium-md outline-none transition-all duration-300"
+                className="flex h-9 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
               >
                 <option value="">Select category</option>
                 {categories.map((cat) => (
                   <option key={cat} value={cat}>{cat}</option>
                 ))}
               </select>
-            </div>
+              </CardContent>
+            </Card>
 
             {/* Tags */}
-            <div className="bg-white rounded-xl p-4 shadow-premium-sm">
+            <Card>
+              <CardContent className="p-4">
               <label className="block text-sm font-medium mb-3 flex items-center gap-2">
                 <Tag className="h-4 w-4" />
                 Tags
               </label>
-              <input
+              <Input
                 type="text"
                 value={formData.tags.join(', ')}
                 onChange={(e) => handleChange('tags', e.target.value.split(',').map(t => t.trim()))}
                 placeholder="Enter tags separated by commas"
-                className="w-full px-3 py-2 rounded-lg shadow-premium-sm focus:shadow-premium-md outline-none transition-all duration-300 text-sm"
               />
-            </div>
+              </CardContent>
+            </Card>
 
             {/* Author */}
-            <div className="bg-white rounded-xl p-4 shadow-premium-sm">
+            <Card>
+              <CardContent className="p-4">
               <label className="block text-sm font-medium mb-3 flex items-center gap-2">
                 <User className="h-4 w-4" />
                 Author
@@ -510,33 +509,36 @@ export function BlogEditor({ post, postId, isNewPost, onSave, onCancel }: BlogEd
                 onChange={(e) => handleChange('author_name', e.target.value)}
                 placeholder="Author name (auto from login)"
                 readOnly
-                className="bg-gray-50"
+                className="bg-muted/50"
               />
-              <p className="text-xs text-gray-500 mt-1">Set automatically from your admin account</p>
-            </div>
+              <p className="text-xs text-muted-foreground mt-1">Set automatically from your admin account</p>
+              </CardContent>
+            </Card>
 
             {/* Publishing */}
-            <div className="bg-white rounded-xl p-4 shadow-premium-sm">
+            <Card>
+              <CardContent className="p-4">
               <label className="block text-sm font-medium mb-3 flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
                 Publishing
               </label>
               <div className="space-y-2">
                 <label className="flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     checked={formData.is_published}
-                    onChange={(e) => handleChange('is_published', e.target.checked)}
-                    className="rounded"
+                    onCheckedChange={(checked) => handleChange('is_published', checked === true)}
                   />
                   Published post
                 </label>
               </div>
-            </div>
+              </CardContent>
+            </Card>
 
             {/* SEO */}
-            <div className="bg-white rounded-xl p-4 shadow-premium-sm">
+            <Card>
+              <CardContent className="p-4">
               <button
+                type="button"
                 onClick={() => setSeoPreview(!seoPreview)}
                 className="flex items-center gap-2 text-sm font-medium mb-3"
               >
@@ -561,22 +563,26 @@ export function BlogEditor({ post, postId, isNewPost, onSave, onCancel }: BlogEd
                   <SEOPreview />
                 </div>
               )}
-            </div>
+              </CardContent>
+            </Card>
 
             {/* Read Time */}
-            <div className="bg-white rounded-xl p-4 shadow-premium-sm">
+            <Card>
+              <CardContent className="p-4">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600">Estimated read time:</span>
+                <span className="text-muted-foreground">Estimated read time:</span>
                 <span className="font-medium">{calculateReadTime(formData.content)} min</span>
               </div>
-            </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       ) : (
         // Preview Mode
-        <div className="bg-white rounded-xl p-8 shadow-premium-sm">
+        <Card>
+          <CardContent className="p-8">
           <h1 className="text-4xl font-bold mb-4">{formData.title}</h1>
-          <div className="flex items-center gap-4 text-sm text-gray-600 mb-8">
+          <div className="flex items-center gap-4 text-sm text-muted-foreground mb-8">
             <span>By {formData.author_name}</span>
             <span>•</span>
             <span>{formData.category}</span>
@@ -593,7 +599,8 @@ export function BlogEditor({ post, postId, isNewPost, onSave, onCancel }: BlogEd
           <div className="prose max-w-none">
             <div dangerouslySetInnerHTML={{ __html: formData.content.replace(/\n/g, '<br/>') }} />
           </div>
-        </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Media Picker Modal */}

@@ -25,6 +25,7 @@ import {
   PanelLeft,
 } from 'lucide-react';
 import type { AdminUser } from '@/lib/auth/rbac';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 interface NavItem {
@@ -251,24 +252,28 @@ export function AdminSidebar({
             />
           )}
 
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon-lg"
             onClick={onMobileClose}
-            className="lg:hidden min-h-10 min-w-10 inline-flex items-center justify-center rounded-lg hover:bg-muted"
+            className="lg:hidden"
             aria-label="Close menu"
           >
             <X className="h-5 w-5" />
-          </button>
+          </Button>
         </div>
 
-        <button
+        <Button
           type="button"
+          variant="outline"
+          size="icon"
           onClick={onToggle}
-          className="hidden lg:inline-flex absolute -right-3 top-20 z-10 h-6 w-6 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-sm hover:bg-muted hover:text-foreground"
+          className="hidden lg:inline-flex absolute -right-3 top-20 z-10 h-6 w-6 rounded-full shadow-sm"
           aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           {isCollapsed ? <PanelLeft className="h-3.5 w-3.5" /> : <PanelLeftClose className="h-3.5 w-3.5" />}
-        </button>
+        </Button>
 
         <nav className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-4 space-y-5">
           {navigationSections.map((section) => (
@@ -365,20 +370,20 @@ export function AdminSidebar({
             <Home className="size-4 shrink-0" />
             {!isCollapsed && <span>View website</span>}
           </Link>
-          <button
+          <Button
             type="button"
+            variant="destructive"
             onClick={handleLogout}
             disabled={isLoggingOut}
             className={cn(
-              'w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium min-h-10',
-              'text-destructive hover:bg-destructive/10 disabled:opacity-50',
+              'w-full justify-start gap-3 rounded-lg px-3 py-2.5 text-sm font-medium min-h-10 h-auto',
               isCollapsed && 'justify-center px-2'
             )}
             title="Log out"
           >
             <LogOut className="size-4 shrink-0" />
             {!isCollapsed && <span>{isLoggingOut ? 'Logging out…' : 'Log out'}</span>}
-          </button>
+          </Button>
         </div>
       </aside>
     </>

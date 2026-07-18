@@ -150,7 +150,7 @@ export function ToursGrid({ tours }: ToursGridProps) {
               <Badge
                 className="mb-6 px-5 py-2 text-sm font-semibold tracking-wider uppercase border-0"
                 style={{
-                  background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)',
+                  background: 'var(--primary)',
                   color: '#FFFFFF'
                 }}
               >
@@ -158,7 +158,7 @@ export function ToursGrid({ tours }: ToursGridProps) {
               </Badge>
               <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight mb-8">
                 <span className="bg-clip-text text-transparent" style={{
-                  backgroundImage: 'linear-gradient(135deg, #DC143C 0%, #8B0000 50%, #D4A017 100%)',
+                  backgroundImage: 'linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--accent) 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent'
                 }}>
@@ -177,7 +177,7 @@ export function ToursGrid({ tours }: ToursGridProps) {
                   placeholder="Search tours by destination, activity, or keyword..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full rounded-2xl shadow-lg bg-background px-6 py-4 pl-14 pr-12 text-lg outline-none focus:border-prayer-red focus:ring-2 focus:ring-prayer-red/20 transition-all shadow-lg"
+                  className="w-full rounded-2xl shadow-lg bg-background px-6 py-4 pl-14 pr-12 text-lg outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all shadow-lg"
                 />
                 <Compass className="absolute left-5 top-1/2 h-6 w-6 -translate-y-1/2 text-muted-foreground" />
                 {searchQuery && (
@@ -203,7 +203,7 @@ export function ToursGrid({ tours }: ToursGridProps) {
               <div className="sticky top-28 space-y-8">
                 <div className="flex items-center justify-between">
                   <h2 className="font-heading text-xl font-bold flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)' }}>
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: 'var(--primary)' }}>
                       <Filter className="h-5 w-5 text-white" />
                     </div>
                     Filters
@@ -211,7 +211,7 @@ export function ToursGrid({ tours }: ToursGridProps) {
                   {activeFiltersCount > 0 && (
                     <button
                       onClick={clearFilters}
-                      className="text-sm font-medium hover:text-prayer-red transition-colors"
+                      className="text-sm font-medium hover:text-primary transition-colors"
                     >
                       Clear all
                     </button>
@@ -234,7 +234,7 @@ export function ToursGrid({ tours }: ToursGridProps) {
                               : 'hover:bg-muted'
                           }`}
                           style={selectedCategory === category.value ? {
-                            background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)'
+                            background: 'var(--primary)'
                           } : {}}
                         >
                           <Icon className="h-5 w-5 shrink-0" />
@@ -260,8 +260,8 @@ export function ToursGrid({ tours }: ToursGridProps) {
                           onChange={() =>
                             toggleFilter(difficulty, setSelectedDifficulty, selectedDifficulty)
                           }
-                          className="h-5 w-5 rounded border-transparent accent-prayer-red"
-                          style={{ accentColor: 'var(--prayer-red)' }}
+                          className="h-5 w-5 rounded border-transparent accent-primary"
+                          style={{ accentColor: 'var(--primary)' }}
                         />
                         <span className="capitalize">{difficulty}</span>
                       </label>
@@ -291,7 +291,7 @@ export function ToursGrid({ tours }: ToursGridProps) {
                             )
                           }
                           className="h-5 w-5 rounded border-transparent"
-                          style={{ accentColor: 'var(--prayer-red)' }}
+                          style={{ accentColor: 'var(--primary)' }}
                         />
                         {duration.label}
                       </label>
@@ -321,7 +321,7 @@ export function ToursGrid({ tours }: ToursGridProps) {
                             )
                           }
                           className="h-5 w-5 rounded border-transparent"
-                          style={{ accentColor: 'var(--prayer-red)' }}
+                          style={{ accentColor: 'var(--primary)' }}
                         />
                         {range.label}
                       </label>
@@ -336,7 +336,7 @@ export function ToursGrid({ tours }: ToursGridProps) {
               {/* Results Header */}
               <div className="mb-8 flex items-center justify-between">
                 <p className="text-muted-foreground text-lg">
-                  <span className="font-bold" style={{ color: 'var(--prayer-red)' }}>
+                  <span className="font-bold" style={{ color: 'var(--primary)' }}>
                     {filteredTours.length}
                   </span>
                   {' '}{filteredTours.length === 1 ? 'tour' : 'tours'} found
@@ -346,7 +346,7 @@ export function ToursGrid({ tours }: ToursGridProps) {
                     <Badge
                       className="px-4 py-2 font-semibold border-0"
                       style={{
-                        background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)',
+                        background: 'var(--primary)',
                         color: '#FFFFFF'
                       }}
                     >
@@ -377,7 +377,7 @@ export function ToursGrid({ tours }: ToursGridProps) {
                               <Badge
                                 className="border-0 font-semibold shadow-lg"
                                 style={{
-                                  background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)',
+                                  background: 'var(--primary)',
                                   color: '#FFFFFF'
                                 }}
                               >
@@ -400,7 +400,7 @@ export function ToursGrid({ tours }: ToursGridProps) {
                             {tour.price > 0 && (
                               <div className="absolute bottom-4 right-4">
                                 <div className="bg-white/95 backdrop-blur-md rounded-xl px-4 py-2 shadow-lg">
-                                  <div className="text-2xl font-bold" style={{ color: 'var(--prayer-red)' }}>
+                                  <div className="text-2xl font-bold" style={{ color: 'var(--primary)' }}>
                                     ${tour.price}
                                   </div>
                                   <div className="text-xs text-muted-foreground text-center">per person</div>
@@ -411,14 +411,14 @@ export function ToursGrid({ tours }: ToursGridProps) {
 
                           {/* Content Section */}
                           <div className="p-6">
-                            <h3 className="font-heading font-bold text-xl mb-2 line-clamp-2 group-hover:text-prayer-red transition-colors">
+                            <h3 className="font-heading font-bold text-xl mb-2 line-clamp-2 group-hover:text-primary transition-colors">
                               {tour.title}
                             </h3>
 
                             {/* Quick Info */}
                             <div className="flex items-center gap-4 text-sm mb-4">
                               <div className="flex items-center gap-2 font-semibold">
-                                <div className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ background: 'linear-gradient(135deg, var(--prayer-red) 0%, var(--monastery-red) 100%)' }}>
+                                <div className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ background: 'var(--primary)' }}>
                                   <Clock className="h-4 w-4 text-white" />
                                 </div>
                                 <span>{tour.duration}d</span>
@@ -454,7 +454,7 @@ export function ToursGrid({ tours }: ToursGridProps) {
                             {/* View Button */}
                             <div
                               className="inline-flex items-center gap-2 text-sm font-semibold transition-all group-hover:gap-4"
-                              style={{ color: 'var(--prayer-red)' }}
+                              style={{ color: 'var(--primary)' }}
                             >
                               View Details
                               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
@@ -478,7 +478,7 @@ export function ToursGrid({ tours }: ToursGridProps) {
                     onClick={clearFilters}
                     className="inline-flex items-center justify-center rounded-xl px-8 py-4 text-lg font-semibold text-white transition-all hover:scale-105"
                     style={{
-                      background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)',
+                      background: 'var(--primary)',
                       border: 'none'
                     }}
                   >

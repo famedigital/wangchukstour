@@ -1,9 +1,8 @@
 import Link from 'next/link';
 import { Navigation } from '@/components/public/Navigation';
 import { Footer } from '@/components/public/Footer';
-import { MagneticButton } from '@/components/ui/magnetic-button';
+import { buttonVariants } from '@/components/ui/button';
 import { ScrollReveal } from '@/components/ui/scroll-reveal';
-import { Badge } from '@/components/ui/badge';
 import { getFeaturedTours, getActiveHeroSlides, getFeaturedTestimonials } from '@/lib/database';
 import { HeroSlideshow } from '@/components/public/HeroSlideshow';
 import { TestimonialsSection } from '@/components/public/TestimonialsSection';
@@ -15,6 +14,7 @@ import { TourCard } from '@/components/public/TourCard';
 import { CTASection } from '@/components/public/CTASection';
 import { ArrowRight } from 'lucide-react';
 import type { Metadata } from 'next';
+import { cn } from '@/lib/utils';
 
 // Enhanced metadata for SEO
 export const metadata: Metadata = {
@@ -74,73 +74,63 @@ export default async function HomePage() {
     <div className="flex min-h-screen flex-col bg-background safe-bottom-padding lg:pb-0">
       <Navigation />
 
-      {/* === IMMERSIVE HERO SECTION WITH SLIDESHOW === */}
       <HeroSlideshow slides={heroSlides} autoPlay={true} interval={6000} />
 
-      {/* === FEATURED TOURS === */}
-      <section className="relative bg-muted py-14 md:py-20">
+      {/* Featured tours */}
+      <section className="relative bg-muted py-20 md:py-28">
         <div className="container">
           <ScrollReveal>
-            <div className="mb-10 text-center md:mb-12">
-              <Badge className="mb-4 border-transparent bg-primary text-primary-foreground">
-                Popular Tours
-              </Badge>
-              <h2 className="mb-3 font-heading text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl">
-                Featured <span className="text-primary">Journeys</span>
+            <div className="mb-14 max-w-2xl md:mb-16">
+              <p className="mb-3 text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                Curated experiences
+              </p>
+              <h2 className="font-accent text-3xl font-medium tracking-tight text-foreground md:text-4xl lg:text-5xl">
+                Featured journeys
               </h2>
-              <p className="mx-auto max-w-2xl text-base text-muted-foreground md:text-lg">
+              <p className="mt-4 text-base leading-relaxed text-muted-foreground md:text-lg">
                 Our most loved experiences, crafted with care and attention to every detail.
               </p>
             </div>
           </ScrollReveal>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
             {featuredTours.length > 0 ? (
               featuredTours.map((tour, index) => (
                 <TourCard key={tour.id} tour={tour} index={index} />
               ))
             ) : (
-              <div className="col-span-3 text-center py-12">
-                <p className="text-muted-foreground text-lg">No featured tours available at the moment.</p>
-                <Link href="/tours">
-                  <MagneticButton variant="outline" className="mt-4">
-                    View All Tours
-                  </MagneticButton>
+              <div className="col-span-full py-16 text-center">
+                <p className="text-lg text-muted-foreground">No featured tours available at the moment.</p>
+                <Link href="/tours" className={cn(buttonVariants({ variant: 'outline' }), 'mt-6')}>
+                  View All Tours
                 </Link>
               </div>
             )}
           </div>
 
-          <ScrollReveal direction="up" className="mt-12 text-center">
-            <Link href="/tours">
-              <MagneticButton variant="outline" className="px-12">
+          {featuredTours.length > 0 && (
+            <ScrollReveal direction="up" className="mt-14 text-center md:mt-16">
+              <Link
+                href="/tours"
+                className={cn(buttonVariants({ variant: 'outline', size: 'lg' }), 'inline-flex gap-2')}
+              >
                 View All Tours
-                <ArrowRight className="w-5 h-5" />
-              </MagneticButton>
-            </Link>
-          </ScrollReveal>
+                <ArrowRight className="size-4" />
+              </Link>
+            </ScrollReveal>
+          )}
         </div>
       </section>
 
-      {/* === WHY CHOOSE US === */}
-      <section className="py-16 bg-background relative overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `repeating-linear-gradient(45deg, var(--primary) 0, var(--primary) 1px, transparent 0, transparent 50%)`,
-            backgroundSize: '20px 20px'
-          }} />
-        </div>
-
-        <div className="container relative z-10">
+      {/* Why choose us */}
+      <section className="relative overflow-hidden bg-background py-20 md:py-28">
+        <div className="container">
           <DifferentiatorsSection />
         </div>
       </section>
 
-      {/* === TESTIMONIALS === */}
       <TestimonialsSection testimonials={testimonials} />
 
-      {/* === CTA SECTION === */}
       <CTASection />
 
       <Footer />

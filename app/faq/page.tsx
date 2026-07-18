@@ -3,14 +3,16 @@
 import { useState, useEffect } from 'react';
 import { Navigation } from '@/components/public/Navigation';
 import { Footer } from '@/components/public/Footer';
-import { MagneticButton } from '@/components/ui/magnetic-button';
+import { buttonVariants } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { ScrollReveal } from '@/components/ui/scroll-reveal';
 import { Loader2, ChevronDown, ChevronUp, Search, Filter } from 'lucide-react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 interface FAQ {
   id: string;
@@ -103,8 +105,8 @@ export default function FAQPage() {
         <Navigation />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <Loader2 className="h-12 w-12 text-prayer-red animate-spin mx-auto mb-4" />
-            <p className="text-gray-600">Loading FAQs...</p>
+            <Loader2 className="mx-auto mb-4 h-12 w-12 animate-spin text-primary" />
+            <p className="text-muted-foreground">Loading FAQs...</p>
           </div>
         </main>
         <Footer />
@@ -118,14 +120,8 @@ export default function FAQPage() {
         <Navigation />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <p className="text-red-600 mb-4">{error}</p>
-            <button
-              onClick={fetchFAQs}
-              className="inline-flex items-center justify-center rounded-xl px-6 py-3 text-lg font-semibold text-white transition-all hover:scale-105"
-              style={{ background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)' }}
-            >
-              Try Again
-            </button>
+            <p className="mb-4 text-destructive">{error}</p>
+            <Button onClick={fetchFAQs}>Try Again</Button>
           </div>
         </main>
         <Footer />
@@ -147,26 +143,17 @@ export default function FAQPage() {
               fill
               className="object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/60 to-black/80" />
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-prayer-red/20 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/45 to-black/30" />
           </div>
 
-          <div className="relative container pt-32 pb-16 md:pt-40 md:pb-20">
+          <div className="relative container pt-32 pb-16 md:pt-40 md:pb-24">
             <ScrollReveal direction="down">
               <div className="mx-auto max-w-3xl text-center">
-                <Badge
-                  className="mb-6 px-5 py-2 text-sm font-semibold tracking-wider uppercase border-0"
-                  style={{
-                    background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)',
-                    color: '#FFFFFF'
-                  }}
-                >
-                  FAQ
-                </Badge>
-                <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight mb-8 text-white">
+                <p className="mb-4 text-sm font-medium uppercase tracking-[0.2em] text-white/70">FAQ</p>
+                <h1 className="font-accent mb-6 text-4xl font-medium tracking-tight text-white md:text-5xl lg:text-6xl">
                   Frequently Asked Questions
                 </h1>
-                <p className="text-lg md:text-xl text-white/90 leading-relaxed max-w-2xl mx-auto mb-10">
+                <p className="mx-auto max-w-2xl text-lg leading-relaxed text-white/85 md:text-xl">
                   Find answers to common questions about traveling to Bhutan with our tours
                 </p>
               </div>
@@ -174,53 +161,41 @@ export default function FAQPage() {
           </div>
         </section>
 
-        {/* Search and Filter */}
-        <section className="py-8 bg-muted/30 backdrop-blur-md sticky top-20 z-30 shadow-premium-sm">
+        <section className="sticky top-20 z-30 border-b border-border bg-background/90 py-6 backdrop-blur-xl">
           <div className="container">
-            <div className="flex flex-col md:flex-row items-center gap-4">
-              <div className="relative flex-1 w-full">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                <input
+            <div className="flex flex-col items-center gap-4 md:flex-row">
+              <div className="relative w-full flex-1">
+                <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
                   type="text"
                   placeholder="Search questions..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 rounded-xl shadow-premium-sm focus:shadow-premium-md transition-shadow duration-300 outline-none bg-white"
+                  className="h-11 pl-10"
                 />
               </div>
 
-              <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto">
-                <Filter className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                <button
+              <div className="flex w-full items-center gap-2 overflow-x-auto md:w-auto">
+                <Filter className="size-4 shrink-0 text-muted-foreground" />
+                <Button
+                  type="button"
+                  variant={selectedCategory === 'all' ? 'default' : 'outline'}
+                  size="sm"
                   onClick={() => setSelectedCategory('all')}
-                  className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${
-                    selectedCategory === 'all'
-                      ? 'bg-white shadow-premium-md'
-                      : 'bg-muted/50 hover:bg-muted'
-                  }`}
-                  style={selectedCategory === 'all' ? {
-                    color: '#DC143C',
-                    border: '2px solid #DC143C'
-                  } : {}}
                 >
                   All
-                </button>
-                {categories.map(category => (
-                  <button
+                </Button>
+                {categories.map((category) => (
+                  <Button
                     key={category}
+                    type="button"
+                    variant={selectedCategory === category ? 'default' : 'outline'}
+                    size="sm"
                     onClick={() => setSelectedCategory(category)}
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${
-                      selectedCategory === category
-                        ? 'bg-white shadow-premium-md'
-                        : 'bg-muted/50 hover:bg-muted'
-                    }`}
-                    style={selectedCategory === category ? {
-                      color: '#DC143C',
-                      border: '2px solid #DC143C'
-                    } : {}}
+                    className="whitespace-nowrap"
                   >
                     {category}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
@@ -248,7 +223,7 @@ export default function FAQPage() {
 
                         return (
                           <ScrollReveal key={faq.id} delay={faqIndex * 50}>
-                            <Card className="hover:shadow-premium-md transition-all duration-300">
+                            <Card className="border-border shadow-none transition-shadow hover:shadow-sm">
                               <CardContent className="p-0">
                                 <button
                                   onClick={() => toggleFAQ(globalIndex)}
@@ -261,9 +236,9 @@ export default function FAQPage() {
                                   </div>
                                   <div className="flex-shrink-0 pt-1">
                                     {isOpen ? (
-                                      <ChevronUp className="h-5 w-5 text-prayer-red" />
+                                      <ChevronUp className="size-5 text-primary" />
                                     ) : (
-                                      <ChevronDown className="h-5 w-5 text-prayer-red" />
+                                      <ChevronDown className="size-5 text-primary" />
                                     )}
                                   </div>
                                 </button>
@@ -307,16 +282,14 @@ export default function FAQPage() {
                     : 'No FAQs available yet.'}
                 </p>
                 {(searchQuery || selectedCategory !== 'all') && (
-                  <button
-                    onClick={() => { setSelectedCategory('all'); setSearchQuery(''); }}
-                    className="inline-flex items-center justify-center rounded-xl px-8 py-4 text-lg font-semibold text-white transition-all hover:scale-105"
-                    style={{
-                      background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)',
-                      border: 'none'
+                  <Button
+                    onClick={() => {
+                      setSelectedCategory('all');
+                      setSearchQuery('');
                     }}
                   >
                     Clear Filters
-                  </button>
+                  </Button>
                 )}
               </div>
             )}
@@ -332,29 +305,25 @@ export default function FAQPage() {
               fill
               className="object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/75 to-black/85" />
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(255,255,255,0.1)_0%,_transparent_50%)]" />
+            <div className="absolute inset-0 bg-black/70" />
           </div>
 
           <div className="relative container text-center">
             <ScrollReveal>
-              <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
-                Still Have Questions?
+              <h2 className="font-accent mb-5 text-3xl font-medium text-white md:text-4xl lg:text-5xl">
+                Still have questions?
               </h2>
-              <p className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto mb-12 leading-relaxed">
-                Our team is here to help you plan your perfect Bhutan adventure. Reach out to us and we'll get back to you within 24 hours.
+              <p className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-white/85 md:text-xl">
+                Our team is here to help you plan your perfect Bhutan adventure. Reach out to us and we&apos;ll get back to you within 24 hours.
               </p>
-              <Link href="/contact">
-                <MagneticButton
-                  className="rounded-xl px-10 py-6 text-lg font-semibold"
-                  style={{
-                    background: '#FFFFFF',
-                    color: 'var(--prayer-red)',
-                    border: 'none'
-                  }}
-                >
-                  Contact Us
-                </MagneticButton>
+              <Link
+                href="/contact"
+                className={cn(
+                  buttonVariants({ size: 'lg' }),
+                  'inline-flex bg-white text-primary hover:bg-white/90'
+                )}
+              >
+                Contact Us
               </Link>
             </ScrollReveal>
           </div>

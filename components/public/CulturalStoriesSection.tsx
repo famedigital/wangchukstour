@@ -52,7 +52,7 @@ export function CulturalStoriesSection() {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-              <story.icon className="w-8 h-8 mb-3" style={{ color: '#DC143C' }} />
+              <story.icon className="w-8 h-8 mb-3" style={{ color: 'var(--primary)' }} />
               <h3 className="text-xl font-heading font-bold mb-1">{story.title}</h3>
               <p className="text-sm text-white/80 mb-2">{story.subtitle}</p>
               <p className="text-xs text-white/60">{story.description}</p>

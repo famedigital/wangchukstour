@@ -1,13 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Upload, Plus, Trash2, ChevronDown, ChevronRight, Calendar, MapPin, Users, DollarSign, Clock, TrendingUp, Star, Loader2, Eye, Check } from 'lucide-react';
-import { PremiumCard } from '@/components/ui/premium-card';
-import { PremiumButton } from '@/components/ui/premium-button';
+import { X, Upload, Plus, Trash2, ChevronRight, Calendar, MapPin, Users, DollarSign, Clock, TrendingUp, Star, Loader2, Eye, Check } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { PremiumInput } from '@/components/ui/premium-input';
 import { MediaPickerModal } from '@/components/admin/MediaPickerModal';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 function CategorySelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const [options, setOptions] = useState<{ slug: string; name: string }[]>([
@@ -30,7 +34,7 @@ function CategorySelect({ value, onChange }: { value: string; onChange: (v: stri
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full min-h-11 px-4 py-3 rounded-xl shadow-premium-sm focus:shadow-premium-md transition-all outline-none bg-white"
+      className="flex h-8 w-full rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
     >
       {options.map((o) => (
         <option key={o.slug} value={o.slug}>
@@ -38,6 +42,49 @@ function CategorySelect({ value, onChange }: { value: string; onChange: (v: stri
         </option>
       ))}
     </select>
+  );
+}
+
+function StatusSwitches({
+  formData,
+  updateField,
+}: {
+  formData: { is_active: boolean; is_featured: boolean; is_published: boolean };
+  updateField: (field: string, value: boolean) => void;
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-4 rounded-lg border border-border bg-muted/40 px-4 py-3">
+      <div className="flex items-center gap-2">
+        <Switch
+          id="tour-active"
+          checked={formData.is_active}
+          onCheckedChange={(v) => updateField('is_active', v)}
+        />
+        <Label htmlFor="tour-active" className="cursor-pointer font-normal">
+          Active
+        </Label>
+      </div>
+      <div className="flex items-center gap-2">
+        <Switch
+          id="tour-featured"
+          checked={formData.is_featured}
+          onCheckedChange={(v) => updateField('is_featured', v)}
+        />
+        <Label htmlFor="tour-featured" className="cursor-pointer font-normal">
+          Featured
+        </Label>
+      </div>
+      <div className="flex items-center gap-2">
+        <Switch
+          id="tour-published"
+          checked={formData.is_published}
+          onCheckedChange={(v) => updateField('is_published', v)}
+        />
+        <Label htmlFor="tour-published" className="cursor-pointer font-normal">
+          Published
+        </Label>
+      </div>
+    </div>
   );
 }
 
@@ -212,10 +259,10 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
   };
 
   return (
-    <div className="flex gap-8">
+    <div className="flex gap-6">
       {/* Steps Sidebar */}
-      <div className="hidden lg:block w-64 flex-shrink-0">
-        <div className="sticky top-8 space-y-2">
+      <div className="hidden w-56 shrink-0 lg:block">
+        <div className="sticky top-4 space-y-1">
           {steps.map((step, index) => {
             const Icon = step.icon;
             const isActive = index === currentStep;
@@ -225,33 +272,38 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
             return (
               <button
                 key={step.id}
+                type="button"
                 onClick={() => setCurrentStep(index)}
-                className={`w-full text-left p-4 rounded-xl transition-all ${
+                className={cn(
+                  'w-full rounded-lg border p-3 text-left transition-colors',
                   isActive
-                    ? 'bg-white shadow-premium-md border-l-4 border-prayer-red'
+                    ? 'border-primary bg-primary/5'
                     : isCompleted
-                    ? 'bg-muted/50 hover:bg-muted'
-                    : 'bg-muted/30 opacity-60'
-                }`}
+                      ? 'border-transparent bg-muted/50 hover:bg-muted'
+                      : 'border-transparent opacity-60 hover:opacity-80'
+                )}
               >
                 <div className="flex items-center gap-3">
-                  <div className={`relative flex h-8 w-8 items-center justify-center rounded-lg ${
-                    isActive ? 'bg-prayer-red text-white' : 'bg-muted-foreground/20'
-                  }`}>
+                  <div
+                    className={cn(
+                      'relative flex size-8 items-center justify-center rounded-md',
+                      isActive ? 'bg-primary text-primary-foreground' : 'bg-muted'
+                    )}
+                  >
                     {isCompleted ? (
-                      <Check className="h-4 w-4 text-green-600" />
+                      <Check className="size-4 text-primary" />
                     ) : (
-                      <Icon className="h-4 w-4" />
+                      <Icon className="size-4" />
                     )}
                     {hasError && (
-                      <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-red-500" />
+                      <div className="absolute -top-1 -right-1 size-2.5 rounded-full bg-destructive" />
                     )}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-medium ${isActive ? 'text-prayer-red' : ''}`}>
+                  <div className="min-w-0 flex-1">
+                    <p className={cn('text-sm font-medium', isActive && 'text-primary')}>
                       {step.title}
                     </p>
-                    <p className="text-xs text-muted-foreground truncate">{step.description}</p>
+                    <p className="truncate text-xs text-muted-foreground">{step.description}</p>
                   </div>
                 </div>
               </button>
@@ -261,13 +313,16 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
       </div>
 
       {/* Main Form Content */}
-      <div className="flex-1 min-w-0">
-        <PremiumCard className="mb-6">
-          <div className="p-6 border-b">
-            <div className="flex items-center justify-between mb-4">
+      <div className="min-w-0 flex-1">
+        <div className="mb-4">
+          <StatusSwitches formData={formData} updateField={updateField} />
+        </div>
+        <Card className="mb-6">
+          <div className="border-b px-4 py-4">
+            <div className="mb-4 flex items-center justify-between">
               <div>
-                <h2 className="font-heading text-2xl font-bold">{steps[currentStep].title}</h2>
-                <p className="text-muted-foreground">{steps[currentStep].description}</p>
+                <h2 className="font-heading text-xl font-semibold">{steps[currentStep].title}</h2>
+                <p className="text-sm text-muted-foreground">{steps[currentStep].description}</p>
               </div>
               <div className="text-sm text-muted-foreground">
                 Step {currentStep + 1} of {steps.length}
@@ -275,7 +330,7 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
             </div>
 
             {/* Mobile Steps Indicator */}
-            <div className="flex lg:hidden gap-2 overflow-x-auto pb-2">
+            <div className="flex gap-2 overflow-x-auto pb-2 lg:hidden">
               {steps.map((step, index) => {
                 const Icon = step.icon;
                 const isActive = index === currentStep;
@@ -284,23 +339,25 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
                 return (
                   <button
                     key={step.id}
+                    type="button"
                     onClick={() => setCurrentStep(index)}
-                    className={`flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${
-                      isActive ? 'bg-prayer-red text-white' : 'bg-muted'
-                    }`}
+                    className={cn(
+                      'flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm',
+                      isActive ? 'bg-primary text-primary-foreground' : 'bg-muted'
+                    )}
                   >
-                    <Icon className="h-4 w-4" />
+                    <Icon className="size-4" />
                     <span className="hidden sm:inline">{step.title}</span>
-                    {isCompleted && <Check className="h-3 w-3 ml-1" />}
+                    {isCompleted && <Check className="ml-1 size-3" />}
                   </button>
                 );
               })}
             </div>
 
             {/* Progress Bar */}
-            <div className="w-full bg-muted rounded-full h-2 mt-4">
+            <div className="mt-4 h-1.5 w-full rounded-full bg-muted">
               <div
-                className="bg-prayer-red h-2 rounded-full transition-all duration-300"
+                className="h-1.5 rounded-full bg-primary transition-all duration-300"
                 style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
               />
             </div>
@@ -340,7 +397,7 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
                         <button
                           type="button"
                           onClick={generateSlug}
-                          className="text-sm text-prayer-red hover:underline"
+                          className="text-sm text-primary hover:underline"
                         >
                           Generate from title
                         </button>
@@ -449,7 +506,7 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
                         <button
                           type="button"
                           onClick={() => addArrayItem('highlights')}
-                          className="text-sm text-prayer-red hover:text-prayer-red/80 flex items-center gap-1"
+                          className="flex items-center gap-1 text-sm text-primary hover:text-primary/80"
                         >
                           <Plus className="h-4 w-4" />
                           Add Highlight
@@ -541,7 +598,7 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
                             setMediaPickerTarget({ field: 'gallery_urls', index: formData.gallery_urls.length });
                             setMediaPickerOpen(true);
                           }}
-                          className="text-sm text-prayer-red hover:text-prayer-red/80 flex items-center gap-1"
+                          className="flex items-center gap-1 text-sm text-primary hover:text-primary/80"
                         >
                           <Plus className="h-4 w-4" />
                           Add Image
@@ -584,7 +641,7 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
                       <button
                         type="button"
                         onClick={() => addArrayItem('itinerary')}
-                        className="text-sm text-prayer-red hover:text-prayer-red/80 flex items-center gap-1"
+                        className="flex items-center gap-1 text-sm text-primary hover:text-primary/80"
                       >
                         <Plus className="h-4 w-4" />
                         Add Day
@@ -593,9 +650,9 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
 
                     <div className="space-y-4">
                       {formData.itinerary.map((day: any, index: number) => (
-                        <PremiumCard key={index} className="p-4">
+                        <Card key={index} className="p-4">
                           <div className="flex items-start gap-4">
-                            <div className="flex-shrink-0 w-16 h-16 rounded-full bg-gradient-to-br from-prayer-red to-monastery-red flex items-center justify-center text-white font-bold">
+                            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground">
                               D{index + 1}
                             </div>
                             <div className="flex-1 space-y-3">
@@ -644,7 +701,7 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
                               <Trash2 className="h-4 w-4" />
                             </button>
                           </div>
-                        </PremiumCard>
+                        </Card>
                       ))}
                     </div>
 
@@ -777,12 +834,13 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
                         ))}
                       </div>
                       <div className="flex gap-2">
-                        <input
+                        <Input
                           type="text"
                           placeholder="Add keyword and press Enter"
-                          className="flex-1 px-4 py-2 rounded-lg shadow-premium-sm focus:shadow-premium-md transition-all outline-none"
-                          onKeyPress={(e) => {
+                          className="flex-1"
+                          onKeyDown={(e) => {
                             if (e.key === 'Enter') {
+                              e.preventDefault();
                               const target = e.target as HTMLInputElement;
                               if (target.value.trim()) {
                                 updateField('meta_keywords', [...formData.meta_keywords, target.value.trim()]);
@@ -800,76 +858,55 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
                 {currentStep === 6 && (
                   <div className="space-y-6">
                     <div className="grid gap-6 md:grid-cols-2">
-                      <PremiumCard className="overflow-hidden">
+                      <Card className="overflow-hidden py-0">
                         {formData.hero_image_url && (
                           <div className="relative h-48">
                             <img
                               src={formData.hero_image_url}
                               alt={formData.title}
-                              className="w-full h-full object-cover"
+                              className="h-full w-full object-cover"
                             />
                             <div className="absolute top-3 right-3">
-                              <span className="px-3 py-1 bg-white/90 rounded-full text-sm font-medium">
+                              <span className="rounded-md bg-background/90 px-3 py-1 text-sm font-medium ring-1 ring-border">
                                 ${formData.price}
                               </span>
                             </div>
                           </div>
                         )}
-                        <div className="p-4">
-                          <h3 className="font-heading font-bold text-lg mb-1">{formData.title}</h3>
+                        <CardContent className="p-4">
+                          <h3 className="mb-1 font-heading text-lg font-semibold">{formData.title}</h3>
                           {formData.tagline && (
-                            <p className="text-sm text-muted-foreground mb-2">{formData.tagline}</p>
+                            <p className="mb-2 text-sm text-muted-foreground">{formData.tagline}</p>
                           )}
                           <div className="flex items-center gap-4 text-sm text-muted-foreground">
                             <span className="flex items-center gap-1">
-                              <Clock className="h-4 w-4" />
+                              <Clock className="size-4" />
                               {formData.duration} days
                             </span>
                             <span className="flex items-center gap-1">
-                              <Users className="h-4 w-4" />
+                              <Users className="size-4" />
                               {formData.difficulty_level}
                             </span>
                           </div>
-                        </div>
-                      </PremiumCard>
+                        </CardContent>
+                      </Card>
 
                       <div className="space-y-4">
                         <div>
-                          <h4 className="font-semibold mb-2">Tour Status</h4>
-                          <div className="space-y-2">
-                            <label className="flex items-center gap-3 cursor-pointer">
-                              <input
-                                type="checkbox"
-                                checked={formData.is_active}
-                                onChange={(e) => updateField('is_active', e.target.checked)}
-                                className="w-4 h-4 text-prayer-red rounded"
-                              />
-                              <span className="text-sm">Active (visible on website)</span>
-                            </label>
-                            <label className="flex items-center gap-3 cursor-pointer">
-                              <input
-                                type="checkbox"
-                                checked={formData.is_featured}
-                                onChange={(e) => updateField('is_featured', e.target.checked)}
-                                className="w-4 h-4 text-prayer-red rounded"
-                              />
-                              <span className="text-sm">Featured tour</span>
-                            </label>
-                            <label className="flex items-center gap-3 cursor-pointer">
-                              <input
-                                type="checkbox"
-                                checked={formData.is_published}
-                                onChange={(e) => updateField('is_published', e.target.checked)}
-                                className="w-4 h-4 text-prayer-red rounded"
-                              />
-                              <span className="text-sm">Published</span>
-                            </label>
-                          </div>
+                          <h4 className="mb-2 font-medium">Status</h4>
+                          <p className="text-sm text-muted-foreground">
+                            Use the Active / Featured / Published switches above the form.
+                          </p>
+                          <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
+                            <li>Active: {formData.is_active ? 'Yes' : 'No'}</li>
+                            <li>Featured: {formData.is_featured ? 'Yes' : 'No'}</li>
+                            <li>Published: {formData.is_published ? 'Yes' : 'No'}</li>
+                          </ul>
                         </div>
 
                         <div>
-                          <h4 className="font-semibold mb-2">Summary</h4>
-                          <div className="text-sm space-y-1 text-muted-foreground">
+                          <h4 className="mb-2 font-medium">Summary</h4>
+                          <div className="space-y-1 text-sm text-muted-foreground">
                             <p>Duration: {formData.duration} days</p>
                             <p>Price: ${formData.price}</p>
                             <p>Group size: {formData.min_group_size}-{formData.max_group_size}</p>
@@ -885,54 +922,44 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
             </AnimatePresence>
 
             {/* Navigation Buttons */}
-            <div className="flex items-center justify-between mt-8 pt-6 border-t">
-              <PremiumButton
-                type="button"
-                onClick={onCancel}
-                variant="outline"
-                className="min-w-[120px]"
-              >
+            <div className="mt-8 flex items-center justify-between border-t pt-6">
+              <Button type="button" onClick={onCancel} variant="outline">
                 Cancel
-              </PremiumButton>
+              </Button>
 
-              <div className="flex gap-3">
+              <div className="flex gap-2">
                 {currentStep > 0 && (
-                  <PremiumButton
+                  <Button
                     type="button"
                     onClick={() => setCurrentStep(currentStep - 1)}
                     variant="outline"
-                    className="min-w-[120px]"
                   >
                     Previous
-                  </PremiumButton>
+                  </Button>
                 )}
 
-                <PremiumButton
-                  type="submit"
-                  disabled={loading}
-                  className="min-w-[120px]"
-                >
+                <Button type="submit" disabled={loading}>
                   {loading ? (
                     <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      <Loader2 className="size-4 animate-spin" />
                       Saving...
                     </>
                   ) : currentStep === steps.length - 1 ? (
                     <>
-                      <Check className="h-4 w-4 mr-2" />
+                      <Check className="size-4" />
                       Save Tour
                     </>
                   ) : (
                     <>
                       Next
-                      <ChevronRight className="h-4 w-4 ml-2" />
+                      <ChevronRight className="size-4" />
                     </>
                   )}
-                </PremiumButton>
+                </Button>
               </div>
             </div>
           </form>
-        </PremiumCard>
+        </Card>
       </div>
 
       {/* Media Picker Modal */}

@@ -53,18 +53,20 @@ export function Navigation() {
       navSolid
         ? active
           ? 'text-primary'
-          : 'text-foreground/80 hover:text-primary'
+          : 'text-foreground/75 hover:text-foreground'
         : active
-          ? 'text-accent'
-          : 'text-white/90 hover:text-white'
+          ? 'text-white'
+          : 'text-white/85 hover:text-white'
     );
 
   return (
     <>
       <nav
         className={cn(
-          'fixed top-0 right-0 left-0 z-50 hidden transition-[background-color,box-shadow,backdrop-filter] duration-300 lg:block',
-          navSolid ? 'border-b border-border/60 bg-card/95 shadow-sm backdrop-blur-md' : 'bg-transparent'
+          'fixed top-0 right-0 left-0 z-50 hidden transition-[background-color,box-shadow,backdrop-filter,border-color] duration-300 lg:block',
+          navSolid
+            ? 'border-b border-border/50 bg-background/80 shadow-sm backdrop-blur-xl'
+            : 'border-b border-transparent bg-transparent'
         )}
       >
         <div className="container flex h-16 items-center justify-between xl:h-[4.5rem]">
@@ -72,7 +74,7 @@ export function Navigation() {
             <img
               src="https://res.cloudinary.com/hckgrdeh/image/upload/v1782962660/wangchukstlogo_usxclz.png"
               alt="Wangchuks Tours & Treks"
-              className="h-11 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.03] xl:h-12"
+              className="h-11 w-auto object-contain transition-opacity duration-300 group-hover:opacity-90 xl:h-12"
             />
           </Link>
 
@@ -95,7 +97,7 @@ export function Navigation() {
               </button>
               {toursOpen && (
                 <div className="absolute top-full left-0 min-w-[13rem] pt-2">
-                  <div className="overflow-hidden rounded-lg border border-border bg-card py-1.5 shadow-lg">
+                  <div className="overflow-hidden rounded-lg border border-border bg-card/95 py-1.5 shadow-lg backdrop-blur-xl">
                     <Link
                       href="/tours"
                       className="block px-4 py-2.5 text-sm text-foreground hover:bg-muted hover:text-primary"
@@ -134,10 +136,7 @@ export function Navigation() {
 
             <Link
               href="/contact"
-              className={cn(
-                buttonVariants({ size: 'sm' }),
-                'ml-3 h-9 rounded-md bg-accent px-4 text-accent-foreground hover:bg-accent/90'
-              )}
+              className={cn(buttonVariants({ size: 'sm' }), 'ml-4')}
             >
               Get Quote
             </Link>
@@ -146,7 +145,7 @@ export function Navigation() {
       </nav>
 
       {/* Mobile bottom nav */}
-      <div className="safe-area-inset-bottom fixed right-0 bottom-0 left-0 z-50 border-t border-border bg-card/95 shadow-[0_-4px_24px_rgba(0,0,0,0.06)] backdrop-blur-md lg:hidden">
+      <div className="safe-area-inset-bottom fixed right-0 bottom-0 left-0 z-50 border-t border-border bg-background/90 shadow-[0_-4px_24px_rgba(0,0,0,0.04)] backdrop-blur-xl lg:hidden">
         {mobileToursOpen && (
           <div className="grid grid-cols-2 gap-2 border-b border-border bg-card px-3 py-2.5">
             <Link
@@ -235,8 +234,8 @@ export function Navigation() {
             rel="noopener noreferrer"
             className="flex min-w-0 flex-1 flex-col items-center justify-center px-1 py-2.5"
           >
-            <MessageCircle className="mb-0.5 size-5 text-emerald-600" />
-            <span className="text-[10px] font-semibold text-emerald-700">WhatsApp</span>
+            <MessageCircle className="mb-0.5 size-5 text-primary" />
+            <span className="text-[10px] font-semibold text-primary">WhatsApp</span>
           </a>
         </div>
       </div>

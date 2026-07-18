@@ -5,6 +5,8 @@ import { toast } from 'sonner';
 import { PremiumCard } from '@/components/ui/premium-card';
 import { PremiumButton } from '@/components/ui/premium-button';
 import { PremiumInput } from '@/components/ui/premium-input';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Loader2, Save, Plus, Trash2, Edit3, Check, X, GripVertical, Search, Filter } from 'lucide-react';
 import { ScrollReveal } from '@/components/ui/scroll-reveal';
 import { StaggerChildren } from '@/components/ui/scroll-reveal';
@@ -198,7 +200,7 @@ export function FAQManager() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-prayer-red" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -228,39 +230,35 @@ export function FAQManager() {
         <div className="flex flex-wrap items-center gap-4">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input
+            <Input
               type="text"
               placeholder="Search FAQs..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-lg border-0 bg-muted/50 focus:ring-2 focus:ring-prayer-red/20 outline-none transition-all"
+              className="pl-10"
             />
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
             <Filter className="h-4 w-4 text-muted-foreground" />
-            <button
+            <Button
+              type="button"
+              size="sm"
+              variant={selectedCategory === 'all' ? 'default' : 'secondary'}
               onClick={() => setSelectedCategory('all')}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                selectedCategory === 'all'
-                  ? 'bg-prayer-red text-white'
-                  : 'bg-muted/50 hover:bg-muted'
-              }`}
             >
               All
-            </button>
+            </Button>
             {categories.map(category => (
-              <button
+              <Button
                 key={category}
+                type="button"
+                size="sm"
+                variant={selectedCategory === category ? 'default' : 'secondary'}
                 onClick={() => setSelectedCategory(category)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                  selectedCategory === category
-                    ? 'bg-prayer-red text-white'
-                    : 'bg-muted/50 hover:bg-muted'
-                }`}
               >
                 {category}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
@@ -299,7 +297,7 @@ export function FAQManager() {
                   <select
                     value={editForm.category}
                     onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
-                    className="w-full px-4 py-2 rounded-lg border-0 bg-muted/50 focus:ring-2 focus:ring-prayer-red/20 outline-none transition-all"
+                    className="flex h-9 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
                   >
                     {categories.map(cat => (
                       <option key={cat} value={cat}>{cat}</option>
@@ -313,7 +311,7 @@ export function FAQManager() {
                     id="isActive"
                     checked={editForm.is_active}
                     onChange={(e) => setEditForm({ ...editForm, is_active: e.target.checked })}
-                    className="w-4 h-4 text-prayer-red rounded focus:ring-prayer-red"
+                    className="w-4 h-4 rounded border-input text-primary focus-visible:ring-ring/50"
                   />
                   <label htmlFor="isActive" className="text-sm font-medium">
                     Active (visible on website)
@@ -399,7 +397,7 @@ export function FAQManager() {
                             <select
                               value={editForm.category}
                               onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
-                              className="w-full px-4 py-2 rounded-lg border-0 bg-muted/50 focus:ring-2 focus:ring-prayer-red/20 outline-none"
+                              className="flex h-9 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
                             >
                               {categories.map(cat => (
                                 <option key={cat} value={cat}>{cat}</option>
@@ -412,7 +410,7 @@ export function FAQManager() {
                               type="checkbox"
                               checked={editForm.is_active}
                               onChange={(e) => setEditForm({ ...editForm, is_active: e.target.checked })}
-                              className="w-4 h-4 text-prayer-red rounded"
+                              className="w-4 h-4 rounded border-input text-primary"
                             />
                             <label className="text-sm font-medium">Active</label>
                           </div>
@@ -472,20 +470,26 @@ export function FAQManager() {
                                   Inactive
                                 </Badge>
                               )}
-                              <button
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon-sm"
                                 onClick={() => startEdit(faq)}
-                                className="p-2 text-prayer-red hover:bg-prayer-red/10 rounded-lg transition-colors"
+                                className="text-primary"
                                 title="Edit"
                               >
                                 <Edit3 className="h-4 w-4" />
-                              </button>
-                              <button
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon-sm"
                                 onClick={() => handleDelete(faq.id!)}
-                                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                className="text-destructive hover:text-destructive"
                                 title="Delete"
                               >
                                 <Trash2 className="h-4 w-4" />
-                              </button>
+                              </Button>
                             </div>
                           </div>
                         </div>
