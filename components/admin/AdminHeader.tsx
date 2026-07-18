@@ -9,6 +9,7 @@ import { Button, buttonVariants } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -177,14 +178,18 @@ export function AdminHeader({ onMobileMenuOpen, user }: AdminHeaderProps) {
               )}
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-80 p-0 sm:w-96">
-              <div className="border-b border-border p-4">
-                <DropdownMenuLabel className="p-0 text-sm font-semibold">Notifications</DropdownMenuLabel>
-                <p className="text-xs text-muted-foreground">
-                  {unreadCount > 0
-                    ? `${unreadCount} pending booking${unreadCount === 1 ? '' : 's'} / new inquir${unreadCount === 1 ? 'y' : 'ies'}`
-                    : "You're all caught up"}
-                </p>
-              </div>
+              <DropdownMenuGroup>
+                <div className="border-b border-border p-4">
+                  <DropdownMenuLabel className="p-0 text-sm font-semibold text-foreground">
+                    Notifications
+                  </DropdownMenuLabel>
+                  <p className="text-xs text-muted-foreground">
+                    {unreadCount > 0
+                      ? `${unreadCount} pending booking${unreadCount === 1 ? '' : 's'} / new inquir${unreadCount === 1 ? 'y' : 'ies'}`
+                      : "You're all caught up"}
+                  </p>
+                </div>
+              </DropdownMenuGroup>
               <div className="max-h-80 overflow-y-auto">
                 {loadingNotifications && notifications.length === 0 ? (
                   <p className="p-4 text-sm text-muted-foreground">Loading…</p>
@@ -192,41 +197,48 @@ export function AdminHeader({ onMobileMenuOpen, user }: AdminHeaderProps) {
                   <p className="p-4 text-sm text-muted-foreground">No new notifications</p>
                 ) : (
                   notifications.map((notification) => (
-                    <button
+                    <DropdownMenuItem
                       key={notification.id}
-                      type="button"
                       onClick={() => openNotification(notification)}
                       className={cn(
-                        'w-full border-b border-border/60 p-4 text-left last:border-0 hover:bg-muted/60',
+                        'cursor-pointer items-start rounded-none border-b border-border/60 p-4 focus:bg-muted/60',
                         notification.unread && 'bg-primary/5'
                       )}
                     >
-                      <p className="text-sm font-medium text-foreground">{notification.title}</p>
-                      <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">
-                        {notification.message}
-                      </p>
-                      <p className="mt-1 text-xs text-muted-foreground">{notification.time}</p>
-                    </button>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-foreground">{notification.title}</p>
+                        <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">
+                          {notification.message}
+                        </p>
+                        <p className="mt-1 text-xs text-muted-foreground">{notification.time}</p>
+                      </div>
+                    </DropdownMenuItem>
                   ))
                 )}
               </div>
-              <div className="flex items-center gap-2 border-t border-border bg-muted/40 p-3">
-                <Button
-                  type="button"
-                  variant="link"
-                  className="h-auto flex-1 p-0"
-                  onClick={markAllRead}
-                >
-                  Mark inquiries read
-                </Button>
-                <Link
-                  href="/admin/bookings"
-                  onClick={() => setNotificationsOpen(false)}
-                  className="flex-1 text-center text-sm font-medium text-muted-foreground hover:text-foreground"
-                >
-                  View bookings
-                </Link>
-              </div>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <div className="flex items-center gap-2 bg-muted/40 p-3">
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="h-auto flex-1 p-0"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      markAllRead();
+                    }}
+                  >
+                    Mark inquiries read
+                  </Button>
+                  <Link
+                    href="/admin/bookings"
+                    onClick={() => setNotificationsOpen(false)}
+                    className="flex-1 text-center text-sm font-medium text-muted-foreground hover:text-foreground"
+                  >
+                    View bookings
+                  </Link>
+                </div>
+              </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
 

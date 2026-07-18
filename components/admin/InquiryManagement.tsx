@@ -18,10 +18,15 @@ type Inquiry = {
   message?: string;
   status?: string;
   created_at?: string;
+  subject?: string;
+  tour_interest?: string;
 };
 
-const selectClassName =
-  'flex h-11 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30';
+const filterSelectClassName =
+  'flex h-11 w-full sm:w-44 shrink-0 rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30';
+
+const statusSelectClassName =
+  'flex h-9 w-auto min-w-[7.5rem] shrink-0 rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30';
 
 export function InquiryManagement() {
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
@@ -69,7 +74,7 @@ export function InquiryManagement() {
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
+        <div className="relative flex-1 min-w-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             value={search}
@@ -82,7 +87,7 @@ export function InquiryManagement() {
         <select
           value={status}
           onChange={(e) => setStatus(e.target.value)}
-          className={selectClassName}
+          className={filterSelectClassName}
         >
           <option value="all">All statuses</option>
           <option value="new">New</option>
@@ -90,7 +95,7 @@ export function InquiryManagement() {
           <option value="replied">Replied</option>
           <option value="closed">Closed</option>
         </select>
-        <Button type="button" onClick={load} className="min-h-11">
+        <Button type="button" onClick={load} className="min-h-11 sm:w-auto">
           Search
         </Button>
       </div>
@@ -109,22 +114,23 @@ export function InquiryManagement() {
           {inquiries.map((item) => {
             const name = item.name || item.client_name || 'Unknown';
             const email = item.email || item.client_email || '';
+            const phone = item.phone || item.client_phone || '';
             return (
               <Card key={item.id}>
-                <CardContent className="p-4 md:p-5 space-y-2">
-                  <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
-                    <div>
-                      <p className="font-semibold text-foreground">{name}</p>
-                      <p className="text-sm text-muted-foreground">{email}</p>
-                      <p className="text-sm text-foreground/80 mt-2 whitespace-pre-wrap">{item.message}</p>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        {item.created_at ? new Date(item.created_at).toLocaleString() : ''}
-                      </p>
+                <CardContent className="p-4 md:p-5">
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-foreground truncate">{name}</p>
+                      <p className="text-sm text-muted-foreground truncate">{email}</p>
+                      {phone ? (
+                        <p className="text-xs text-muted-foreground mt-0.5">{phone}</p>
+                      ) : null}
                     </div>
                     <select
                       value={item.status || 'new'}
                       onChange={(e) => updateStatus(item.id, e.target.value)}
-                      className={selectClassName}
+                      className={statusSelectClassName}
+                      aria-label="Inquiry status"
                     >
                       <option value="new">New</option>
                       <option value="read">Read</option>
@@ -132,6 +138,20 @@ export function InquiryManagement() {
                       <option value="closed">Closed</option>
                     </select>
                   </div>
+
+                  {(item.subject || item.tour_interest) && (
+                    <p className="text-xs font-medium text-muted-foreground mb-2">
+                      {[item.subject, item.tour_interest].filter(Boolean).join(' · ')}
+                    </p>
+                  )}
+
+                  <p className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed">
+                    {item.message || '—'}
+                  </p>
+
+                  <p className="text-xs text-muted-foreground mt-3">
+                    {item.created_at ? new Date(item.created_at).toLocaleString() : ''}
+                  </p>
                 </CardContent>
               </Card>
             );
