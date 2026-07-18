@@ -3,13 +3,15 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import { Home, Compass, Users, Book, Mail, MessageCircle, ChevronDown } from 'lucide-react';
+import { Home, Compass, Users, Book, MessageCircle, ChevronDown } from 'lucide-react';
+import { buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 const baseNavLinks = [
   { name: 'Home', href: '/', icon: Home },
   { name: 'About', href: '/about', icon: Users },
   { name: 'Blog', href: '/blog', icon: Book },
-  { name: 'Contact', href: '/contact', icon: Mail },
+  { name: 'Contact', href: '/contact', icon: MessageCircle },
 ];
 
 type TourCategory = { name: string; slug: string };
@@ -34,40 +36,48 @@ export function Navigation() {
     fetch('/api/tour-categories')
       .then((r) => r.json())
       .then((data) => setTourCategories(data.categories || []))
-      .catch(() => setTourCategories([
-        { name: 'International Tour', slug: 'international' },
-        { name: 'Regional Tour', slug: 'regional' },
-      ]));
+      .catch(() =>
+        setTourCategories([
+          { name: 'International Tour', slug: 'international' },
+          { name: 'Regional Tour', slug: 'regional' },
+        ])
+      );
   }, []);
 
   const isToursActive = pathname === '/tours' || pathname.startsWith('/tours');
+  const navSolid = !mounted || scrolled;
+
+  const desktopLink = (active?: boolean) =>
+    cn(
+      'rounded-md px-4 py-2 text-sm font-medium transition-colors',
+      navSolid
+        ? active
+          ? 'text-primary'
+          : 'text-foreground/80 hover:text-primary'
+        : active
+          ? 'text-accent'
+          : 'text-white/90 hover:text-white'
+    );
 
   return (
     <>
       <nav
-        className={`hidden lg:flex fixed top-0 left-0 right-0 z-50 ${
-          !mounted || scrolled ? 'bg-white/95 backdrop-blur-md shadow-lg' : 'bg-transparent'
-        }`}
-        style={{ transition: 'background-color 0.3s ease, backdrop-filter 0.3s ease, box-shadow 0.3s ease' }}
+        className={cn(
+          'fixed top-0 right-0 left-0 z-50 hidden transition-[background-color,box-shadow,backdrop-filter] duration-300 lg:block',
+          navSolid ? 'border-b border-border/60 bg-card/95 shadow-sm backdrop-blur-md' : 'bg-transparent'
+        )}
       >
-        <div className="container flex h-20 items-center justify-between">
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="relative h-14 w-auto transition-transform duration-300 group-hover:scale-105">
-              <img
-                src="https://res.cloudinary.com/hckgrdeh/image/upload/v1782962660/wangchukstlogo_usxclz.png"
-                alt="Wangchuks Tours & Treks"
-                className="h-full w-auto object-contain"
-                style={{ maxHeight: '56px' }}
-              />
-            </div>
+        <div className="container flex h-16 items-center justify-between xl:h-[4.5rem]">
+          <Link href="/" className="group flex items-center gap-3">
+            <img
+              src="https://res.cloudinary.com/hckgrdeh/image/upload/v1782962660/wangchukstlogo_usxclz.png"
+              alt="Wangchuks Tours & Treks"
+              className="h-11 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.03] xl:h-12"
+            />
           </Link>
 
-          <div className="flex items-center gap-1">
-            <Link
-              href="/"
-              className="px-5 py-3 text-sm font-medium rounded-lg"
-              style={{ color: '#D4A017' }}
-            >
+          <div className="flex items-center gap-0.5">
+            <Link href="/" className={desktopLink(pathname === '/')}>
               Home
             </Link>
 
@@ -78,18 +88,17 @@ export function Navigation() {
             >
               <button
                 type="button"
-                className="px-5 py-3 text-sm font-medium rounded-lg inline-flex items-center gap-1"
-                style={{ color: isToursActive ? '#FF6B00' : '#D4A017' }}
+                className={cn(desktopLink(isToursActive), 'inline-flex items-center gap-1')}
                 onClick={() => setToursOpen((v) => !v)}
               >
-                Tours <ChevronDown className="h-4 w-4" />
+                Tours <ChevronDown className={cn('size-3.5 transition-transform', toursOpen && 'rotate-180')} />
               </button>
               {toursOpen && (
-                <div className="absolute top-full left-0 pt-2 min-w-[220px]">
-                  <div className="bg-white rounded-xl shadow-xl border border-gray-100 py-2 overflow-hidden">
+                <div className="absolute top-full left-0 min-w-[13rem] pt-2">
+                  <div className="overflow-hidden rounded-lg border border-border bg-card py-1.5 shadow-lg">
                     <Link
                       href="/tours"
-                      className="block px-4 py-2.5 text-sm text-gray-800 hover:bg-red-50 hover:text-red-700"
+                      className="block px-4 py-2.5 text-sm text-foreground hover:bg-muted hover:text-primary"
                     >
                       All Tours
                     </Link>
@@ -97,7 +106,7 @@ export function Navigation() {
                       <Link
                         key={cat.slug}
                         href={`/tours?category=${cat.slug}`}
-                        className="block px-4 py-2.5 text-sm text-gray-800 hover:bg-red-50 hover:text-red-700"
+                        className="block px-4 py-2.5 text-sm text-foreground hover:bg-muted hover:text-primary"
                       >
                         {cat.name}
                       </Link>
@@ -107,21 +116,28 @@ export function Navigation() {
               )}
             </div>
 
-            {baseNavLinks.filter((l) => l.name !== 'Home').map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                className="px-5 py-3 text-sm font-medium rounded-lg"
-                style={{ color: '#D4A017' }}
-              >
-                {link.name}
-              </Link>
-            ))}
+            {baseNavLinks
+              .filter((l) => l.name !== 'Home')
+              .map((link) => (
+                <Link
+                  key={link.name}
+                  href={link.href}
+                  className={desktopLink(
+                    link.href === '/blog'
+                      ? pathname?.startsWith('/blog')
+                      : pathname === link.href
+                  )}
+                >
+                  {link.name}
+                </Link>
+              ))}
 
             <Link
               href="/contact"
-              className="ml-4 inline-flex items-center justify-center rounded-lg px-5 py-3 text-sm font-medium"
-              style={{ backgroundColor: '#D4A017', color: '#FFFFFF' }}
+              className={cn(
+                buttonVariants({ size: 'sm' }),
+                'ml-3 h-9 rounded-md bg-accent px-4 text-accent-foreground hover:bg-accent/90'
+              )}
             >
               Get Quote
             </Link>
@@ -130,13 +146,13 @@ export function Navigation() {
       </nav>
 
       {/* Mobile bottom nav */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white shadow-2xl border-t-2 border-gray-200 safe-area-inset-bottom">
+      <div className="safe-area-inset-bottom fixed right-0 bottom-0 left-0 z-50 border-t border-border bg-card/95 shadow-[0_-4px_24px_rgba(0,0,0,0.06)] backdrop-blur-md lg:hidden">
         {mobileToursOpen && (
-          <div className="border-b bg-white px-3 py-2 grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-2 border-b border-border bg-card px-3 py-2.5">
             <Link
               href="/tours"
               onClick={() => setMobileToursOpen(false)}
-              className="min-h-11 flex items-center justify-center rounded-lg bg-gray-50 text-sm font-medium"
+              className="flex min-h-11 items-center justify-center rounded-md bg-muted text-sm font-medium text-foreground"
             >
               All Tours
             </Link>
@@ -145,42 +161,82 @@ export function Navigation() {
                 key={cat.slug}
                 href={`/tours?category=${cat.slug}`}
                 onClick={() => setMobileToursOpen(false)}
-                className="min-h-11 flex items-center justify-center rounded-lg bg-gray-50 text-sm font-medium text-center px-2"
+                className="flex min-h-11 items-center justify-center rounded-md bg-muted px-2 text-center text-sm font-medium text-foreground"
               >
                 {cat.name}
               </Link>
             ))}
           </div>
         )}
-        <div className="flex flex-row max-w-screen-lg mx-auto">
-          <Link href="/" className="flex flex-col items-center justify-center py-3 px-2 min-w-0 flex-1">
-            <Home className="h-6 w-6 mb-1" style={{ color: pathname === '/' ? '#DC143C' : '#1F2937' }} />
-            <span className="text-[10px] font-semibold" style={{ color: pathname === '/' ? '#DC143C' : '#374151' }}>Home</span>
+        <div className="mx-auto flex max-w-lg flex-row">
+          <Link href="/" className="flex min-w-0 flex-1 flex-col items-center justify-center px-1 py-2.5">
+            <Home className={cn('mb-0.5 size-5', pathname === '/' ? 'text-primary' : 'text-muted-foreground')} />
+            <span
+              className={cn(
+                'text-[10px] font-semibold',
+                pathname === '/' ? 'text-primary' : 'text-muted-foreground'
+              )}
+            >
+              Home
+            </span>
           </Link>
           <button
             type="button"
             onClick={() => setMobileToursOpen((v) => !v)}
-            className="flex flex-col items-center justify-center py-3 px-2 min-w-0 flex-1"
+            className="flex min-w-0 flex-1 flex-col items-center justify-center px-1 py-2.5"
           >
-            <Compass className="h-6 w-6 mb-1" style={{ color: isToursActive || mobileToursOpen ? '#DC143C' : '#1F2937' }} />
-            <span className="text-[10px] font-semibold" style={{ color: isToursActive || mobileToursOpen ? '#DC143C' : '#374151' }}>Tours</span>
+            <Compass
+              className={cn(
+                'mb-0.5 size-5',
+                isToursActive || mobileToursOpen ? 'text-primary' : 'text-muted-foreground'
+              )}
+            />
+            <span
+              className={cn(
+                'text-[10px] font-semibold',
+                isToursActive || mobileToursOpen ? 'text-primary' : 'text-muted-foreground'
+              )}
+            >
+              Tours
+            </span>
           </button>
-          <Link href="/about" className="flex flex-col items-center justify-center py-3 px-2 min-w-0 flex-1">
-            <Users className="h-6 w-6 mb-1" style={{ color: pathname === '/about' ? '#DC143C' : '#1F2937' }} />
-            <span className="text-[10px] font-semibold" style={{ color: pathname === '/about' ? '#DC143C' : '#374151' }}>About</span>
+          <Link href="/about" className="flex min-w-0 flex-1 flex-col items-center justify-center px-1 py-2.5">
+            <Users
+              className={cn('mb-0.5 size-5', pathname === '/about' ? 'text-primary' : 'text-muted-foreground')}
+            />
+            <span
+              className={cn(
+                'text-[10px] font-semibold',
+                pathname === '/about' ? 'text-primary' : 'text-muted-foreground'
+              )}
+            >
+              About
+            </span>
           </Link>
-          <Link href="/blog" className="flex flex-col items-center justify-center py-3 px-2 min-w-0 flex-1">
-            <Book className="h-6 w-6 mb-1" style={{ color: pathname?.startsWith('/blog') ? '#DC143C' : '#1F2937' }} />
-            <span className="text-[10px] font-semibold" style={{ color: pathname?.startsWith('/blog') ? '#DC143C' : '#374151' }}>Blog</span>
+          <Link href="/blog" className="flex min-w-0 flex-1 flex-col items-center justify-center px-1 py-2.5">
+            <Book
+              className={cn(
+                'mb-0.5 size-5',
+                pathname?.startsWith('/blog') ? 'text-primary' : 'text-muted-foreground'
+              )}
+            />
+            <span
+              className={cn(
+                'text-[10px] font-semibold',
+                pathname?.startsWith('/blog') ? 'text-primary' : 'text-muted-foreground'
+              )}
+            >
+              Blog
+            </span>
           </Link>
           <a
             href="https://wa.me/97517643416"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex flex-col items-center justify-center py-3 px-2 min-w-0 flex-1"
+            className="flex min-w-0 flex-1 flex-col items-center justify-center px-1 py-2.5"
           >
-            <MessageCircle className="h-6 w-6 mb-1" style={{ color: '#25D366' }} />
-            <span className="text-[10px] font-semibold" style={{ color: '#059669' }}>WhatsApp</span>
+            <MessageCircle className="mb-0.5 size-5 text-emerald-600" />
+            <span className="text-[10px] font-semibold text-emerald-700">WhatsApp</span>
           </a>
         </div>
       </div>

@@ -3,6 +3,9 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
+import { buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface HeroSlide {
   id: string;
@@ -19,12 +22,7 @@ interface HeroSlide {
   is_active: boolean;
 }
 
-// Optimize image URL for performance - NO DUPLICATION
-const optimizeImageUrl = (url: string, isAboveFold: boolean) => {
-  // Return URL as-is to avoid Cloudinary transformation duplication
-  // Database URLs already have proper transformations applied
-  return url;
-};
+const optimizeImageUrl = (url: string) => url;
 
 interface HeroSlideshowProps {
   slides?: HeroSlide[];
@@ -35,7 +33,7 @@ interface HeroSlideshowProps {
 export function HeroSlideshow({
   slides = [],
   autoPlay = true,
-  interval = 6000
+  interval = 6000,
 }: HeroSlideshowProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [hasMounted, setHasMounted] = useState(false);
@@ -58,41 +56,43 @@ export function HeroSlideshow({
 
   const currentSlide = activeSlides[currentIndex];
 
-  // Handle case when no slides are available
   if (!currentSlide) {
     return (
-      <section className="relative h-screen w-full overflow-hidden bg-black">
-        {/* Fallback background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 to-black" />
-        {/* Fallback content */}
-        <div className="relative z-10 h-full flex items-center">
-          <div className="container mx-auto px-6 md:px-12 lg:px-16">
-            <div className="max-w-4xl">
+      <section className="relative h-[100svh] min-h-[32rem] w-full overflow-hidden bg-secondary">
+        <div className="absolute inset-0 bg-gradient-to-br from-secondary via-foreground to-black" />
+        <div className="relative z-10 flex h-full items-end pb-28 pt-24 lg:items-center lg:pb-0 lg:pt-20">
+          <div className="container">
+            <div className="max-w-2xl space-y-5">
               <motion.h1
-                className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white leading-tight"
-                initial={{ opacity: 0, y: 30 }}
+                className="font-heading text-3xl font-semibold tracking-tight text-white sm:text-4xl md:text-5xl lg:text-[3.25rem] lg:leading-[1.15]"
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8 }}
+                transition={{ duration: 0.7 }}
               >
                 Discover Bhutan
               </motion.h1>
               <motion.p
-                className="text-xl md:text-2xl text-white/80 mt-6 max-w-2xl"
+                className="max-w-lg text-base text-white/75 sm:text-lg"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.3, duration: 0.6 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
               >
                 The Last Shangri-La awaits
               </motion.p>
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.5, duration: 0.6 }}
+                transition={{ delay: 0.35, duration: 0.5 }}
               >
-                <Link href="/tours">
-                  <button className="mt-8 px-10 py-4 bg-white text-black font-semibold rounded-none hover:bg-gray-100 transition-all duration-500 text-base tracking-wide">
-                    Explore Tours →
-                  </button>
+                <Link
+                  href="/tours"
+                  className={cn(
+                    buttonVariants({ size: 'lg' }),
+                    'h-11 gap-2 rounded-md bg-white px-6 text-foreground hover:bg-white/90'
+                  )}
+                >
+                  Explore Tours
+                  <ArrowRight className="size-4" />
                 </Link>
               </motion.div>
             </div>
@@ -103,74 +103,90 @@ export function HeroSlideshow({
   }
 
   return (
-    <section className="relative h-screen w-full overflow-hidden bg-black">
-      {/* Background Image with Crossfade - No White Flash */}
+    <section className="relative h-[100svh] min-h-[32rem] w-full overflow-hidden bg-black">
       <div className="absolute inset-0">
         {activeSlides.map((slide, index) => (
           <motion.div
             key={slide.id}
-            // First paint must show slide 0 (avoid opacity:0 blank hero before hydration)
             initial={false}
             animate={{ opacity: index === currentIndex ? 1 : 0 }}
-            transition={hasMounted ? { duration: 1.2, ease: "easeInOut" } : { duration: 0 }}
+            transition={hasMounted ? { duration: 1.2, ease: 'easeInOut' } : { duration: 0 }}
             className="absolute inset-0"
           >
             <img
-              src={optimizeImageUrl(slide.image_url, index === 0)}
+              src={optimizeImageUrl(slide.image_url)}
               alt={slide.title}
-              className="w-full h-full object-cover"
+              className="h-full w-full object-cover"
               loading={index === 0 ? 'eager' : 'lazy'}
               fetchPriority={index === 0 ? 'high' : 'auto'}
               style={{ objectPosition: 'center 35%' }}
             />
-            {/* Dark gradient overlay */}
             <div
               className="absolute inset-0"
               style={{
-                background: 'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%)'
+                background:
+                  'linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.35) 45%, rgba(0,0,0,0.45) 100%)',
               }}
             />
           </motion.div>
         ))}
       </div>
 
-      {/* Content - Smooth Transitions */}
-      <div className="relative z-10 h-full flex items-center">
-        <div className="container mx-auto px-6 md:px-12 lg:px-16">
-          <div className="max-w-4xl">
+      <div className="relative z-10 flex h-full items-end pb-28 pt-24 lg:items-center lg:pb-0 lg:pt-20">
+        <div className="container">
+          <div className="max-w-2xl">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentIndex}
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 18 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -30 }}
-                transition={{ duration: 0.8, delay: 0.2 }}
-                className="space-y-8"
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.55, delay: 0.1 }}
+                className="space-y-5"
               >
-                {/* Single Compelling Headline */}
-                <motion.h1
-                  className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white leading-tight"
-                >
+                <h1 className="font-heading text-3xl font-semibold tracking-tight text-white sm:text-4xl md:text-5xl lg:text-[3.25rem] lg:leading-[1.15]">
                   {currentSlide.title}
-                </motion.h1>
+                </h1>
 
-                {/* Single CTA Button */}
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.5, duration: 0.6 }}
-                >
-                  <Link href={currentSlide.cta_link || '/tours'}>
-                    <button className="px-10 py-4 bg-white text-black font-semibold rounded-none hover:bg-gray-100 transition-all duration-500 text-base tracking-wide">
-                      {currentSlide.cta_text || 'Explore Tours'} →
-                    </button>
+                {(currentSlide.subtitle || currentSlide.description) && (
+                  <p className="max-w-lg text-base leading-relaxed text-white/75 sm:text-lg">
+                    {currentSlide.subtitle || currentSlide.description}
+                  </p>
+                )}
+
+                <div>
+                  <Link
+                    href={currentSlide.cta_link || '/tours'}
+                    className={cn(
+                      buttonVariants({ size: 'lg' }),
+                      'h-11 gap-2 rounded-md bg-white px-6 text-foreground hover:bg-white/90'
+                    )}
+                  >
+                    {currentSlide.cta_text || 'Explore Tours'}
+                    <ArrowRight className="size-4" />
                   </Link>
-                </motion.div>
+                </div>
               </motion.div>
             </AnimatePresence>
           </div>
         </div>
       </div>
+
+      {activeSlides.length > 1 && (
+        <div className="absolute bottom-24 left-1/2 z-20 flex -translate-x-1/2 gap-2 lg:bottom-10">
+          {activeSlides.map((slide, index) => (
+            <button
+              key={slide.id}
+              type="button"
+              aria-label={`Go to slide ${index + 1}`}
+              onClick={() => setCurrentIndex(index)}
+              className={`h-1.5 rounded-full transition-all ${
+                index === currentIndex ? 'w-8 bg-white' : 'w-1.5 bg-white/40 hover:bg-white/70'
+              }`}
+            />
+          ))}
+        </div>
+      )}
     </section>
   );
 }

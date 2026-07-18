@@ -64,12 +64,13 @@ export function BookingManagement() {
 
   const updateBookingStatus = async (id: string, status: string) => {
     try {
-      await fetch(`/api/admin/bookings/${id}`, {
+      await fetch(`/api/admin/bookings`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({ id, status }),
       });
       await fetchBookings();
+      window.dispatchEvent(new Event('admin-badges-refresh'));
     } catch (error) {
       console.error('Failed to update booking:', error);
     }

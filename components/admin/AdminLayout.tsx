@@ -57,10 +57,10 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <div className="flex min-h-screen items-center justify-center bg-muted">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4" />
-          <p className="text-gray-600">Loading admin panel...</p>
+          <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <p className="text-sm text-muted-foreground">Loading admin panel…</p>
         </div>
       </div>
     );
@@ -68,16 +68,16 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
   if (authError) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
-        <div className="text-center max-w-md">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-4">
-            <h2 className="text-red-800 font-semibold mb-2">Authentication Error</h2>
-            <p className="text-red-600">{authError}</p>
+      <div className="flex min-h-screen items-center justify-center bg-muted p-4">
+        <div className="w-full max-w-md text-center">
+          <div className="mb-4 rounded-lg border border-destructive/20 bg-destructive/5 p-6">
+            <h2 className="mb-2 font-heading text-lg font-semibold text-destructive">Authentication Error</h2>
+            <p className="text-sm text-destructive/80">{authError}</p>
           </div>
           <button
             type="button"
             onClick={() => router.push('/admin/login')}
-            className="min-h-11 bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors"
+            className="inline-flex min-h-11 items-center justify-center rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground hover:bg-primary/90"
           >
             Go to Login
           </button>
@@ -88,17 +88,17 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <div className="flex min-h-screen items-center justify-center bg-muted">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4" />
-          <p className="text-gray-600">Redirecting to login...</p>
+          <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <p className="text-sm text-muted-foreground">Redirecting to login…</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden">
+    <div className="flex h-screen overflow-hidden bg-muted">
       <AdminSidebar
         user={user}
         hasPermission={hasPermission}
@@ -108,12 +108,12 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         onMobileClose={() => setIsMobileSidebarOpen(false)}
       />
 
-      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <AdminHeader
           user={user}
           onMobileMenuOpen={() => setIsMobileSidebarOpen(true)}
         />
-        <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6 pb-20 md:pb-6">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto p-4 pb-20 md:p-6 md:pb-6">
           {children}
         </main>
       </div>

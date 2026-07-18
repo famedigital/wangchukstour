@@ -69,10 +69,25 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { id } = body;
+    const { id, ...updates } = body;
 
     if (!id) {
       return NextResponse.json({ error: 'Booking ID is required' }, { status: 400 });
+    }
+
+    const allowed = [
+      'status',
+      'payment_status',
+      'deposit_paid',
+      'deposit_amount',
+      'total_amount',
+      'internal_notes',
+      'travel_date',
+      'custom_requests',
+    ] as const;
+    const payload: Record<string, unknown> = {};
+    for (const key of allowed) {
+      if (updates[key] !== undefined) payload[key] = updates[key];
     }
 
     const supabase = createAdminClient();
@@ -92,7 +107,7 @@ export async function PATCH(request: NextRequest) {
     const { data: updatedBooking, error } = await supabase
       .from('bookings')
       .update({
-        ...body,
+        ...payload,
         updated_by: user.userId,
         updated_at: new Date().toISOString(),
       })

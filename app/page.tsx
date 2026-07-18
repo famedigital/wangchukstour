@@ -78,24 +78,17 @@ export default async function HomePage() {
       <HeroSlideshow slides={heroSlides} autoPlay={true} interval={6000} />
 
       {/* === FEATURED TOURS === */}
-      <section className="py-20 relative" style={{ background: 'var(--muted)' }}>
+      <section className="relative bg-muted py-14 md:py-20">
         <div className="container">
           <ScrollReveal>
-            <div className="text-center mb-12">
-              <Badge
-                className="mb-4"
-                style={{
-                  background: 'linear-gradient(135deg, #B91C1C 0%, #8B0000 100%)',
-                  color: '#FFFFFF',
-                  border: 'none'
-                }}
-              >
+            <div className="mb-10 text-center md:mb-12">
+              <Badge className="mb-4 border-transparent bg-primary text-primary-foreground">
                 Popular Tours
               </Badge>
-              <h2 className="font-heading text-4xl md:text-5xl font-bold mb-4">
-                Featured <span style={{ color: '#B91C1C' }}>Journeys</span>
+              <h2 className="mb-3 font-heading text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl">
+                Featured <span className="text-primary">Journeys</span>
               </h2>
-              <p className="text-lg max-w-2xl mx-auto" style={{ color: 'var(--muted-foreground)' }}>
+              <p className="mx-auto max-w-2xl text-base text-muted-foreground md:text-lg">
                 Our most loved experiences, crafted with care and attention to every detail.
               </p>
             </div>

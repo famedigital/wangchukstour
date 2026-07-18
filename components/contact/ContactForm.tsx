@@ -1,26 +1,46 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { PremiumInput, PremiumTextarea } from '@/components/ui/premium-input';
 import { Send, Check } from 'lucide-react';
 
 export function ContactForm() {
+  const searchParams = useSearchParams();
+  const intent = searchParams.get('intent') || 'inquire';
+  const tourSlug = searchParams.get('tour') || '';
+  const tourTitle = searchParams.get('title') || '';
+
+  const isBooking = intent === 'book';
+
   const [formState, setFormState] = useState({
     name: '',
     email: '',
     phone: '',
     travelDates: '',
     groupSize: '',
-    message: ''
+    message: '',
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
+  useEffect(() => {
+    if (tourTitle || tourSlug) {
+      setFormState((prev) => ({
+        ...prev,
+        message: prev.message
+          ? prev.message
+          : isBooking
+            ? `I would like to book: ${tourTitle || tourSlug}.\nPreferred dates / group details:`
+            : `I have a question about: ${tourTitle || tourSlug}.\n\n`,
+      }));
+    }
+  }, [tourTitle, tourSlug, isBooking]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate required fields
     const requiredFields = ['name', 'email', 'message'];
     const errors: Record<string, string> = {};
 
@@ -30,7 +50,6 @@ export function ContactForm() {
       }
     });
 
-    // Email validation
     if (formState.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formState.email)) {
       errors.email = 'Please enter a valid email address';
     }
@@ -43,10 +62,16 @@ export function ContactForm() {
     try {
       setSubmitting(true);
 
-      const response = await fetch('/api/contact', {
+      const endpoint = isBooking ? '/api/booking-request' : '/api/contact';
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formState)
+        body: JSON.stringify({
+          ...formState,
+          intent,
+          tourSlug,
+          tourTitle,
+        }),
       });
 
       if (response.ok) {
@@ -57,11 +82,9 @@ export function ContactForm() {
           phone: '',
           travelDates: '',
           groupSize: '',
-          message: ''
+          message: '',
         });
         setFormErrors({});
-
-        // Reset success message after 5 seconds
         setTimeout(() => setSubmitted(false), 5000);
       } else {
         throw new Error('Failed to submit form');
@@ -76,13 +99,12 @@ export function ContactForm() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormState(prev => ({ ...prev, [name]: value }));
-    // Clear error for this field
+    setFormState((prev) => ({ ...prev, [name]: value }));
     if (formErrors[name]) {
-      setFormErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[name];
-        return newErrors;
+      setFormErrors((prev) => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
       });
     }
   };
@@ -93,14 +115,34 @@ export function ContactForm() {
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
           <Check className="h-8 w-8 text-green-600" />
         </div>
-        <h3 className="text-xl font-bold mb-2">Message Sent!</h3>
-        <p className="text-muted-foreground">Thank you for reaching out. We'll get back to you within 24 hours.</p>
+        <h3 className="text-xl font-bold mb-2">
+          {isBooking ? 'Booking request sent!' : 'Message sent!'}
+        </h3>
+        <p className="text-muted-foreground">
+          {isBooking
+            ? 'Our team will confirm availability and get back to you within 24 hours.'
+            : "Thank you for reaching out. We'll get back to you within 24 hours."}
+        </p>
       </div>
     );
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="rounded-xl border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+        {isBooking ? (
+          <p>
+            <span className="font-medium text-foreground">Booking request</span>
+            {tourTitle ? ` for ${tourTitle}` : ''}. This creates a pending booking for our team to confirm.
+          </p>
+        ) : (
+          <p>
+            <span className="font-medium text-foreground">General inquiry</span>
+            {tourTitle ? ` about ${tourTitle}` : ''}. We typically reply within 24 hours.
+          </p>
+        )}
+      </div>
+
       <div className="grid gap-6 md:grid-cols-2">
         <div>
           <label className="block text-sm font-medium mb-2">Name *</label>
@@ -112,7 +154,7 @@ export function ContactForm() {
             placeholder="Your full name"
             error={formErrors.name}
           />
-          {formErrors.name && <p className="text-red-500 text-sm mt-1">{formErrors.name}</p>}
+          {formErrors.name && <p className="text-destructive text-sm mt-1">{formErrors.name}</p>}
         </div>
 
         <div>
@@ -122,12 +164,14 @@ export function ContactForm() {
             name="email"
             value={formState.email}
             onChange={handleChange}
-            placeholder="your@email.com"
+            placeholder="you@email.com"
             error={formErrors.email}
           />
-          {formErrors.email && <p className="text-red-500 text-sm mt-1">{formErrors.email}</p>}
+          {formErrors.email && <p className="text-destructive text-sm mt-1">{formErrors.email}</p>}
         </div>
+      </div>
 
+      <div className="grid gap-6 md:grid-cols-2">
         <div>
           <label className="block text-sm font-medium mb-2">Phone</label>
           <PremiumInput
@@ -135,31 +179,30 @@ export function ContactForm() {
             name="phone"
             value={formState.phone}
             onChange={handleChange}
-            placeholder="+1 234 567 8900"
+            placeholder="+975 ..."
           />
         </div>
-
         <div>
-          <label className="block text-sm font-medium mb-2">Preferred Travel Dates</label>
-          <PremiumInput
-            type="text"
-            name="travelDates"
-            value={formState.travelDates}
-            onChange={handleChange}
-            placeholder="e.g., March 2025, flexible dates"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-2">Group Size</label>
+          <label className="block text-sm font-medium mb-2">Group size</label>
           <PremiumInput
             type="text"
             name="groupSize"
             value={formState.groupSize}
             onChange={handleChange}
-            placeholder="e.g., 2 adults, solo traveler"
+            placeholder="e.g. 2 adults"
           />
         </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-2">Preferred travel dates</label>
+        <PremiumInput
+          type="text"
+          name="travelDates"
+          value={formState.travelDates}
+          onChange={handleChange}
+          placeholder="e.g. Oct 2026"
+        />
       </div>
 
       <div>
@@ -168,29 +211,20 @@ export function ContactForm() {
           name="message"
           value={formState.message}
           onChange={handleChange}
-          placeholder="Tell us about your dream Bhutan adventure..."
+          placeholder="Tell us about your trip..."
           rows={5}
           error={formErrors.message}
         />
-        {formErrors.message && <p className="text-red-500 text-sm mt-1">{formErrors.message}</p>}
+        {formErrors.message && <p className="text-destructive text-sm mt-1">{formErrors.message}</p>}
       </div>
 
       <button
         type="submit"
         disabled={submitting}
-        className="w-full inline-flex items-center justify-center gap-2 rounded-xl px-8 py-4 text-lg font-semibold text-white transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-        style={{ background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)' }}
+        className="w-full min-h-11 inline-flex items-center justify-center gap-2 rounded-xl bg-primary text-primary-foreground px-6 py-3 font-medium hover:bg-primary/90 disabled:opacity-50"
       >
-        {submitting ? (
-          <>
-            <span>Sending...</span>
-          </>
-        ) : (
-          <>
-            <Send className="h-5 w-5" />
-            <span>Send Message</span>
-          </>
-        )}
+        <Send className="h-4 w-4" />
+        {submitting ? 'Sending...' : isBooking ? 'Submit booking request' : 'Send inquiry'}
       </button>
     </form>
   );

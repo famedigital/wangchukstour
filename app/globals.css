@@ -1,183 +1,220 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-@theme {
-  --radius: 0.6rem;
+@custom-variant dark (&:is(.dark *));
 
-  /* Typography */
-  --font-sans: var(--font-inter);
-  --font-heading: var(--font-jakarta);
-  --font-accent: var(--font-playfair);
-}
-
-/* === Bhutan-Inspired Vibrant Color Palette === */
-
+/* Brand theme — shared by public site + admin (shadcn Base UI) */
 :root {
-  /* Primary Colors - Prayer Flag & Sunset Inspired */
-  --color-primary: #E85D04;
-  --color-primary-foreground: #FAFAF9;
+  --radius: 0.625rem;
 
-  /* Secondary - Deep Mountain */
-  --color-secondary: #1E3A5F;
-  --color-secondary-foreground: #FAFAF9;
+  --background: #fafaf9;
+  --foreground: #1c1917;
 
-  /* Accent - Golden Temple */
-  --color-accent: #D4A017;
-  --color-accent-foreground: #1C1917;
+  --card: #ffffff;
+  --card-foreground: #1c1917;
 
-  /* Premium Red Palette */
-  --color-prayer-red: #C41E3A;
-  --color-prayer-red-light: #E63946;
-  --color-prayer-red-dark: #9D1B2F;
-  --color-crimson: #DC143C;
-  --color-royal-red: #B22222;
-  --color-luxury-red: #8B0000;
-  --color-monastery-red: #B91C1C;
-  --color-monastery-red-dark: #7F1D1D;
+  --popover: #ffffff;
+  --popover-foreground: #1c1917;
 
-  /* Prayer Flag Colors */
-  --color-prayer-blue: #2563EB;
-  --color-prayer-green: #16A34A;
-  --color-prayer-yellow: #EAB308;
+  /* Monastery red — primary CTAs & active states */
+  --primary: #b91c1c;
+  --primary-foreground: #fafaf9;
 
-  /* Premium Red Gradients */
-  --gradient-premium-red: linear-gradient(135deg, #C41E3A 0%, #8B0000 50%, #B22222 100%);
-  --gradient-crimson-gold: linear-gradient(135deg, #DC143C 0%, #D4A017 100%);
-  --gradient-red-sunset: linear-gradient(135deg, #E63946 0%, #C41E3A 50%, #8B0000 100%);
+  /* Himalayan navy */
+  --secondary: #1e3a5f;
+  --secondary-foreground: #fafaf9;
 
-  /* Neutral Base */
-  --color-background: #FAFAF9;
-  --color-foreground: #1C1917;
-  --color-card: #FFFFFF;
-  --color-card-foreground: #1C1917;
-  --color-popover: #FFFFFF;
-  --color-popover-foreground: #1C1917;
+  --muted: #f5f5f4;
+  --muted-foreground: #78716c;
 
-  /* Muted */
-  --color-muted: #F5F5F4;
-  --color-muted-foreground: #78716C;
+  /* Prayer-flag gold */
+  --accent: #d4a017;
+  --accent-foreground: #1c1917;
 
-  /* Destructive */
-  --color-destructive: #DC2626;
-  --color-destructive-foreground: #FAFAF9;
+  --destructive: #dc2626;
+  --destructive-foreground: #fafaf9;
 
-  /* Border & Input */
-  --color-border: #E7E5E4;
-  --color-input: #E7E5E4;
-  --color-ring: #E85D04;
+  --border: #e7e5e4;
+  --input: #e7e5e4;
+  --ring: #b91c1c;
+
+  --chart-1: #b91c1c;
+  --chart-2: #d4a017;
+  --chart-3: #1e3a5f;
+  --chart-4: #78716c;
+  --chart-5: #c41e3a;
+
+  --sidebar: #ffffff;
+  --sidebar-foreground: #1c1917;
+  --sidebar-primary: #b91c1c;
+  --sidebar-primary-foreground: #fafaf9;
+  --sidebar-accent: #f5f5f4;
+  --sidebar-accent-foreground: #1c1917;
+  --sidebar-border: #e7e5e4;
+  --sidebar-ring: #b91c1c;
+
+  /* Legacy brand aliases */
+  --prayer-red: #c41e3a;
+  --monastery-red: #b91c1c;
+  --crimson: #dc143c;
+  --color-crimson: #dc143c;
+  --color-monastery-red: #b91c1c;
+  --color-prayer-red: #c41e3a;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-primary: var(--primary);
+  --color-border: var(--border);
 }
 
 .dark {
-  /* Primary Colors - Vibrant in Dark Mode */
-  --color-primary: #F97316;
-  --color-primary-foreground: #1C1917;
+  --background: #1c1917;
+  --foreground: #fafaf9;
+  --card: #292524;
+  --card-foreground: #fafaf9;
+  --popover: #292524;
+  --popover-foreground: #fafaf9;
+  --primary: #f87171;
+  --primary-foreground: #1c1917;
+  --secondary: #334155;
+  --secondary-foreground: #fafaf9;
+  --muted: #292524;
+  --muted-foreground: #a8a29e;
+  --accent: #fbbf24;
+  --accent-foreground: #1c1917;
+  --destructive: #ef4444;
+  --destructive-foreground: #fafaf9;
+  --border: rgba(255, 255, 255, 0.14);
+  --input: rgba(255, 255, 255, 0.18);
+  --ring: #f87171;
+  --chart-1: #f87171;
+  --chart-2: #fbbf24;
+  --chart-3: #94a3b8;
+  --chart-4: #a8a29e;
+  --chart-5: #e63946;
+  --sidebar: #292524;
+  --sidebar-foreground: #fafaf9;
+  --sidebar-primary: #f87171;
+  --sidebar-primary-foreground: #1c1917;
+  --sidebar-accent: #44403c;
+  --sidebar-accent-foreground: #fafaf9;
+  --sidebar-border: rgba(255, 255, 255, 0.14);
+  --sidebar-ring: #f87171;
 
-  --color-secondary: #334155;
-  --color-secondary-foreground: #FAFAF9;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-primary: var(--primary);
+  --color-border: var(--border);
+  --color-crimson: #f0565d;
+  --color-monastery-red: #f87171;
+  --color-prayer-red: #e63946;
+}
 
-  /* Accent - Glowing Gold */
-  --color-accent: #FBBF24;
-  --color-accent-foreground: #1C1917;
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 
-  /* Premium Red Palette - Enhanced for Dark */
-  --color-prayer-red: #E63946;
-  --color-prayer-red-light: #F4756A;
-  --color-prayer-red-dark: #C41E3A;
-  --color-crimson: #F0565D;
-  --color-royal-red: #DC143C;
-  --color-luxury-red: #B91C1C;
-  --color-monastery-red: #F87171;
-  --color-monastery-red-dark: #DC2626;
+  --font-sans: var(--font-geist), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-jakarta), var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-accent: var(--font-playfair), ui-serif, Georgia, serif;
 
-  /* Prayer Flag Colors - Enhanced for Dark */
-  --color-prayer-blue: #3B82F6;
-  --color-prayer-green: #22C55E;
-  --color-prayer-yellow: #F59E0B;
-
-  /* Premium Red Gradients - Enhanced for Dark */
-  --gradient-premium-red: linear-gradient(135deg, #E63946 0%, #B91C1C 50%, #DC143C 100%);
-  --gradient-crimson-gold: linear-gradient(135deg, #F0565D 0%, #FBBF24 100%);
-  --gradient-red-sunset: linear-gradient(135deg, #F4756A 0%, #E63946 50%, #B91C1C 100%);
-
-  /* Neutral Base */
-  --color-background: #1C1917;
-  --color-foreground: #FAFAF9;
-  --color-card: #292524;
-  --color-card-foreground: #FAFAF9;
-  --color-popover: #292524;
-  --color-popover-foreground: #FAFAF9;
-
-  /* Muted */
-  --color-muted: #292524;
-  --color-muted-foreground: #A8A29E;
-
-  /* Destructive */
-  --color-destructive: #EF4444;
-  --color-destructive-foreground: #FAFAF9;
-
-  /* Border & Input */
-  --color-border: rgba(255, 255, 255, 0.15);
-  --color-input: rgba(255, 255, 255, 0.2);
-  --color-ring: #F97316;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
 }
 
 @layer base {
-  body {
-    background-color: var(--color-background);
-    color: var(--color-foreground);
+  * {
+    @apply border-border outline-ring/50;
   }
 
-  /* Mobile bottom navigation safe area */
   html {
     height: 100%;
-    position: relative;
+    -webkit-text-size-adjust: 100%;
   }
 
   body {
-    min-height: 100%;
-    position: relative;
+    @apply min-h-full bg-background text-foreground antialiased font-sans;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-heading tracking-tight;
   }
 
   @supports (padding-bottom: env(safe-area-inset-bottom)) {
     .safe-bottom-padding {
-      padding-bottom: calc(4rem + env(safe-area-inset-bottom));
+      padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
     }
   }
 
   .container {
     width: 100%;
-    max-width: 1400px;
+    max-width: 1280px;
     margin-left: auto;
     margin-right: auto;
-    padding-left: 2rem;
-    padding-right: 2rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
 
   @media (min-width: 640px) {
     .container {
-      padding-left: 3rem;
-      padding-right: 3rem;
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
     }
   }
 
   @media (min-width: 768px) {
     .container {
-      padding-left: 4rem;
-      padding-right: 4rem;
+      padding-left: 2rem;
+      padding-right: 2rem;
     }
   }
 
   @media (min-width: 1024px) {
     .container {
-      padding-left: 5rem;
-      padding-right: 5rem;
-    }
-  }
-
-  @media (min-width: 1280px) {
-    .container {
-      padding-left: 6rem;
-      padding-right: 6rem;
+      padding-left: 2.5rem;
+      padding-right: 2.5rem;
     }
   }
 }

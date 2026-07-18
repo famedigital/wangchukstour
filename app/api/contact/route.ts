@@ -9,6 +9,9 @@ const contactSchema = z.object({
   travelDates: z.string().optional(),
   groupSize: z.string().optional(),
   message: z.string().min(1),
+  tourSlug: z.string().optional(),
+  tourTitle: z.string().optional(),
+  intent: z.string().optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -19,7 +22,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid input', details: parsed.error.issues }, { status: 400 });
     }
 
-    const { name, email, phone, travelDates, groupSize, message } = parsed.data;
+    const { name, email, phone, travelDates, groupSize, message, tourSlug, tourTitle } = parsed.data;
     const supabase = createAdminClient();
 
     const groupSizeNum = groupSize ? parseInt(groupSize, 10) : null;
@@ -33,7 +36,8 @@ export async function POST(request: NextRequest) {
       group_size: Number.isFinite(groupSizeNum as number) ? groupSizeNum : null,
       status: 'new',
       inquiry_type: 'contact_form',
-      subject: 'Website contact form',
+      subject: tourTitle ? `Inquiry: ${tourTitle}` : 'Website contact form',
+      tour_interest: tourTitle || tourSlug || null,
     });
 
     if (error) throw error;

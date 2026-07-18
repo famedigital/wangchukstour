@@ -245,7 +245,7 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
 
             {/* Action Buttons */}
             <div className="flex flex-row gap-2">
-              <Link href="/contact">
+              <Link href={`/contact?intent=book&tour=${tour.slug}&title=${encodeURIComponent(tour.title || '')}`}>
                 <MagneticButton
                   className="rounded-lg px-4 py-2 text-sm font-medium"
                   style={{
@@ -256,12 +256,12 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
                   Book Now
                 </MagneticButton>
               </Link>
-              <Link href="/contact">
+              <Link href={`/contact?intent=inquire&tour=${tour.slug}&title=${encodeURIComponent(tour.title || '')}`}>
                 <MagneticButton
                   className="rounded-lg px-4 py-2 text-sm font-medium"
                   variant="outline"
                 >
-                  Ask
+                  Inquire
                 </MagneticButton>
               </Link>
             </div>
@@ -464,7 +464,7 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
                     </div>
                   </div>
 
-                  <Link href="/contact" className="block mb-3">
+                  <Link href={`/contact?intent=book&tour=${tour.slug}&title=${encodeURIComponent(tour.title || '')}`} className="block mb-3">
                     <MagneticButton
                       className="w-full rounded-lg px-6 py-3 text-sm font-medium"
                       style={{
@@ -476,7 +476,7 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
                     </MagneticButton>
                   </Link>
 
-                  <Link href="/contact" className="block">
+                  <Link href={`/contact?intent=inquire&tour=${tour.slug}&title=${encodeURIComponent(tour.title || '')}`} className="block">
                     <MagneticButton
                       className="w-full rounded-lg px-5 py-2.5 text-sm font-medium"
                       variant="outline"

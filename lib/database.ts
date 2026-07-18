@@ -204,7 +204,7 @@ export async function getTourBySlug(slug: string): Promise<Tour | null> {
 
 export async function getPublishedBlogPosts(limit?: number): Promise<BlogPost[]> {
   try {
-    const supabase = await createClient();
+    const supabase = createReadClient();
 
     let query = supabase
       .from('blog_posts')
@@ -228,7 +228,7 @@ export async function getPublishedBlogPosts(limit?: number): Promise<BlogPost[]>
 
 export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> {
   try {
-    const supabase = await createClient();
+    const supabase = createReadClient();
 
     const { data, error } = await supabase
       .from('blog_posts')

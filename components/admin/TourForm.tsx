@@ -126,7 +126,9 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
       await onSubmit(formData);
       toast.success('Tour saved successfully!');
     } catch (error) {
-      toast.error('Failed to save tour');
+      const message = error instanceof Error ? error.message : 'Failed to save tour';
+      toast.error(message);
+      throw error;
     } finally {
       setLoading(false);
     }

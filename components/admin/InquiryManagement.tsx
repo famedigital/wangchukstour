@@ -54,6 +54,7 @@ export function InquiryManagement() {
       if (!res.ok) throw new Error('Failed');
       toast.success('Status updated');
       await load();
+      window.dispatchEvent(new Event('admin-badges-refresh'));
     } catch {
       toast.error('Update failed');
     }

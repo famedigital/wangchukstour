@@ -1,8 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Search, Bell, User, Settings, LogOut, Menu, Moon, Sun } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
 interface AdminHeaderProps {
   onMobileMenuOpen: () => void;
@@ -14,183 +17,257 @@ interface AdminHeaderProps {
   };
 }
 
+type NotificationItem = {
+  id: string;
+  type: 'booking' | 'inquiry';
+  title: string;
+  message: string;
+  href: string;
+  time: string;
+  unread: boolean;
+};
+
 export function AdminHeader({ onMobileMenuOpen, user }: AdminHeaderProps) {
   const router = useRouter();
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [loadingNotifications, setLoadingNotifications] = useState(false);
 
-  const notifications = [
-    { id: 1, title: 'New booking received', message: 'John Smith booked Cultural Highlights', time: '2 min ago', unread: true },
-    { id: 2, title: 'New inquiry', message: 'Sarah asked about custom tour', time: '15 min ago', unread: true },
-    { id: 3, title: 'Payment confirmed', message: 'Booking #WCT-20240624-0001 paid', time: '1 hour ago', unread: false },
-  ];
+  const loadNotifications = useCallback(async () => {
+    try {
+      setLoadingNotifications(true);
+      const res = await fetch('/api/admin/notifications');
+      if (!res.ok) return;
+      const data = await res.json();
+      setNotifications(data.notifications || []);
+      setUnreadCount(data.counts?.unread || 0);
+    } catch {
+      // keep previous
+    } finally {
+      setLoadingNotifications(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadNotifications();
+    const interval = setInterval(loadNotifications, 60_000);
+    return () => clearInterval(interval);
+  }, [loadNotifications]);
+
+  useEffect(() => {
+    if (showNotifications) loadNotifications();
+  }, [showNotifications, loadNotifications]);
 
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true);
       setShowUserMenu(false);
-
-      const response = await fetch('/api/auth/logout', {
-        method: 'POST',
-      });
-
-      if (response.ok) {
-        // Redirect to login page
-        router.push('/admin/login');
-        router.refresh();
-      } else {
-        console.error('Logout failed');
-        // Even if API fails, clear client-side state and redirect
-        router.push('/admin/login');
-      }
-    } catch (error) {
-      console.error('Logout error:', error);
-      // Even on error, redirect to login
+      await fetch('/api/auth/logout', { method: 'POST' });
+      router.push('/admin/login');
+      router.refresh();
+    } catch {
       router.push('/admin/login');
     } finally {
       setIsLoggingOut(false);
     }
   };
 
+  const markAllRead = async () => {
+    try {
+      await fetch('/api/admin/notifications', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'mark_inquiries_read' }),
+      });
+      await loadNotifications();
+      // Notify sidebar to refresh badges
+      window.dispatchEvent(new Event('admin-badges-refresh'));
+    } catch {
+      // ignore
+    }
+  };
+
+  const openNotification = async (n: NotificationItem) => {
+    setShowNotifications(false);
+    if (n.type === 'inquiry') {
+      await fetch('/api/admin/notifications', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'mark_inquiry_read', id: n.id }),
+      });
+      window.dispatchEvent(new Event('admin-badges-refresh'));
+    }
+    router.push(n.href);
+  };
+
   return (
-    <header className="sticky top-0 z-30 bg-white shadow-sm">
-      <div className="flex items-center justify-between h-16 px-6">
-        {/* Left Side */}
-        <div className="flex items-center gap-4">
-          {/* Mobile Menu Button */}
+    <header className="sticky top-0 z-30 border-b border-border bg-card/95 backdrop-blur-md">
+      <div className="flex h-14 items-center justify-between gap-3 px-4 md:h-16 md:px-6">
+        <div className="flex min-w-0 flex-1 items-center gap-3">
           <button
+            type="button"
             onClick={onMobileMenuOpen}
-            className="lg:hidden p-2 hover:bg-gray-100 rounded-lg"
+            className="inline-flex size-10 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground lg:hidden"
+            aria-label="Open menu"
           >
-            <Menu className="h-5 w-5" />
+            <Menu className="size-5" />
           </button>
 
-          {/* Search Bar */}
-          <div className="hidden md:flex relative w-96">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search tours, bookings, customers..."
-              className="w-full pl-10 pr-4 py-2 bg-gray-50 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-100"
+          <div className="relative hidden w-full max-w-md md:block">
+            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Search tours, bookings, customers…"
+              className="h-9 bg-muted/60 pl-9"
             />
           </div>
         </div>
 
-        {/* Right Side */}
-        <div className="flex items-center gap-3">
-          {/* Dark Mode Toggle */}
+        <div className="flex shrink-0 items-center gap-1.5">
           <button
+            type="button"
             onClick={() => setIsDarkMode(!isDarkMode)}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="inline-flex size-9 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
             title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
           >
-            {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            {isDarkMode ? <Sun className="size-4" /> : <Moon className="size-4" />}
           </button>
 
-          {/* Notifications */}
           <div className="relative">
             <button
+              type="button"
               onClick={() => setShowNotifications(!showNotifications)}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors relative"
+              className="relative inline-flex size-9 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+              aria-label="Notifications"
             >
-              <Bell className="h-5 w-5" />
-              <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
+              <Bell className="size-4" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
+              )}
             </button>
 
-            {/* Notifications Dropdown */}
             {showNotifications && (
               <>
-                <div
-                  className="fixed inset-0 z-10"
-                  onClick={() => setShowNotifications(false)}
-                />
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg z-20">
-                  <div className="p-4">
-                    <h3 className="font-semibold">Notifications</h3>
-                    <p className="text-sm text-gray-500">You have {notifications.filter(n => n.unread).length} unread notifications</p>
+                <div className="fixed inset-0 z-10" onClick={() => setShowNotifications(false)} />
+                <div className="absolute right-0 z-20 mt-2 w-80 overflow-hidden rounded-lg border border-border bg-card shadow-lg sm:w-96">
+                  <div className="border-b border-border p-4">
+                    <h3 className="font-heading text-sm font-semibold">Notifications</h3>
+                    <p className="text-xs text-muted-foreground">
+                      {unreadCount > 0
+                        ? `${unreadCount} pending booking${unreadCount === 1 ? '' : 's'} / new inquir${unreadCount === 1 ? 'y' : 'ies'}`
+                        : 'You\'re all caught up'}
+                    </p>
                   </div>
-                  <div className="max-h-96 overflow-y-auto">
-                    {notifications.map((notification) => (
-                      <div
-                        key={notification.id}
-                        className={`p-4 hover:bg-gray-50 cursor-pointer ${notification.unread ? 'bg-blue-50' : ''}`}
-                      >
-                        <div className="flex items-start gap-3">
-                          <div className={`h-2 w-2 mt-2 rounded-full ${notification.unread ? 'bg-blue-500' : 'bg-gray-300'}`} />
-                          <div className="flex-1">
-                            <p className="font-medium text-sm">{notification.title}</p>
-                            <p className="text-sm text-gray-600">{notification.message}</p>
-                            <p className="text-xs text-gray-400 mt-1">{notification.time}</p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                  <div className="max-h-80 overflow-y-auto">
+                    {loadingNotifications && notifications.length === 0 ? (
+                      <p className="p-4 text-sm text-muted-foreground">Loading…</p>
+                    ) : notifications.length === 0 ? (
+                      <p className="p-4 text-sm text-muted-foreground">No new notifications</p>
+                    ) : (
+                      notifications.map((notification) => (
+                        <button
+                          key={notification.id}
+                          type="button"
+                          onClick={() => openNotification(notification)}
+                          className={cn(
+                            'w-full border-b border-border/60 p-4 text-left last:border-0 hover:bg-muted/60',
+                            notification.unread && 'bg-primary/5'
+                          )}
+                        >
+                          <p className="text-sm font-medium text-foreground">{notification.title}</p>
+                          <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">
+                            {notification.message}
+                          </p>
+                          <p className="mt-1 text-xs text-muted-foreground">{notification.time}</p>
+                        </button>
+                      ))
+                    )}
                   </div>
-                  <div className="p-4 bg-gray-50 rounded-b-xl">
-                    <button className="w-full text-center text-sm text-red-600 hover:text-red-700 font-medium">
-                      Mark all as read
+                  <div className="flex items-center gap-2 border-t border-border bg-muted/40 p-3">
+                    <button
+                      type="button"
+                      onClick={markAllRead}
+                      className="flex-1 text-center text-sm font-medium text-primary hover:underline"
+                    >
+                      Mark inquiries read
                     </button>
+                    <Link
+                      href="/admin/bookings"
+                      onClick={() => setShowNotifications(false)}
+                      className="flex-1 text-center text-sm font-medium text-muted-foreground hover:text-foreground"
+                    >
+                      View bookings
+                    </Link>
                   </div>
                 </div>
               </>
             )}
           </div>
 
-          {/* User Menu */}
           <div className="relative">
             <button
+              type="button"
               onClick={() => setShowUserMenu(!showUserMenu)}
-              className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="flex items-center gap-2.5 rounded-md p-1.5 hover:bg-muted"
             >
               {user?.avatar_url ? (
-                <img
-                  src={user.avatar_url}
-                  alt={user.name}
-                  className="h-8 w-8 rounded-full object-cover"
-                />
+                <img src={user.avatar_url} alt={user.name} className="size-8 rounded-full object-cover" />
               ) : (
-                <div className="h-8 w-8 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)' }}>
-                  <User className="h-4 w-4 text-white" />
+                <div className="flex size-8 items-center justify-center rounded-full bg-primary">
+                  <User className="size-4 text-primary-foreground" />
                 </div>
               )}
-              <div className="hidden md:block text-left">
-                <p className="font-medium text-sm">{user?.name || 'Admin User'}</p>
-                <p className="text-xs text-gray-500 capitalize">{user?.role || 'Admin'}</p>
+              <div className="hidden text-left md:block">
+                <p className="text-sm font-medium leading-none">{user?.name || 'Admin User'}</p>
+                <p className="mt-1 text-xs capitalize text-muted-foreground">{user?.role || 'Admin'}</p>
               </div>
             </button>
 
-            {/* User Dropdown */}
             {showUserMenu && (
               <>
-                <div
-                  className="fixed inset-0 z-10"
-                  onClick={() => setShowUserMenu(false)}
-                />
-                <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg z-20">
-                  <div className="p-4">
-                    <p className="font-medium">{user?.name || 'Admin User'}</p>
-                    <p className="text-sm text-gray-500">{user?.email || 'admin@wangchuktour.com'}</p>
+                <div className="fixed inset-0 z-10" onClick={() => setShowUserMenu(false)} />
+                <div className="absolute right-0 z-20 mt-2 w-56 overflow-hidden rounded-lg border border-border bg-card shadow-lg">
+                  <div className="border-b border-border p-3">
+                    <p className="text-sm font-medium">{user?.name || 'Admin User'}</p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {user?.email || 'admin@wangchuktour.com'}
+                    </p>
                   </div>
-                  <div className="py-2">
-                    <button className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-3">
-                      <User className="h-4 w-4" />
-                      <span className="text-sm">My Profile</span>
-                    </button>
-                    <button className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-3">
-                      <Settings className="h-4 w-4" />
-                      <span className="text-sm">Settings</span>
-                    </button>
-                  </div>
-                  <div className="bg-gray-50 rounded-b-xl py-2">
+                  <div className="p-1">
                     <button
+                      type="button"
+                      className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm hover:bg-muted"
+                    >
+                      <User className="size-4 text-muted-foreground" />
+                      My Profile
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowUserMenu(false);
+                        router.push('/admin/settings/general');
+                      }}
+                      className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm hover:bg-muted"
+                    >
+                      <Settings className="size-4 text-muted-foreground" />
+                      Settings
+                    </button>
+                  </div>
+                  <div className="border-t border-border p-1">
+                    <button
+                      type="button"
                       onClick={handleLogout}
                       disabled={isLoggingOut}
-                      className="w-full px-4 py-2 text-left hover:bg-red-50 text-red-600 flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm text-destructive hover:bg-destructive/10 disabled:opacity-50"
                     >
-                      <LogOut className="h-4 w-4" />
-                      <span className="text-sm">{isLoggingOut ? 'Logging out...' : 'Logout'}</span>
+                      <LogOut className="size-4" />
+                      {isLoggingOut ? 'Logging out…' : 'Log out'}
                     </button>
                   </div>
                 </div>

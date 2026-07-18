@@ -1,9 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback } from 'react';
 import {
   LayoutDashboard,
   Calendar,
@@ -15,26 +14,26 @@ import {
   BarChart3,
   Home,
   LogOut,
-  Menu,
   X,
   ChevronDown,
-  Globe,
+  Images,
   Mail,
-  CreditCard,
   Shield,
-  Bell,
-  FolderKanban,
+  HelpCircle,
+  Search,
+  PanelLeftClose,
+  PanelLeft,
 } from 'lucide-react';
 import type { AdminUser } from '@/lib/auth/rbac';
+import { cn } from '@/lib/utils';
 
 interface NavItem {
   id: string;
   label: string;
-  icon: any;
+  icon: React.ComponentType<{ className?: string }>;
   href?: string;
-  badge?: number | string;
-  permission?: string; // Required permission to view this item
   children?: NavItem[];
+  badgeKey?: 'pendingBookings' | 'newInquiries';
 }
 
 interface AdminSidebarProps {
@@ -46,72 +45,69 @@ interface AdminSidebarProps {
   onMobileClose: () => void;
 }
 
-const navigationItems: NavItem[] = [
+const navigationSections: { title: string; items: NavItem[] }[] = [
   {
-    id: 'dashboard',
-    label: 'Dashboard',
-    icon: LayoutDashboard,
-    href: '/admin/dashboard',
-    permission: 'analytics.view', // Dashboard shows stats
-  },
-  {
-    id: 'content',
-    label: 'Content',
-    icon: FolderKanban,
-    children: [
-      { id: 'tours', label: 'Tours', icon: MapPin, href: '/admin/tours', permission: 'tour.read' },
-      { id: 'blog', label: 'Blog Posts', icon: FileText, href: '/admin/blog', permission: 'blog.read' },
-      { id: 'media', label: 'Media Library', icon: Image, href: '/admin/media', permission: 'media.read' },
-      { id: 'hero', label: 'Hero Slides', icon: Globe, href: '/admin/hero', permission: 'settings.edit' },
+    title: 'Overview',
+    items: [
+      { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, href: '/admin/dashboard' },
     ],
   },
   {
-    id: 'bookings',
-    label: 'Bookings',
-    icon: Calendar,
-    href: '/admin/bookings',
-    permission: 'booking.read',
-    badge: '5', // This would be dynamic
+    title: 'Website content',
+    items: [
+      { id: 'hero', label: 'Hero slides', icon: Images, href: '/admin/hero' },
+      { id: 'tours', label: 'Tours', icon: MapPin, href: '/admin/tours' },
+      { id: 'blog', label: 'Blog', icon: FileText, href: '/admin/blog' },
+      { id: 'media', label: 'Media library', icon: Image, href: '/admin/media' },
+    ],
   },
   {
-    id: 'inquiries',
-    label: 'Inquiries',
-    icon: Mail,
-    href: '/admin/inquiries',
-    permission: 'inquiry.read',
-    badge: '3', // This would be dynamic
+    title: 'Customers',
+    items: [
+      {
+        id: 'bookings',
+        label: 'Bookings',
+        icon: Calendar,
+        href: '/admin/bookings',
+        badgeKey: 'pendingBookings',
+      },
+      {
+        id: 'inquiries',
+        label: 'Inquiries',
+        icon: Mail,
+        href: '/admin/inquiries',
+        badgeKey: 'newInquiries',
+      },
+      { id: 'customers', label: 'Customers', icon: Users, href: '/admin/customers' },
+    ],
   },
   {
-    id: 'customers',
-    label: 'Customers',
-    icon: Users,
-    href: '/admin/customers',
-    permission: 'user.read',
+    title: 'Insights',
+    items: [
+      { id: 'analytics', label: 'Analytics', icon: BarChart3, href: '/admin/analytics' },
+    ],
   },
   {
-    id: 'analytics',
-    label: 'Analytics',
-    icon: BarChart3,
-    href: '/admin/analytics',
-    permission: 'analytics.view',
-  },
-  {
-    id: 'settings',
-    label: 'Settings',
-    icon: Settings,
-    children: [
-      { id: 'general', label: 'General', icon: Settings, href: '/admin/settings/general', permission: 'settings.read' },
-      { id: 'site', label: 'Site Settings', icon: Globe, href: '/admin/settings/site', permission: 'settings.edit' },
-      { id: 'navigation', label: 'Navigation', icon: Menu, href: '/admin/settings/navigation', permission: 'settings.edit' },
-      { id: 'users', label: 'Users & Roles', icon: Shield, href: '/admin/settings/users', permission: 'user.manage' },
-      { id: 'payments', label: 'Payments', icon: CreditCard, href: '/admin/settings/payments', permission: 'settings.edit' },
+    title: 'Settings',
+    items: [
+      {
+        id: 'settings',
+        label: 'Settings',
+        icon: Settings,
+        children: [
+          { id: 'general', label: 'Contact & general', icon: Settings, href: '/admin/settings/general' },
+          { id: 'site', label: 'About page', icon: Home, href: '/admin/settings/site' },
+          { id: 'navigation', label: 'SEO', icon: Search, href: '/admin/settings/navigation' },
+          { id: 'payments', label: 'FAQ', icon: HelpCircle, href: '/admin/settings/payments' },
+          { id: 'users', label: 'Admin users', icon: Shield, href: '/admin/settings/users' },
+        ],
+      },
     ],
   },
 ];
 
 export function AdminSidebar({
   user,
-  hasPermission,
   isCollapsed,
   onToggle,
   isMobileOpen,
@@ -119,241 +115,269 @@ export function AdminSidebar({
 }: AdminSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const [expandedItems, setExpandedItems] = useState<string[]>(['content', 'settings']);
+  const [expandedItems, setExpandedItems] = useState<string[]>(['settings']);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [badges, setBadges] = useState({ pendingBookings: 0, newInquiries: 0 });
+
+  const loadBadges = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/notifications');
+      if (!res.ok) return;
+      const data = await res.json();
+      setBadges({
+        pendingBookings: data.counts?.pendingBookings || 0,
+        newInquiries: data.counts?.newInquiries || 0,
+      });
+    } catch {
+      // keep previous
+    }
+  }, []);
+
+  useEffect(() => {
+    loadBadges();
+    const interval = setInterval(loadBadges, 60_000);
+    const onRefresh = () => loadBadges();
+    window.addEventListener('admin-badges-refresh', onRefresh);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('admin-badges-refresh', onRefresh);
+    };
+  }, [loadBadges]);
+
+  useEffect(() => {
+    if (pathname.startsWith('/admin/bookings') || pathname.startsWith('/admin/inquiries')) {
+      loadBadges();
+    }
+  }, [pathname, loadBadges]);
 
   const toggleExpanded = (itemId: string) => {
-    setExpandedItems(prev =>
-      prev.includes(itemId)
-        ? prev.filter(id => id !== itemId)
-        : [...prev, itemId]
+    setExpandedItems((prev) =>
+      prev.includes(itemId) ? prev.filter((id) => id !== itemId) : [...prev, itemId]
     );
   };
 
-  const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
+  const isActive = (href: string) =>
+    pathname === href || (href !== '/admin/dashboard' && pathname.startsWith(href + '/'));
 
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true);
-      onMobileClose(); // Close mobile menu if open
-
-      const response = await fetch('/api/auth/logout', {
-        method: 'POST',
-      });
-
-      if (response.ok) {
-        router.push('/admin/login');
-        router.refresh();
-      } else {
-        console.error('Logout failed');
-        router.push('/admin/login');
-      }
-    } catch (error) {
-      console.error('Logout error:', error);
+      onMobileClose();
+      await fetch('/api/auth/logout', { method: 'POST' });
+      router.push('/admin/login');
+      router.refresh();
+    } catch {
       router.push('/admin/login');
     } finally {
       setIsLoggingOut(false);
     }
   };
 
+  const linkClass = (active: boolean) =>
+    cn(
+      'flex items-center gap-3 rounded-lg text-sm font-medium transition-colors min-h-10',
+      'px-3 py-2.5',
+      isCollapsed && 'justify-center px-2',
+      active
+        ? 'bg-primary text-primary-foreground shadow-sm'
+        : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+    );
+
+  const childLinkClass = (active: boolean) =>
+    cn(
+      'flex items-center gap-3 rounded-md px-3 py-2 text-sm min-h-9 transition-colors',
+      active
+        ? 'bg-primary/10 text-primary font-medium'
+        : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+    );
+
+  const renderBadge = (item: NavItem, active: boolean) => {
+    if (!item.badgeKey) return null;
+    const count = badges[item.badgeKey];
+    if (!count) return null;
+    return (
+      <span
+        className={cn(
+          'ml-auto inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full px-1.5 text-[10px] font-semibold',
+          active
+            ? 'bg-primary-foreground/20 text-primary-foreground'
+            : 'bg-primary text-primary-foreground'
+        )}
+      >
+        {count > 99 ? '99+' : count}
+      </span>
+    );
+  };
+
   return (
     <>
-      {/* Mobile Overlay */}
       {isMobileOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={onMobileClose}
-        />
+        <div className="fixed inset-0 bg-black/40 z-40 lg:hidden" onClick={onMobileClose} />
       )}
 
-      {/* Sidebar */}
       <aside
-        className={`
-          fixed lg:static inset-y-0 left-0 z-50
-          bg-white shadow-xl lg:shadow-none flex flex-col
-          transition-all duration-300 ease-in-out
-          ${isCollapsed ? 'w-20' : 'w-72'}
-          ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-        `}
+        className={cn(
+          'fixed lg:static inset-y-0 left-0 z-50 flex flex-col border-r border-border bg-card',
+          'transition-[width,transform] duration-200 ease-out',
+          isCollapsed ? 'w-[4.5rem]' : 'w-64',
+          isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        )}
       >
-        {/* Logo Section */}
-        <div className="flex items-center justify-between h-20 px-6 shrink-0">
+        <div
+          className={cn(
+            'flex h-16 shrink-0 items-center border-b border-border px-3',
+            isCollapsed ? 'justify-center' : 'justify-between gap-2'
+          )}
+        >
           {!isCollapsed ? (
-            <div className="flex items-center gap-3">
-              <div className="flex h-12 w-auto items-center justify-center">
-                <img
-                  src="https://res.cloudinary.com/hckgrdeh/image/upload/v1782962660/wangchukstlogo_usxclz.png"
-                  alt="Wangchuk Tours & Treks"
-                  className="h-full w-auto object-contain"
-                />
-              </div>
-              <div>
-                <div className="font-bold text-lg">Admin Panel</div>
-                <div className="text-xs text-gray-500">Wangchuk Tours</div>
+            <div className="flex min-w-0 items-center gap-2.5 px-1">
+              <img
+                src="https://res.cloudinary.com/hckgrdeh/image/upload/v1782962660/wangchukstlogo_usxclz.png"
+                alt="Wangchuk Tours"
+                className="h-9 w-auto object-contain shrink-0"
+              />
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-foreground">Admin</p>
+                <p className="truncate text-xs text-muted-foreground">
+                  {user?.name || 'Wangchuk Tours'}
+                </p>
               </div>
             </div>
           ) : (
-            <div className="flex h-10 w-auto items-center justify-center mx-auto">
-              <img
-                src="https://res.cloudinary.com/hckgrdeh/image/upload/v1782962660/wangchukstlogo_usxclz.png"
-                alt="Wangchuk Tours & Treks"
-                className="h-full w-auto object-contain"
-              />
-            </div>
+            <img
+              src="https://res.cloudinary.com/hckgrdeh/image/upload/v1782962660/wangchukstlogo_usxclz.png"
+              alt="Logo"
+              className="h-8 w-auto object-contain"
+            />
           )}
 
-          {/* Mobile Close Button */}
           <button
+            type="button"
             onClick={onMobileClose}
-            className="lg:hidden p-2 hover:bg-gray-100 rounded-lg"
+            className="lg:hidden min-h-10 min-w-10 inline-flex items-center justify-center rounded-lg hover:bg-muted"
+            aria-label="Close menu"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        {/* Collapse Toggle (Desktop) */}
         <button
+          type="button"
           onClick={onToggle}
-          className="hidden lg:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 h-8 w-4 items-center justify-center rounded-l bg-white shadow-md hover:bg-gray-50 z-10"
+          className="hidden lg:inline-flex absolute -right-3 top-20 z-10 h-6 w-6 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-sm hover:bg-muted hover:text-foreground"
+          aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
-          <ChevronDown
-            className={`h-4 w-4 transition-transform ${isCollapsed ? 'rotate-90' : '-rotate-90'}`}
-          />
+          {isCollapsed ? <PanelLeft className="h-3.5 w-3.5" /> : <PanelLeftClose className="h-3.5 w-3.5" />}
         </button>
 
-        {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto overflow-x-hidden py-6 px-3 space-y-1">
-          {navigationItems.map((item) => {
-            const Icon = item.icon;
-            const hasChildren = item.children && item.children.length > 0;
-            const isExpanded = expandedItems.includes(item.id);
-            const isItemActive = hasChildren
-              ? item.children?.some(child => child.href ? isActive(child.href) : false)
-              : item.href ? isActive(item.href) : false;
+        <nav className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-4 space-y-5">
+          {navigationSections.map((section) => (
+            <div key={section.title} className="space-y-1">
+              {!isCollapsed && (
+                <p className="px-3 mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/80">
+                  {section.title}
+                </p>
+              )}
+              {section.items.map((item) => {
+                const Icon = item.icon;
+                const hasChildren = !!item.children?.length;
+                const isExpanded = expandedItems.includes(item.id);
+                const childActive = item.children?.some((c) => c.href && isActive(c.href));
+                const itemActive = item.href ? isActive(item.href) : !!childActive;
+                const badgeCount = item.badgeKey ? badges[item.badgeKey] : 0;
 
-            // TEMPORARY: Skip permission filtering to get blog working first
-            const filteredChildren = hasChildren ? item.children : [];
-
-            return (
-              <div key={item.id}>
-                {hasChildren ? (
-                  <>
-                    {/* Parent Item with Children */}
-                    <button
-                      onClick={() => toggleExpanded(item.id)}
-                      className={`
-                        w-full flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium
-                        transition-all duration-200
-                        ${isCollapsed ? 'justify-center' : 'justify-between'}
-                        ${isItemActive ? 'text-white shadow-md' : 'text-gray-700 hover:bg-gray-100'}
-                      `}
-                      style={isItemActive ? {
-                        background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)',
-                      } : {}}
-                    >
-                      <div className="flex items-center gap-3">
-                        <Icon className="h-5 w-5 shrink-0" />
-                        {!isCollapsed && <span>{item.label}</span>}
-                      </div>
-                      {!isCollapsed && (
-                        <ChevronDown
-                          className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-                        />
+                if (hasChildren) {
+                  return (
+                    <div key={item.id}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (isCollapsed) onToggle();
+                          toggleExpanded(item.id);
+                        }}
+                        className={cn(linkClass(!!childActive), 'w-full')}
+                        title={item.label}
+                      >
+                        <Icon className="size-4 shrink-0" />
+                        {!isCollapsed && (
+                          <>
+                            <span className="flex-1 text-left">{item.label}</span>
+                            <ChevronDown
+                              className={cn('h-4 w-4 opacity-60 transition-transform', isExpanded && 'rotate-180')}
+                            />
+                          </>
+                        )}
+                      </button>
+                      {!isCollapsed && isExpanded && (
+                        <div className="mt-0.5 ml-2 space-y-0.5 border-l border-border pl-2">
+                          {item.children!.map((child) => {
+                            const ChildIcon = child.icon;
+                            const active = !!child.href && isActive(child.href);
+                            return (
+                              <Link
+                                key={child.id}
+                                href={child.href || '#'}
+                                onClick={onMobileClose}
+                                className={childLinkClass(active)}
+                              >
+                                <ChildIcon className="size-4 shrink-0" />
+                                <span>{child.label}</span>
+                              </Link>
+                            );
+                          })}
+                        </div>
                       )}
-                    </button>
+                    </div>
+                  );
+                }
 
-                    {/* Children */}
-                    {!isCollapsed && isExpanded && (
-                      <div className="mt-1 ml-8 space-y-1">
-                        {filteredChildren?.map((child) => {
-                          const ChildIcon = child.icon;
-                          return (
-                            <Link
-                              key={child.id}
-                              href={child.href || '#'}
-                              onClick={onMobileClose}
-                              className={`
-                                flex items-center gap-3 rounded-lg px-4 py-2 text-sm font-medium
-                                transition-all duration-200
-                                ${child.href && isActive(child.href)
-                                  ? 'text-white bg-red-50'
-                                  : 'text-gray-600 hover:bg-gray-50'
-                                }
-                              `}
-                              style={child.href && isActive(child.href) ? { color: '#DC143C' } : {}}
-                            >
-                              <ChildIcon className="h-4 w-4 shrink-0" />
-                              <span>{child.label}</span>
-                              {child.badge && (
-                                <span className="ml-auto bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
-                                  {child.badge}
-                                </span>
-                              )}
-                            </Link>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  /* Single Item */
+                return (
                   <Link
+                    key={item.id}
                     href={item.href || '#'}
                     onClick={onMobileClose}
-                    className={`
-                      flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium
-                      transition-all duration-200
-                      ${isCollapsed ? 'justify-center' : ''}
-                      ${isItemActive ? 'text-white shadow-md' : 'text-gray-700 hover:bg-gray-100'}
-                    `}
-                    style={isItemActive ? {
-                      background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)',
-                    } : {}}
+                    className={cn(linkClass(itemActive), !isCollapsed && 'pr-2')}
+                    title={badgeCount ? `${item.label} (${badgeCount} pending)` : item.label}
                   >
-                    <Icon className="h-5 w-5 shrink-0" />
+                    <span className="relative shrink-0">
+                      <Icon className="size-4" />
+                      {isCollapsed && badgeCount > 0 && (
+                        <span className="absolute -top-1.5 -right-1.5 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-primary px-0.5 text-[8px] font-bold text-primary-foreground">
+                          {badgeCount > 9 ? '9+' : badgeCount}
+                        </span>
+                      )}
+                    </span>
                     {!isCollapsed && (
                       <>
-                        <span>{item.label}</span>
-                        {item.badge && (
-                          <span className="ml-auto bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
-                            {item.badge}
-                          </span>
-                        )}
+                        <span className="flex-1 truncate">{item.label}</span>
+                        {renderBadge(item, itemActive)}
                       </>
                     )}
                   </Link>
-                )}
-              </div>
-            );
-          })}
+                );
+              })}
+            </div>
+          ))}
         </nav>
 
-        {/* Bottom Section */}
-        <div className="p-4 space-y-1 mt-4 shrink-0">
-          <Link
-            href="/"
-            target="_blank"
-            className={`
-              flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium
-              text-gray-700 hover:bg-gray-100 transition-all duration-200
-              ${isCollapsed ? 'justify-center' : ''}
-            `}
-          >
-            <Home className="h-5 w-5 shrink-0" />
-            {!isCollapsed && <span>View Website</span>}
+        <div className="shrink-0 border-t border-border p-2 space-y-0.5">
+          <Link href="/" target="_blank" className={linkClass(false)} title="View website">
+            <Home className="size-4 shrink-0" />
+            {!isCollapsed && <span>View website</span>}
           </Link>
           <button
+            type="button"
             onClick={handleLogout}
             disabled={isLoggingOut}
-            className={`
-              w-full flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium
-              text-red-600 hover:bg-red-50 transition-all duration-200
-              disabled:opacity-50 disabled:cursor-not-allowed
-              ${isCollapsed ? 'justify-center' : ''}
-            `}
+            className={cn(
+              'w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium min-h-10',
+              'text-destructive hover:bg-destructive/10 disabled:opacity-50',
+              isCollapsed && 'justify-center px-2'
+            )}
+            title="Log out"
           >
-            <LogOut className="h-5 w-5 shrink-0" />
-            {!isCollapsed && <span>{isLoggingOut ? 'Logging out...' : 'Logout'}</span>}
+            <LogOut className="size-4 shrink-0" />
+            {!isCollapsed && <span>{isLoggingOut ? 'Logging out…' : 'Log out'}</span>}
           </button>
         </div>
       </aside>

@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Inter, Playfair_Display } from "next/font/google";
+import { Plus_Jakarta_Sans, Inter, Playfair_Display, Geist } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
+import { cn } from "@/lib/utils";
 
-// Plus Jakarta Sans - Modern, professional headings
+const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
+
 const jakartaSans = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
   subsets: ["latin"],
@@ -11,7 +13,6 @@ const jakartaSans = Plus_Jakarta_Sans({
   weight: ["400", "500", "600", "700", "800"],
 });
 
-// Inter - Clean, readable body text
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
@@ -19,7 +20,6 @@ const inter = Inter({
   weight: ["300", "400", "500", "600", "700"],
 });
 
-// Playfair Display - Cultural elegance for accents
 const playfair = Playfair_Display({
   variable: "--font-playfair",
   subsets: ["latin"],
@@ -57,9 +57,15 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${jakartaSans.variable} ${inter.variable} ${playfair.variable} h-full antialiased`}
+      className={cn(
+        "h-full antialiased font-sans",
+        geist.variable,
+        jakartaSans.variable,
+        inter.variable,
+        playfair.variable
+      )}
     >
-      <body className="min-h-full flex flex-col font-sans">
+      <body className="flex min-h-full flex-col font-sans">
         {children}
         <Toaster richColors position="top-right" />
       </body>

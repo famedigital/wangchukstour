@@ -1,7 +1,19 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Search, Filter, Edit, Trash2, Eye, Clock, TrendingUp, MapPin, Users, Calendar, X } from 'lucide-react';
+import {
+  Plus,
+  Search,
+  Edit,
+  Trash2,
+  Eye,
+  Clock,
+  TrendingUp,
+  MapPin,
+} from 'lucide-react';
+import { toast } from 'sonner';
+import { PremiumModal } from '@/components/ui/premium-modal';
+import { TourForm } from '@/components/admin/TourForm';
 
 interface Tour {
   id: string;
@@ -18,7 +30,10 @@ interface Tour {
   is_active: boolean;
   view_count: number;
   created_at: string;
+  [key: string]: unknown;
 }
+
+type TourCategory = { slug: string; name: string };
 
 export function TourManagement() {
   const [tours, setTours] = useState<Tour[]>([]);
@@ -27,13 +42,37 @@ export function TourManagement() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingTour, setEditingTour] = useState<Tour | null>(null);
+  const [editLoading, setEditLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [categories, setCategories] = useState<TourCategory[]>([
+    { slug: 'international', name: 'International Tour' },
+    { slug: 'regional', name: 'Regional Tour' },
+  ]);
+
+  useEffect(() => {
+    fetch('/api/admin/tour-categories')
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.categories?.length) {
+          setCategories(
+            data.categories.map((c: { slug: string; name: string }) => ({
+              slug: c.slug,
+              name: c.name,
+            }))
+          );
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     fetchTours();
   }, [filterCategory, filterStatus, searchQuery]);
+
+  const categoryLabel = (slug: string) =>
+    categories.find((c) => c.slug === slug)?.name || slug;
 
   const fetchTours = async () => {
     try {
@@ -45,32 +84,82 @@ export function TourManagement() {
 
       const response = await fetch(`/api/admin/tours?${params.toString()}`);
       const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to fetch tours');
       setTours(data.tours || []);
     } catch (error) {
       console.error('Failed to fetch tours:', error);
+      toast.error('Failed to load tours');
     } finally {
       setLoading(false);
     }
   };
 
+  const handleCreate = async (formData: Record<string, unknown>) => {
+    const response = await fetch('/api/admin/tours', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to create tour');
+    }
+    await fetchTours();
+    setShowCreateModal(false);
+  };
+
+  const handleUpdate = async (formData: Record<string, unknown>) => {
+    if (!editingTour) return;
+    const response = await fetch(`/api/admin/tours/${editingTour.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to update tour');
+    }
+    await fetchTours();
+    setShowEditModal(false);
+    setEditingTour(null);
+  };
+
+  const openEditModal = async (tour: Tour) => {
+    setEditLoading(true);
+    setShowEditModal(true);
+    try {
+      const response = await fetch(`/api/admin/tours/${tour.id}`);
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to load tour');
+      setEditingTour(data);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to load tour';
+      toast.error(message);
+      setShowEditModal(false);
+      setEditingTour(null);
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
   const handleDeleteSelected = async () => {
     if (selectedTours.size === 0) return;
-
     if (!confirm(`Are you sure you want to delete ${selectedTours.size} tour(s)?`)) {
       return;
     }
 
     try {
       await Promise.all(
-        Array.from(selectedTours).map(id =>
+        Array.from(selectedTours).map((id) =>
           fetch(`/api/admin/tours/${id}`, { method: 'DELETE' })
         )
       );
-
       setSelectedTours(new Set());
       await fetchTours();
+      toast.success('Tours deleted');
     } catch (error) {
       console.error('Delete failed:', error);
+      toast.error('Failed to delete tours');
     }
   };
 
@@ -78,220 +167,203 @@ export function TourManagement() {
     if (!confirm('Are you sure you want to delete this tour?')) return;
 
     try {
-      await fetch(`/api/admin/tours/${id}`, { method: 'DELETE' });
+      const response = await fetch(`/api/admin/tours/${id}`, { method: 'DELETE' });
+      if (!response.ok) throw new Error('Delete failed');
       await fetchTours();
+      toast.success('Tour deleted');
     } catch (error) {
       console.error('Delete failed:', error);
+      toast.error('Failed to delete tour');
     }
   };
 
   const toggleSelectTour = (id: string) => {
-    const newSelected = new Set(selectedTours);
-    if (newSelected.has(id)) {
-      newSelected.delete(id);
-    } else {
-      newSelected.add(id);
-    }
-    setSelectedTours(newSelected);
+    const next = new Set(selectedTours);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    setSelectedTours(next);
   };
 
   const selectAll = () => {
     if (selectedTours.size === tours.length) {
       setSelectedTours(new Set());
     } else {
-      setSelectedTours(new Set(tours.map(t => t.id)));
+      setSelectedTours(new Set(tours.map((t) => t.id)));
     }
-  };
-
-  const openEditModal = (tour: Tour) => {
-    setEditingTour(tour);
-    setShowEditModal(true);
   };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Manage Tours</h1>
-          <p className="text-gray-500 mt-1">{tours.length} tours</p>
+          <h2 className="font-heading text-xl font-bold text-foreground">Tour packages</h2>
+          <p className="mt-1 text-sm text-muted-foreground">{tours.length} tours</p>
         </div>
         <button
+          type="button"
           onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-2 px-6 py-3 rounded-xl text-white font-medium"
-          style={{ background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)' }}
+          className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
         >
-          <Plus className="w-5 h-5" />
+          <Plus className="size-4" />
           Add New Tour
         </button>
       </div>
 
-      {/* Toolbar */}
-      <div className="bg-white rounded-xl border p-4">
-        <div className="flex items-center gap-4">
-          {/* Search */}
+      <div className="rounded-lg border border-border bg-card p-4">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search tours..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+              className="h-10 w-full rounded-md border border-input bg-background pr-4 pl-10 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
             />
           </div>
 
-          {/* Category Filter */}
           <select
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}
-            className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+            className="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
           >
             <option value="all">All Categories</option>
-            <option value="all">All Categories</option>
-            <option value="international">International Tour</option>
-            <option value="regional">Regional Tour</option>
-            <option value="festival">Festival</option>
-            <option value="spiritual">Spiritual</option>
-            <option value="adventure">Adventure</option>
+            {categories.map((c) => (
+              <option key={c.slug} value={c.slug}>
+                {c.name}
+              </option>
+            ))}
           </select>
 
-          {/* Status Filter */}
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+            className="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
           >
             <option value="all">All Status</option>
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
           </select>
 
-          {/* Actions */}
           {selectedTours.size > 0 && (
             <button
+              type="button"
               onClick={handleDeleteSelected}
-              className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg"
+              className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
             >
-              <Trash2 className="w-5 h-5" />
+              <Trash2 className="size-4" />
               Delete ({selectedTours.size})
             </button>
           )}
         </div>
       </div>
 
-      {/* Tours Grid */}
       {loading ? (
-        <div className="flex items-center justify-center h-96">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
+        <div className="flex h-64 items-center justify-center">
+          <div className="size-10 animate-spin rounded-full border-2 border-primary border-t-transparent" />
         </div>
       ) : tours.length > 0 ? (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {/* Select All */}
           <div className="col-span-full flex items-center gap-2 p-2">
             <input
               type="checkbox"
-              checked={selectedTours.size === tours.length}
+              checked={selectedTours.size === tours.length && tours.length > 0}
               onChange={selectAll}
-              className="w-4 h-4 rounded"
+              className="size-4 rounded"
             />
-            <span className="text-sm text-gray-600">Select All</span>
+            <span className="text-sm text-muted-foreground">Select All</span>
           </div>
 
           {tours.map((tour) => (
             <div
               key={tour.id}
-              className={`bg-white rounded-xl border overflow-hidden hover:shadow-lg transition-shadow ${
-                selectedTours.has(tour.id) ? 'ring-2 ring-red-500' : ''
+              className={`relative overflow-hidden rounded-lg border border-border bg-card transition-shadow hover:shadow-md ${
+                selectedTours.has(tour.id) ? 'ring-2 ring-primary' : ''
               }`}
             >
-              {/* Checkbox */}
-              <div className="absolute top-4 left-4 z-10">
+              <div className="absolute top-3 left-3 z-10">
                 <input
                   type="checkbox"
                   checked={selectedTours.has(tour.id)}
                   onChange={() => toggleSelectTour(tour.id)}
-                  className="w-4 h-4 rounded"
+                  className="size-4 rounded"
                 />
               </div>
 
-              {/* Image */}
               <div className="relative h-48">
                 <img
                   src={tour.hero_image_url || tour.thumbnail_url || '/placeholder.jpg'}
                   alt={tour.title}
-                  className="w-full h-full object-cover"
+                  className="h-full w-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
 
-                {/* Badges */}
-                <div className="absolute top-4 right-4 flex flex-col gap-2 items-end">
-                  <span className="px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-semibold capitalize">
-                    {tour.category}
+                <div className="absolute top-3 right-3 flex flex-col items-end gap-1.5">
+                  <span className="rounded-full bg-white/90 px-2.5 py-1 text-xs font-semibold text-foreground backdrop-blur-sm">
+                    {categoryLabel(tour.category)}
                   </span>
                   {tour.is_featured && (
-                    <span className="px-3 py-1 bg-yellow-500 text-white rounded-full text-xs font-semibold">
-                      ⭐ Featured
+                    <span className="rounded-full bg-accent px-2.5 py-1 text-xs font-semibold text-accent-foreground">
+                      Featured
                     </span>
                   )}
-                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                    tour.is_active ? 'bg-green-500 text-white' : 'bg-gray-500 text-white'
-                  }`}>
+                  <span
+                    className={`rounded-full px-2.5 py-1 text-xs font-semibold text-white ${
+                      tour.is_active ? 'bg-emerald-600' : 'bg-muted-foreground'
+                    }`}
+                  >
                     {tour.is_active ? 'Active' : 'Inactive'}
                   </span>
                 </div>
 
-                {/* Price */}
-                <div className="absolute bottom-4 right-4 bg-white rounded-lg px-3 py-1 shadow">
-                  <div className="text-lg font-bold" style={{ color: '#DC143C' }}>
-                    ${tour.price}
-                  </div>
-                  <div className="text-xs text-gray-500">per person</div>
+                <div className="absolute right-3 bottom-3 rounded-md bg-card px-3 py-1 shadow">
+                  <div className="text-lg font-bold text-primary">${tour.price}</div>
+                  <div className="text-xs text-muted-foreground">per person</div>
                 </div>
               </div>
 
-              {/* Content */}
               <div className="p-5">
-                <h3 className="font-bold text-lg mb-2 line-clamp-2">{tour.title}</h3>
-                <p className="text-sm text-gray-600 mb-4 line-clamp-2">{tour.tagline}</p>
+                <h3 className="mb-2 line-clamp-2 font-heading text-lg font-semibold">{tour.title}</h3>
+                <p className="mb-4 line-clamp-2 text-sm text-muted-foreground">{tour.tagline}</p>
 
-                {/* Quick Info */}
-                <div className="flex items-center gap-4 text-sm mb-4">
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-gray-400" />
+                <div className="mb-4 flex items-center gap-4 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-1.5">
+                    <Clock className="size-4" />
                     <span>{tour.duration}d</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-gray-400" />
+                  <div className="flex items-center gap-1.5">
+                    <TrendingUp className="size-4" />
                     <span className="capitalize">{tour.difficulty_level}</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Eye className="w-4 h-4 text-gray-400" />
+                  <div className="flex items-center gap-1.5">
+                    <Eye className="size-4" />
                     <span>{tour.view_count}</span>
                   </div>
                 </div>
 
-                {/* Actions */}
-                <div className="flex items-center gap-2 pt-4 border-t">
+                <div className="flex items-center gap-2 border-t border-border pt-4">
                   <button
+                    type="button"
                     onClick={() => window.open(`/tours/${tour.slug}`, '_blank')}
-                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm hover:bg-gray-100 rounded-lg"
+                    className="flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-muted"
                   >
-                    <Eye className="w-4 h-4" />
+                    <Eye className="size-4" />
                     View
                   </button>
                   <button
+                    type="button"
                     onClick={() => openEditModal(tour)}
-                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm hover:bg-gray-100 rounded-lg"
+                    className="flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-muted"
                   >
-                    <Edit className="w-4 h-4" />
+                    <Edit className="size-4" />
                     Edit
                   </button>
                   <button
+                    type="button"
                     onClick={() => handleDeleteTour(tour.id)}
-                    className="flex items-center justify-center gap-2 px-3 py-2 text-sm hover:bg-red-50 text-red-600 rounded-lg"
+                    className="inline-flex items-center justify-center rounded-md px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="size-4" />
                   </button>
                 </div>
               </div>
@@ -299,20 +371,64 @@ export function TourManagement() {
           ))}
         </div>
       ) : (
-        <div className="text-center py-12 bg-white rounded-lg border">
-          <MapPin className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No tours found</h3>
-          <p className="text-gray-500 mb-6">Create your first tour to get started</p>
+        <div className="rounded-lg border border-border bg-card py-12 text-center">
+          <MapPin className="mx-auto mb-4 size-12 text-muted-foreground/40" />
+          <h3 className="mb-2 font-heading text-lg font-medium">No tours found</h3>
+          <p className="mb-6 text-sm text-muted-foreground">Create your first tour to get started</p>
           <button
+            type="button"
             onClick={() => setShowCreateModal(true)}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-medium"
-            style={{ background: 'linear-gradient(135deg, #DC143C 0%, #B91C1C 100%)' }}
+            className="inline-flex items-center gap-2 rounded-md bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
           >
-            <Plus className="w-5 h-5" />
+            <Plus className="size-4" />
             Create Tour
           </button>
         </div>
       )}
+
+      <PremiumModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        title="Create New Tour"
+        size="full"
+        showCloseButton
+      >
+        <div className="max-h-[80vh] overflow-y-auto">
+          <TourForm
+            onSubmit={handleCreate}
+            onCancel={() => setShowCreateModal(false)}
+          />
+        </div>
+      </PremiumModal>
+
+      <PremiumModal
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setEditingTour(null);
+        }}
+        title="Edit Tour"
+        size="full"
+        showCloseButton
+      >
+        <div className="max-h-[80vh] overflow-y-auto">
+          {editLoading || !editingTour ? (
+            <div className="flex h-48 items-center justify-center">
+              <div className="size-10 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            </div>
+          ) : (
+            <TourForm
+              key={editingTour.id}
+              tour={editingTour}
+              onSubmit={handleUpdate}
+              onCancel={() => {
+                setShowEditModal(false);
+                setEditingTour(null);
+              }}
+            />
+          )}
+        </div>
+      </PremiumModal>
     </div>
   );
 }

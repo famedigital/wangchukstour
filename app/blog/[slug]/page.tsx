@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar, User, Clock, Tag, ArrowLeft, Mail, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { getBlogPostBySlug, getPublishedBlogPosts } from '@/lib/database';
+import { BlogMarkdown } from '@/components/public/BlogMarkdown';
 
 const optimizeImageUrl = (url: string | null | undefined, width: number, height: number) => {
   if (!url) return '/placeholder.jpg';
@@ -116,53 +117,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
               )}
 
               {/* Content */}
-              <div className="prose prose-lg max-w-none">
-                {blog.content.split('\n').map((paragraph, i) => {
-                  // Handle headings
-                  if (paragraph.startsWith('## ')) {
-                    return (
-                      <h2 key={i} className="font-heading text-3xl md:text-4xl font-bold mt-12 mb-6" style={{ color: 'var(--prayer-red)' }}>
-                        {paragraph.replace('## ', '')}
-                      </h2>
-                    );
-                  }
-                  if (paragraph.startsWith('# ')) {
-                    return (
-                      <h1 key={i} className="font-heading text-4xl md:text-5xl font-bold mt-12 mb-6">
-                        {paragraph.replace('# ', '')}
-                      </h1>
-                    );
-                  }
-
-                  // Handle lists
-                  if (paragraph.startsWith('- ')) {
-                    return (
-                      <li key={i} className="ml-8 text-lg">
-                        {paragraph.replace('- ', '')}
-                      </li>
-                    );
-                  }
-
-                  // Handle bold
-                  if (paragraph.startsWith('**') && paragraph.endsWith('**')) {
-                    return (
-                      <p key={i} className="font-bold text-xl mt-6 mb-6">
-                        {paragraph.replace(/\*\*/g, '')}
-                      </p>
-                    );
-                  }
-
-                  // Regular paragraph
-                  if (paragraph.trim()) {
-                    return (
-                      <p key={i} className="text-muted-foreground text-lg leading-relaxed mb-6">
-                        {paragraph}
-                      </p>
-                    );
-                  }
-                  return null;
-                })}
-              </div>
+              <BlogMarkdown content={blog.content || ''} />
 
               {/* Share */}
               <div className="mt-16 pt-10 shadow-lg">

@@ -1,6 +1,44 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/utils/supabase/server';
+import { createAdminClient } from '@/utils/supabase/admin';
 import { getCurrentUser } from '@/lib/auth/jwt';
+
+const TOUR_FIELDS = [
+  'title',
+  'slug',
+  'tagline',
+  'description',
+  'long_description',
+  'category',
+  'duration',
+  'price',
+  'difficulty_level',
+  'max_group_size',
+  'min_group_size',
+  'hero_image_url',
+  'thumbnail_url',
+  'gallery_urls',
+  'highlights',
+  'included_items',
+  'excluded_items',
+  'is_featured',
+  'is_active',
+  'is_published',
+  'meta_title',
+  'meta_description',
+  'meta_keywords',
+  'itinerary',
+  'locations',
+  'departure_dates',
+  'faqs',
+] as const;
+
+function pickTourFields(body: Record<string, unknown>) {
+  const data: Record<string, unknown> = {};
+  for (const key of TOUR_FIELDS) {
+    if (body[key] !== undefined) data[key] = body[key];
+  }
+  return data;
+}
 
 // GET /api/admin/tours/[id] - Get single tour
 export async function GET(
@@ -14,7 +52,7 @@ export async function GET(
     }
 
     const { id } = await params;
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     const { data: tour, error } = await supabase
       .from('tours')
@@ -45,11 +83,9 @@ export async function PATCH(
     }
 
     const body = await request.json();
-
     const { id } = await params;
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
-    // Get current tour
     const { data: currentTour, error: fetchError } = await supabase
       .from('tours')
       .select('*')
@@ -60,11 +96,12 @@ export async function PATCH(
       return NextResponse.json({ error: 'Tour not found' }, { status: 404 });
     }
 
-    // Update tour
+    const payload = pickTourFields(body);
+
     const { data: updatedTour, error } = await supabase
       .from('tours')
       .update({
-        ...body,
+        ...payload,
         updated_by: user.userId,
         updated_at: new Date().toISOString(),
       })
@@ -74,7 +111,6 @@ export async function PATCH(
 
     if (error) throw error;
 
-    // Log the update
     await supabase.from('audit_logs').insert({
       user_id: user.userId,
       user_name: user.name,
@@ -93,11 +129,12 @@ export async function PATCH(
     return NextResponse.json(updatedTour);
   } catch (error) {
     console.error('Tour update error:', error);
-    return NextResponse.json({ error: 'Failed to update tour' }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Failed to update tour';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
-// DELETE /api/admin/tours/[id] - Delete tour
+// DELETE /api/admin/tours/[id] - Soft delete tour
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -109,9 +146,8 @@ export async function DELETE(
     }
 
     const { id } = await params;
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
-    // Get tour before deletion
     const { data: tour, error: fetchError } = await supabase
       .from('tours')
       .select('*')
@@ -122,7 +158,6 @@ export async function DELETE(
       return NextResponse.json({ error: 'Tour not found' }, { status: 404 });
     }
 
-    // Soft delete by setting is_active to false
     const { error } = await supabase
       .from('tours')
       .update({
@@ -134,7 +169,6 @@ export async function DELETE(
 
     if (error) throw error;
 
-    // Log the deletion
     await supabase.from('audit_logs').insert({
       user_id: user.userId,
       user_name: user.name,
