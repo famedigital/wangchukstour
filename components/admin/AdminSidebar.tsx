@@ -28,6 +28,7 @@ import {
 import type { AdminUser } from '@/lib/auth/rbac';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { authFetch } from '@/lib/auth/fetch';
 
 interface NavItem {
   id: string;
@@ -122,30 +123,49 @@ export function AdminSidebar({
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [badges, setBadges] = useState({ pendingBookings: 0, newInquiries: 0 });
 
-  const loadBadges = useCallback(async () => {
+  const loadBadges = useCallback(async (): Promise<boolean> => {
     try {
-      const res = await fetch('/api/admin/notifications');
-      if (!res.ok) return;
+      const res = await authFetch('/api/admin/notifications');
+      if (res.status === 401) {
+        setBadges({ pendingBookings: 0, newInquiries: 0 });
+        return false;
+      }
+      if (!res.ok) return true;
       const data = await res.json();
       setBadges({
         pendingBookings: data.counts?.pendingBookings || 0,
         newInquiries: data.counts?.newInquiries || 0,
       });
+      return true;
     } catch {
-      // keep previous
+      return true;
     }
   }, []);
 
   useEffect(() => {
-    loadBadges();
-    const interval = setInterval(loadBadges, 60_000);
-    const onRefresh = () => loadBadges();
+    let cancelled = false;
+    let intervalId: ReturnType<typeof setInterval> | null = null;
+
+    const tick = async () => {
+      const ok = await loadBadges();
+      if (!ok && !cancelled) {
+        if (intervalId) clearInterval(intervalId);
+        router.push('/admin/login');
+      }
+    };
+
+    void tick();
+    intervalId = setInterval(tick, 60_000);
+    const onRefresh = () => {
+      void tick();
+    };
     window.addEventListener('admin-badges-refresh', onRefresh);
     return () => {
-      clearInterval(interval);
+      cancelled = true;
+      if (intervalId) clearInterval(intervalId);
       window.removeEventListener('admin-badges-refresh', onRefresh);
     };
-  }, [loadBadges]);
+  }, [loadBadges, router]);
 
   useEffect(() => {
     if (pathname.startsWith('/admin/bookings') || pathname.startsWith('/admin/inquiries')) {

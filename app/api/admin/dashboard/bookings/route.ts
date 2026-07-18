@@ -53,9 +53,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Format the bookings for display
+    // Format the bookings for display (id must be the DB uuid for deep links)
     const formattedBookings = bookings?.map(booking => ({
-      id: booking.booking_number,
+      id: booking.id,
+      bookingNumber: booking.booking_number,
       clientName: booking.client_name,
       email: booking.client_email,
       tour: booking.tour_title || 'Custom Tour',

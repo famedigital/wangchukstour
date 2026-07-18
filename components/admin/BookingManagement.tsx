@@ -255,8 +255,13 @@ export function BookingManagement() {
 
   const downloadInvoice = (booking: Booking) => {
     try {
+      const total =
+        Number(booking.total_amount) > 0
+          ? Number(booking.total_amount)
+          : Number(booking.suggested_total || 0);
       openInvoicePrintWindow({
         ...booking,
+        total_amount: total,
         payments: booking.payments || [],
       });
     } catch (e) {

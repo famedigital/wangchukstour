@@ -16,6 +16,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
+import { authFetch, authPatch } from '@/lib/auth/fetch';
 
 interface AdminHeaderProps {
   onMobileMenuOpen: () => void;
@@ -48,16 +49,22 @@ export function AdminHeader({ onMobileMenuOpen, user }: AdminHeaderProps) {
   const [loadingNotifications, setLoadingNotifications] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
 
-  const loadNotifications = useCallback(async () => {
+  const loadNotifications = useCallback(async (): Promise<boolean> => {
     try {
       setLoadingNotifications(true);
-      const res = await fetch('/api/admin/notifications');
-      if (!res.ok) return;
+      const res = await authFetch('/api/admin/notifications');
+      if (res.status === 401) {
+        setNotifications([]);
+        setUnreadCount(0);
+        return false;
+      }
+      if (!res.ok) return true;
       const data = await res.json();
       setNotifications(data.notifications || []);
       setUnreadCount(data.counts?.unread || 0);
+      return true;
     } catch {
-      // keep previous
+      return true;
     } finally {
       setLoadingNotifications(false);
     }
@@ -73,18 +80,32 @@ export function AdminHeader({ onMobileMenuOpen, user }: AdminHeaderProps) {
   }, []);
 
   useEffect(() => {
-    loadNotifications();
-    const interval = setInterval(loadNotifications, 60_000);
-    const onRefresh = () => loadNotifications();
+    let cancelled = false;
+    let intervalId: ReturnType<typeof setInterval> | null = null;
+
+    const tick = async () => {
+      const ok = await loadNotifications();
+      if (!ok && !cancelled) {
+        if (intervalId) clearInterval(intervalId);
+        router.push('/admin/login');
+      }
+    };
+
+    void tick();
+    intervalId = setInterval(tick, 60_000);
+    const onRefresh = () => {
+      void tick();
+    };
     window.addEventListener('admin-badges-refresh', onRefresh);
     return () => {
-      clearInterval(interval);
+      cancelled = true;
+      if (intervalId) clearInterval(intervalId);
       window.removeEventListener('admin-badges-refresh', onRefresh);
     };
-  }, [loadNotifications]);
+  }, [loadNotifications, router]);
 
   useEffect(() => {
-    if (notificationsOpen) loadNotifications();
+    if (notificationsOpen) void loadNotifications();
   }, [notificationsOpen, loadNotifications]);
 
   const toggleDarkMode = () => {
@@ -113,11 +134,7 @@ export function AdminHeader({ onMobileMenuOpen, user }: AdminHeaderProps) {
 
   const markAllRead = async () => {
     try {
-      await fetch('/api/admin/notifications', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'mark_inquiries_read' }),
-      });
+      await authPatch('/api/admin/notifications', { action: 'mark_inquiries_read' });
       await loadNotifications();
       refreshBadges();
     } catch {
@@ -133,10 +150,9 @@ export function AdminHeader({ onMobileMenuOpen, user }: AdminHeaderProps) {
 
     try {
       if (n.type === 'inquiry') {
-        await fetch('/api/admin/notifications', {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'mark_inquiry_read', id: n.id }),
+        await authPatch('/api/admin/notifications', {
+          action: 'mark_inquiry_read',
+          id: n.id,
         });
       }
       await loadNotifications();
@@ -281,7 +297,7 @@ export function AdminHeader({ onMobileMenuOpen, user }: AdminHeaderProps) {
                   {user?.email || 'admin@wangchuktour.com'}
                 </p>
               </div>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push('/admin/settings/users')}>
                 <User className="size-4 text-muted-foreground" />
                 My Profile
               </DropdownMenuItem>

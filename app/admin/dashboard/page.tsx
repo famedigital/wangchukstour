@@ -45,6 +45,7 @@ interface DashboardStats {
 
 interface Booking {
   id: string;
+  bookingNumber?: string;
   clientName: string;
   email: string;
   tour: string;
@@ -76,12 +77,17 @@ interface Inquiry {
 }
 
 export default function AdminDashboardPage() {
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [tours, setTours] = useState<Tour[]>([]);
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  const openBooking = (id: string) => {
+    router.push(`/admin/bookings?id=${encodeURIComponent(id)}`);
+  };
 
   // Fetch real data on component mount
   useEffect(() => {
@@ -243,9 +249,11 @@ export default function AdminDashboardPage() {
                       </thead>
                       <tbody>
                         {bookings.map((booking) => (
-                          <tr key={booking.id} className="border-b hover:bg-gray-50">
+                          <tr key={booking.id} className="border-b hover:bg-muted/50">
                             <td className="py-4 px-4">
-                              <span className="font-medium">{booking.id}</span>
+                              <span className="font-medium">
+                                {booking.bookingNumber || booking.id}
+                              </span>
                             </td>
                             <td className="py-4 px-4">
                               <div>
@@ -254,17 +262,31 @@ export default function AdminDashboardPage() {
                               </div>
                             </td>
                             <td className="py-4 px-4">{booking.tour}</td>
-                            <td className="py-4 px-4">{booking.date}</td>
+                            <td className="py-4 px-4">
+                              {booking.date
+                                ? new Date(booking.date).toLocaleDateString()
+                                : '—'}
+                            </td>
                             <td className="py-4 px-4 font-medium">${(booking.amount ?? 0).toLocaleString()}</td>
                             <td className="py-4 px-4">
                               <Badge className={getStatusColor(booking.status)}>{booking.status}</Badge>
                             </td>
                             <td className="py-4 px-4">
                               <div className="flex items-center justify-end gap-2">
-                                <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="View">
+                                <button
+                                  type="button"
+                                  className="p-2 hover:bg-muted rounded-lg transition-colors"
+                                  title="View booking"
+                                  onClick={() => openBooking(booking.id)}
+                                >
                                   <Eye className="h-4 w-4" />
                                 </button>
-                                <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Edit">
+                                <button
+                                  type="button"
+                                  className="p-2 hover:bg-muted rounded-lg transition-colors"
+                                  title="Edit booking"
+                                  onClick={() => openBooking(booking.id)}
+                                >
                                   <Edit className="h-4 w-4" />
                                 </button>
                               </div>

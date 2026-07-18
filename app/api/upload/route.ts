@@ -55,7 +55,27 @@ export async function DELETE(request: NextRequest) {
     }
 
     const result = await deleteImage(publicId);
-    return NextResponse.json(result);
+    const resultCode = (result as { result?: string })?.result;
+    if (resultCode && resultCode !== 'ok' && resultCode !== 'not found') {
+      return NextResponse.json(
+        { error: `Cloudinary delete failed: ${resultCode}` },
+        { status: 500 }
+      );
+    }
+
+    // Soft-delete from media_library when present
+    try {
+      const { createAdminClient } = await import('@/utils/supabase/admin');
+      const supabase = createAdminClient();
+      await supabase
+        .from('media_library')
+        .update({ is_active: false, updated_at: new Date().toISOString() })
+        .eq('public_id', publicId);
+    } catch {
+      // DB sync is best-effort — Cloudinary delete is primary
+    }
+
+    return NextResponse.json({ ok: true, result });
   } catch (error) {
     console.error('Delete error:', error);
     return NextResponse.json({ error: 'Failed to delete image' }, { status: 500 });

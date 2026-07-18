@@ -7,48 +7,53 @@ interface AuthFetchOptions extends RequestInit {
   skipAuthCheck?: boolean;
 }
 
+let refreshInFlight: Promise<boolean> | null = null;
+
+async function tryRefreshSession(): Promise<boolean> {
+  if (!refreshInFlight) {
+    refreshInFlight = (async () => {
+      try {
+        const refreshResponse = await fetch('/api/auth/refresh', { method: 'POST' });
+        return refreshResponse.ok;
+      } catch {
+        return false;
+      } finally {
+        refreshInFlight = null;
+      }
+    })();
+  }
+  return refreshInFlight;
+}
+
 export async function authFetch(url: string, options: AuthFetchOptions = {}): Promise<Response> {
   const { skipAuthCheck = false, ...fetchOptions } = options;
 
   try {
-    // First attempt with current token
-    const response = await fetch(url, fetchOptions);
+    const response = await fetch(url, {
+      credentials: 'same-origin',
+      ...fetchOptions,
+    });
 
-    // If successful or we're skipping auth checks, return the response
-    if (response.ok || skipAuthCheck) {
+    if (response.ok || skipAuthCheck || response.status !== 401) {
       return response;
     }
 
-    // If 401 Unauthorized, try to refresh token
-    if (response.status === 401) {
-      console.log('Request failed with 401, attempting token refresh...');
-
-      const refreshResponse = await fetch('/api/auth/refresh', {
-        method: 'POST',
-      });
-
-      if (refreshResponse.ok) {
-        console.log('Token refreshed successfully, retrying original request');
-        // Retry the original request with new token
-        return await fetch(url, fetchOptions);
-      } else {
-        console.error('Token refresh failed');
-        // Return the original error response
-        return response;
-      }
+    const refreshed = await tryRefreshSession();
+    if (!refreshed) {
+      return response;
     }
 
-    return response;
+    return await fetch(url, {
+      credentials: 'same-origin',
+      ...fetchOptions,
+    });
   } catch (error) {
     console.error('Auth fetch error:', error);
     throw error;
   }
 }
 
-/**
- * Helper function for POST requests
- */
-export async function authPost(url: string, data: any): Promise<Response> {
+export async function authPost(url: string, data: unknown): Promise<Response> {
   return authFetch(url, {
     method: 'POST',
     headers: {
@@ -58,10 +63,7 @@ export async function authPost(url: string, data: any): Promise<Response> {
   });
 }
 
-/**
- * Helper function for PUT requests
- */
-export async function authPut(url: string, data: any): Promise<Response> {
+export async function authPut(url: string, data: unknown): Promise<Response> {
   return authFetch(url, {
     method: 'PUT',
     headers: {
@@ -71,20 +73,24 @@ export async function authPut(url: string, data: any): Promise<Response> {
   });
 }
 
-/**
- * Helper function for DELETE requests
- */
 export async function authDelete(url: string): Promise<Response> {
   return authFetch(url, {
     method: 'DELETE',
   });
 }
 
-/**
- * Helper function for GET requests
- */
 export async function authGet(url: string): Promise<Response> {
   return authFetch(url, {
     method: 'GET',
+  });
+}
+
+export async function authPatch(url: string, data: unknown): Promise<Response> {
+  return authFetch(url, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
   });
 }

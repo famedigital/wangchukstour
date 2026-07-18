@@ -119,7 +119,7 @@ export default function AdminLoginPage() {
                   Remember me
                 </label>
                 <Link href="/admin/forgot-password" className="text-sm text-primary hover:underline">
-                  Forgot password?
+                  Forgot password or login email?
                 </Link>
               </div>
 

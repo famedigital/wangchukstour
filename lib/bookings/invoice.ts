@@ -288,11 +288,14 @@ function escapeHtml(value: string) {
 
 export function openInvoicePrintWindow(booking: InvoiceBooking) {
   const html = buildInvoiceHtml(booking);
-  const win = window.open('', '_blank', 'noopener,noreferrer,width=900,height=1000');
+  // Blob URL avoids blank tabs caused by noopener + document.write on about:blank
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const win = window.open(url, '_blank');
   if (!win) {
-    throw new Error('Popup blocked — allow popups to download the invoice');
+    URL.revokeObjectURL(url);
+    throw new Error('Popup blocked — allow popups to open the invoice');
   }
-  win.document.open();
-  win.document.write(html);
-  win.document.close();
+  // Revoke after the new tab has a chance to load
+  window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
 }

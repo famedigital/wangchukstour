@@ -156,25 +156,31 @@ export async function clearAuthCookies() {
 }
 
 /**
- * Get current user from request with enhanced error handling
+ * Get current user from request with enhanced error handling.
+ * If the access token is missing/expired, silently refresh from the refresh token.
  */
 export async function getCurrentUser(): Promise<TokenPayload | null> {
   try {
     const cookieStore = await cookies();
     const accessToken = cookieStore.get('access_token')?.value;
 
-    if (!accessToken) {
-      console.log('No access token found in cookies');
+    if (accessToken) {
+      const payload = verifyToken(accessToken);
+      if (payload) return payload;
+    }
+
+    // Access token missing or expired — try refresh token
+    const newAccessToken = await refreshAccessToken();
+    if (!newAccessToken) {
+      if (!accessToken) {
+        console.log('No access token found in cookies');
+      } else {
+        console.log('Failed to verify access token and refresh failed');
+      }
       return null;
     }
 
-    const payload = verifyToken(accessToken);
-    if (!payload) {
-      console.log('Failed to verify access token');
-      return null;
-    }
-
-    return payload;
+    return verifyToken(newAccessToken);
   } catch (error) {
     console.error('Error getting current user:', error);
     return null;

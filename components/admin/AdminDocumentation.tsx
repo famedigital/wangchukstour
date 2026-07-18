@@ -37,9 +37,9 @@ const cmsGuides = [
     href: '/admin/dashboard',
     icon: LayoutDashboard,
     steps: [
-      'Open Dashboard to see bookings, inquiries, and tour activity at a glance.',
-      'Use the numbers as a daily checklist — follow up pending bookings and new messages first.',
-      'Click through cards or sidebar links to jump into the full list for that item.',
+      'Open Dashboard for bookings, pending counts, revenue, and active tours.',
+      'Recent Bookings → View / Edit opens that booking on the Bookings page (detail + deposits).',
+      'Use pending numbers as your daily follow-up list.',
     ],
   },
   {
@@ -51,7 +51,6 @@ const cmsGuides = [
       'Upload images from Media library (Cloudinary) for best quality and speed.',
       'Set CTA button text and link (e.g. “Explore tours” → /tours).',
       'Toggle Active so only finished slides appear on the live site.',
-      'Use order / drag controls if available so the first slide is your strongest image.',
     ],
   },
   {
@@ -60,10 +59,10 @@ const cmsGuides = [
     icon: MapPin,
     steps: [
       'Create categories first (e.g. International / Regional) — they power the public Tours menu.',
-      'Click Add New Tour and complete the wizard: Basic → Content → Media → Itinerary → Pricing → SEO → Preview.',
-      'Use Active / Featured / Published switches at the top of the form so status is never buried.',
-      'Hero and gallery images should come from Media library.',
-      'After save, open the public tour URL (View) to confirm price, itinerary, and Book / Inquire buttons.',
+      'Add New Tour: Basic → Content → Media → Itinerary → Pricing → SEO → Preview.',
+      'Set the tour price — new bookings auto-fill total as price × travelers (editable later).',
+      'Use Active / Featured / Published switches at the top of the form.',
+      'After save, open the public URL and test Book / Inquire.',
     ],
   },
   {
@@ -71,10 +70,9 @@ const cmsGuides = [
     href: '/admin/blog',
     icon: FileText,
     steps: [
-      'Create a post with title, slug, excerpt, featured image, and body content.',
-      'Set category and tags for discovery on the public blog page.',
-      'Publish only when ready — drafts stay in admin until you publish.',
-      'Edit any post later from the blog list; changes show on /blog after save.',
+      'Create a post with title, slug, excerpt, featured image, and body.',
+      'Set category and tags; publish only when ready.',
+      'Edit anytime from the blog list — changes appear on /blog after save.',
     ],
   },
   {
@@ -82,21 +80,67 @@ const cmsGuides = [
     href: '/admin/media',
     icon: Image,
     steps: [
-      'Upload photos once here; reuse them in Hero, Tours, Blog, and About.',
-      'All files are stored on Cloudinary (client account) — not on the laptop that uploaded them.',
-      'Prefer landscape images for heroes; square crops work well for team photos.',
-      'Copy or select an image from the picker when editing any form that asks for media.',
+      'Upload one or many images (stored on Cloudinary under the client account).',
+      'Tap an image to select it; use Select all for the current search results.',
+      'Delete one image with the trash icon, or select many and click Delete (N).',
+      'Copy URL to paste into forms, or pick images from the media picker in editors.',
+      'Prefer landscape for heroes; square crops work well for team photos.',
     ],
   },
   {
-    title: 'Bookings & inquiries',
+    title: 'Bookings',
     href: '/admin/bookings',
     icon: Calendar,
     steps: [
-      'Bookings come from “Book now” on tour pages (intent=book on Contact).',
-      'Inquiries come from Contact / Get Quote / Inquire flows.',
-      'Update status as you reply (e.g. new → in progress → closed).',
-      'Badge counts on the sidebar refresh about every minute.',
+      'New booking requests appear here and in the bell notifications (pending status).',
+      'Open a booking to set/edit the tour total (Use tour price if amount is $0).',
+      'Confirm opens a deposit dialog — enter an installment (or leave blank); deposits can be added many times.',
+      'Download Invoice opens a printable Wangchuks invoice (Print / Save PDF).',
+      'Confirming or cancelling a booking clears it from the pending notification badge.',
+      'Mobile shows card layout (no horizontal table scroll).',
+    ],
+  },
+  {
+    title: 'Inquiries',
+    href: '/admin/inquiries',
+    icon: Mail,
+    steps: [
+      'Contact form and quote messages land here with status New.',
+      'Change status: New → Read → Replied → Closed as you work the inbox.',
+      'Clicking a “New inquiry” notification marks it read and opens this page focused on that message.',
+      '“Mark inquiries read” in the bell clears all new inquiry badges.',
+    ],
+  },
+  {
+    title: 'Customers',
+    href: '/admin/customers',
+    icon: Users,
+    steps: [
+      'Combined list of people who booked or inquired (email + phone when available).',
+      'Use it to spot repeat guests before you reply.',
+    ],
+  },
+  {
+    title: 'Account recovery',
+    href: '/admin/forgot-password',
+    icon: Shield,
+    steps: [
+      'Login → “Forgot password or login email?”',
+      'Forgot password: enter admin email → 1-hour reset link → set new password (min 8 chars).',
+      'Forgot login email: enter registered name or email → reminder sent to that account.',
+      'Production needs RESEND_API_KEY (+ optional EMAIL_FROM, NEXT_PUBLIC_APP_URL) in Vercel.',
+    ],
+  },
+  {
+    title: 'Admin users',
+    href: '/admin/settings/users',
+    icon: Shield,
+    steps: [
+      'Add staff: email, name, role, and a temporary password (min 6–8 characters).',
+      'Edit a user to change name, role, or reset their password from this screen.',
+      'Header → My Profile also opens this page.',
+      'Only trusted people should have access — the CMS can change the live site.',
+      'New users sign in at /admin/login with the email you registered (that is their username).',
     ],
   },
   {
@@ -104,10 +148,8 @@ const cmsGuides = [
     href: '/admin/settings/site',
     icon: Home,
     steps: [
-      'Edit hero title, subtitle, background image, and CTA button.',
-      'Fill Our Story (title, long text, founded year).',
-      'Add Values, Statistics, Timeline milestones, and Team members with photos.',
-      'Click Save Changes, then open /about on the public site to verify every section.',
+      'Edit hero, Our Story, Values, Statistics, Timeline, and Team with photos.',
+      'Save Changes, then open /about on the public site to verify.',
     ],
   },
   {
@@ -115,8 +157,8 @@ const cmsGuides = [
     href: '/admin/settings/general',
     icon: Settings,
     steps: [
-      'Keep phone, email, WhatsApp, address, and office hours up to date.',
-      'These details feed contact areas and help visitors reach you quickly.',
+      'Keep phone, email, WhatsApp, address, and office hours current.',
+      'These details feed contact areas and visitor outreach.',
     ],
   },
   {
@@ -124,7 +166,7 @@ const cmsGuides = [
     href: '/admin/settings/navigation',
     icon: Globe,
     steps: [
-      'Set site-wide title templates and Open Graph defaults when available.',
+      'Set site-wide SEO defaults when available.',
       'Per-tour and per-blog SEO fields live inside those editors.',
     ],
   },
@@ -133,17 +175,8 @@ const cmsGuides = [
     href: '/admin/settings/payments',
     icon: Mail,
     steps: [
-      'Manage frequently asked questions shown on the public FAQ page.',
-      'Keep answers short and accurate — visa, season, safety, pricing.',
-    ],
-  },
-  {
-    title: 'Admin users',
-    href: '/admin/settings/users',
-    icon: Shield,
-    steps: [
-      'Add staff who need CMS access (client Google / account policies apply).',
-      'Only trusted people should have login — the CMS can change the live site.',
+      'Manage FAQs on the public FAQ page (visa, season, safety, pricing).',
+      'Keep answers short and accurate.',
     ],
   },
 ];
@@ -511,8 +544,10 @@ export function AdminDocumentation() {
                   Jul 19
                 </Badge>
                 <p className="text-muted-foreground">
-                  Luxury design system pass, stock shadcn forms, contact deep-links, About CMS
-                  wiring, and this documentation page.
+                  Luxury design system, stock shadcn forms, contact deep-links, About CMS sync,
+                  multi-deposit bookings + printable invoices, notification deep-links &amp; badge
+                  refresh, session auto-refresh, forgot password / login-email recovery, media
+                  multi-select delete, and this operations manual.
                 </p>
               </div>
             </CardContent>
