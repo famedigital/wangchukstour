@@ -270,10 +270,10 @@ export function BookingManagement() {
                       </div>
                     </td>
                     <td className="py-4 px-6">
-                      <div className="font-medium">${booking.total_amount.toLocaleString()}</div>
-                      {booking.deposit_amount > 0 && (
+                      <div className="font-medium">${(booking.total_amount ?? 0).toLocaleString()}</div>
+                      {(booking.deposit_amount ?? 0) > 0 && (
                         <div className="text-xs text-muted-foreground">
-                          Deposit: ${booking.deposit_amount.toLocaleString()}
+                          Deposit: ${(booking.deposit_amount ?? 0).toLocaleString()}
                         </div>
                       )}
                     </td>
@@ -448,12 +448,12 @@ export function BookingManagement() {
               <div className="space-y-3">
                 <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
                   <span className="text-sm text-muted-foreground">Total Amount</span>
-                  <span className="font-bold text-lg">${selectedBooking.total_amount.toLocaleString()}</span>
+                  <span className="font-bold text-lg">${(selectedBooking.total_amount ?? 0).toLocaleString()}</span>
                 </div>
-                {selectedBooking.deposit_amount > 0 && (
+                {(selectedBooking.deposit_amount ?? 0) > 0 && (
                   <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
                     <span className="text-sm text-muted-foreground">Deposit Required</span>
-                    <span className="font-medium">${selectedBooking.deposit_amount.toLocaleString()}</span>
+                    <span className="font-medium">${(selectedBooking.deposit_amount ?? 0).toLocaleString()}</span>
                   </div>
                 )}
                 <div className="flex justify-between items-center p-3 bg-green-500/10 rounded-lg">

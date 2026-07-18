@@ -255,7 +255,7 @@ export default function AdminDashboardPage() {
                             </td>
                             <td className="py-4 px-4">{booking.tour}</td>
                             <td className="py-4 px-4">{booking.date}</td>
-                            <td className="py-4 px-4 font-medium">${booking.amount.toLocaleString()}</td>
+                            <td className="py-4 px-4 font-medium">${(booking.amount ?? 0).toLocaleString()}</td>
                             <td className="py-4 px-4">
                               <Badge className={getStatusColor(booking.status)}>{booking.status}</Badge>
                             </td>

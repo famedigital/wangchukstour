@@ -1,14 +1,9 @@
-'use client';
-
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Navigation } from '@/components/public/Navigation';
 import { Footer } from '@/components/public/Footer';
 import { buttonVariants } from '@/components/ui/button';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { ScrollReveal, StaggerChildren } from '@/components/ui/scroll-reveal';
-import { Loader2 } from 'lucide-react';
+import { getAboutPageContent } from '@/lib/content/get-about';
 import {
   Heart,
   Mountain,
@@ -20,257 +15,199 @@ import {
   Phone,
   MapPin,
   ArrowRight,
+  Compass,
+  Star,
+  Globe,
+  Leaf,
 } from 'lucide-react';
-import Image from 'next/image';
 import { cn } from '@/lib/utils';
+import type { Metadata } from 'next';
 
-const iconMap = {
-  Heart, Mountain, Users, Shield, Award, Sparkles, Mail, Phone, MapPin
+export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  title: 'About Us | Wangchuks Tours & Treks',
+  description:
+    'Learn about our story, values, milestones, and the Bhutanese team behind authentic Himalayan journeys.',
 };
 
-export default function AboutPage() {
-  const [content, setContent] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  Heart,
+  Mountain,
+  Users,
+  Shield,
+  Award,
+  Sparkles,
+  Mail,
+  Phone,
+  MapPin,
+  Compass,
+  Star,
+  Globe,
+  Leaf,
+};
 
-  useEffect(() => {
-    fetchAboutContent();
-  }, []);
+const valueIcons = [Heart, Shield, Users, Mountain, Award, Sparkles];
 
-  const fetchAboutContent = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('/api/content?type=about');
-      const data = await response.json();
-
-      if (response.ok) {
-        setContent(data.content);
-      } else {
-        throw new Error('Failed to load content');
-      }
-    } catch (err) {
-      console.error('Error fetching About content:', err);
-      setError('Failed to load About page content');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const optimizeImageUrl = (url: string, width: number, height: number) => {
-    if (!url) return '';
-    if (url.includes('cloudinary')) {
-      const transformations = `q_auto,f_auto,w_${width},h_${height},c_fill`;
-      return url.replace('/image/upload/', `/image/upload/${transformations}/`);
-    }
-    return url;
-  };
-
-  const getIcon = (iconName: string) => {
-    return (iconMap as any)[iconName] || Heart;
-  };
-
-  if (loading) {
-    return (
-      <div className="flex min-h-screen flex-col bg-background">
-        <Navigation />
-        <main className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <Loader2 className="mx-auto mb-4 h-12 w-12 animate-spin text-primary" />
-            <p className="text-muted-foreground">Loading About page...</p>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
+function optimizeImageUrl(url: string, width: number, height: number) {
+  if (!url) return '';
+  if (url.includes('cloudinary')) {
+    const transformations = `q_auto,f_auto,w_${width},h_${height},c_fill`;
+    return url.replace('/image/upload/', `/image/upload/${transformations}/`);
   }
+  return url;
+}
 
-  if (error || !content) {
-    return (
-      <div className="flex min-h-screen flex-col bg-background">
-        <Navigation />
-        <main className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <p className="mb-4 text-destructive">{error || 'Failed to load content'}</p>
-            <Button onClick={fetchAboutContent}>Try Again</Button>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
+function getIcon(iconName?: string, index = 0) {
+  if (iconName && iconMap[iconName]) return iconMap[iconName];
+  return valueIcons[index % valueIcons.length];
+}
 
+export default async function AboutPage() {
+  const content = await getAboutPageContent();
   const { hero, story, values, statistics, timeline, team } = content;
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      <Navigation />
+      <Navigation forceSolid />
 
-      <main className="flex-1">
-        {/* Premium Hero Section */}
+      <main className="safe-bottom-padding flex-1 pt-16 pb-4 xl:pt-[4.5rem] lg:pb-0">
+        {/* Hero */}
         <section className="relative overflow-hidden">
           <div className="absolute inset-0">
-            <Image
-              src={optimizeImageUrl(hero?.backgroundImage || 'https://res.cloudinary.com/hckgrdeh/image/upload/v1782911267/tigernest_paro_wdenqu.jpg', 1920, 1080)}
-              alt={hero?.title || 'About Us'}
-              fill
-              className="object-cover"
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={optimizeImageUrl(hero.backgroundImage, 1920, 900)}
+              alt={hero.title}
+              className="h-full w-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/45 to-black/30" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/35" />
           </div>
 
-          <div className="relative container pt-32 pb-16 md:pt-40 md:pb-24">
-            <ScrollReveal direction="down">
-              <div className="mx-auto max-w-3xl text-center">
-                <p className="mb-4 text-sm font-medium uppercase tracking-[0.2em] text-white/70">
-                  About us
+          <div className="relative container py-16 md:py-24">
+            <div className="mx-auto max-w-3xl text-center">
+              <p className="mb-3 text-sm font-medium tracking-[0.2em] text-white/70 uppercase">
+                About us
+              </p>
+              <h1 className="font-accent mb-5 text-4xl font-medium tracking-tight text-white md:text-5xl">
+                {hero.title}
+              </h1>
+              {hero.subtitle && (
+                <p className="mx-auto mb-8 max-w-2xl text-base leading-relaxed whitespace-pre-line text-white/85 md:text-lg">
+                  {hero.subtitle}
                 </p>
-                <h1 className="font-accent mb-6 text-4xl font-medium tracking-tight text-white md:text-5xl lg:text-6xl">
-                  {hero?.title || 'Discover the Last Shangri-La'}
-                </h1>
-                <p className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-white/85 md:text-xl">
-                  {hero?.subtitle || 'Experience authentic Bhutanese culture and breathtaking Himalayan landscapes'}
-                </p>
-                {hero?.cta && (
-                  <Link
-                    href={hero.cta.link || '/tours'}
-                    className={cn(
-                      buttonVariants({ size: 'lg' }),
-                      'inline-flex gap-2 bg-white text-primary hover:bg-white/90'
-                    )}
-                  >
-                    {hero.cta.text || 'Explore Our Tours'}
-                    <ArrowRight className="size-4" />
-                  </Link>
-                )}
-              </div>
-            </ScrollReveal>
+              )}
+              {hero.cta?.text && (
+                <Link
+                  href={hero.cta.link || '/tours'}
+                  className={cn(
+                    buttonVariants({ size: 'lg' }),
+                    'inline-flex gap-2 bg-white text-primary hover:bg-white/90'
+                  )}
+                >
+                  {hero.cta.text}
+                  <ArrowRight className="size-4" />
+                </Link>
+              )}
+            </div>
           </div>
         </section>
 
-        {/* Our Story Section */}
-        <section className="py-20 md:py-28">
+        {/* Story */}
+        <section id="story" className="scroll-mt-24 py-16 md:py-24">
           <div className="container">
-            <ScrollReveal>
-              <div className="mx-auto mb-12 max-w-3xl text-center">
-                <p className="mb-3 text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
-                  Our story
+            <div className="mx-auto max-w-3xl text-center">
+              <p className="mb-3 text-sm font-medium tracking-[0.2em] text-muted-foreground uppercase">
+                Our story
+              </p>
+              <h2 className="font-accent mb-5 text-2xl font-medium md:text-3xl">{story.title}</h2>
+              <p className="text-left text-base leading-relaxed whitespace-pre-line text-muted-foreground md:text-center md:text-lg">
+                {story.content}
+              </p>
+              {story.founded && (
+                <p className="mt-6 inline-flex rounded-full border border-border bg-muted/50 px-4 py-1.5 text-sm text-foreground">
+                  Founded in {story.founded}
                 </p>
-                <h2 className="font-accent mb-6 text-2xl font-medium md:text-3xl">
-                  {story?.title || 'Our Journey'}
-                </h2>
-                <p className="text-lg text-muted-foreground leading-relaxed">
-                  {story?.content || 'Wangchuk Tours & Treks is your gateway to experiencing the authentic beauty of Bhutan.'}
-                </p>
-                {story?.founded && (
-                  <p className="mt-4 text-sm text-muted-foreground">
-                    Founded in {story.founded}
-                  </p>
-                )}
-              </div>
-            </ScrollReveal>
+              )}
+            </div>
           </div>
         </section>
 
-        {/* Values Section */}
-        {values && values.length > 0 && (
-          <section className="bg-muted/30 py-20 md:py-28">
+        {/* Values */}
+        {values.length > 0 && (
+          <section className="border-y border-border bg-muted/30 py-16 md:py-24">
             <div className="container">
-              <ScrollReveal>
-                <div className="mx-auto mb-12 max-w-3xl text-center">
-                  <h2 className="font-accent mb-4 text-2xl font-medium md:text-3xl">Our core values</h2>
-                  <p className="text-muted-foreground text-lg">
-                    The principles that guide every journey we create
-                  </p>
-                </div>
-              </ScrollReveal>
-
-              <StaggerChildren>
-                <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-                  {values.map((value: any, index: number) => {
-                    const IconComponent = getIcon(value.icon);
-                    return (
-                      <ScrollReveal key={index} delay={index * 100}>
-                        <Card className="border-border text-center shadow-none transition-shadow hover:shadow-sm">
-                          <CardContent className="p-6">
-                            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
-                              <IconComponent className="h-8 w-8 text-primary" />
-                            </div>
-                            <h3 className="font-heading font-bold text-xl mb-3">
-                              {value.title}
-                            </h3>
-                            <p className="text-muted-foreground text-sm leading-relaxed">
-                              {value.description}
-                            </p>
-                          </CardContent>
-                        </Card>
-                      </ScrollReveal>
-                    );
-                  })}
-                </div>
-              </StaggerChildren>
-            </div>
-          </section>
-        )}
-
-        {/* Statistics Section */}
-        {statistics && statistics.length > 0 && (
-          <section className="py-20 md:py-28">
-            <div className="container">
-              <StaggerChildren>
-                <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-                  {statistics.map((stat: any, index: number) => (
-                    <ScrollReveal key={index} delay={index * 100}>
-                      <div className="text-center">
-                        <div className="mb-2">
-                          <span className="font-accent text-4xl font-medium text-primary md:text-5xl">
-                            {stat.number}
-                          </span>
+              <div className="mx-auto mb-10 max-w-2xl text-center">
+                <h2 className="font-accent mb-3 text-2xl font-medium md:text-3xl">Our values</h2>
+                <p className="text-muted-foreground">What guides every journey we craft</p>
+              </div>
+              <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4">
+                {values.map((value, index) => {
+                  const IconComponent = getIcon(value.icon, index);
+                  return (
+                    <Card key={`${value.title}-${index}`} className="border-border text-center shadow-none">
+                      <CardContent className="p-4 sm:p-6">
+                        <div className="mx-auto mb-3 flex size-10 items-center justify-center rounded-xl bg-primary/10 sm:mb-4 sm:size-12">
+                          <IconComponent className="size-5 text-primary sm:size-6" />
                         </div>
-                        <p className="text-muted-foreground text-lg font-medium">
-                          {stat.label}
-                        </p>
-                      </div>
-                    </ScrollReveal>
-                  ))}
-                </div>
-              </StaggerChildren>
+                        <h3 className="font-heading mb-2 text-sm font-semibold sm:text-base">
+                          {value.title}
+                        </h3>
+                        {value.description && (
+                          <p className="text-xs leading-relaxed text-muted-foreground sm:text-sm">
+                            {value.description}
+                          </p>
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
             </div>
           </section>
         )}
 
-        {/* Timeline Section */}
-        {timeline && timeline.length > 0 && (
-          <section className="bg-muted/30 py-20 md:py-28">
-            <div className="container">
-              <ScrollReveal>
-                <div className="mx-auto mb-12 max-w-3xl text-center">
-                  <h2 className="font-accent mb-4 text-2xl font-medium md:text-3xl">Our journey</h2>
-                  <p className="text-muted-foreground text-lg">
-                    Key milestones in our story
-                  </p>
+        {/* Statistics */}
+        {statistics.length > 0 && (
+          <section className="py-14 md:py-20">
+            <div className="container grid grid-cols-2 gap-6 md:grid-cols-4 md:gap-8">
+              {statistics.map((stat, index) => (
+                <div key={`${stat.label}-${index}`} className="text-center">
+                  <span className="font-accent text-3xl font-medium text-primary md:text-5xl">
+                    {stat.number}
+                  </span>
+                  <p className="mt-2 text-sm text-muted-foreground md:text-base">{stat.label}</p>
                 </div>
-              </ScrollReveal>
+              ))}
+            </div>
+          </section>
+        )}
 
-              <div className="mx-auto max-w-3xl">
+        {/* Timeline */}
+        {timeline.length > 0 && (
+          <section className="border-t border-border bg-muted/30 py-16 md:py-24">
+            <div className="container">
+              <div className="mx-auto mb-10 max-w-2xl text-center">
+                <h2 className="font-accent mb-3 text-2xl font-medium md:text-3xl">Our journey</h2>
+                <p className="text-muted-foreground">Key milestones along the way</p>
+              </div>
+              <div className="relative mx-auto max-w-2xl">
+                <div className="absolute top-3 bottom-3 left-[1.35rem] w-px bg-border md:left-6" />
                 <div className="space-y-8">
-                  {timeline.map((event: any, index: number) => (
-                    <ScrollReveal key={index} delay={index * 100}>
-                      <div className="flex gap-6">
-                        <div className="flex-shrink-0">
-                          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
-                            {event.year}
-                          </div>
-                        </div>
-                        <div className="flex-1 pb-8 border-l-2 border-muted last:pb-0 last:border-0 pl-6">
-                          <h3 className="font-heading font-bold text-xl mb-2">
-                            {event.title}
-                          </h3>
-                          <p className="text-muted-foreground leading-relaxed">
+                  {timeline.map((event, index) => (
+                    <div key={`${event.year}-${index}`} className="relative flex gap-4 md:gap-5">
+                      <div className="relative z-10 flex min-w-12 shrink-0 items-center justify-center rounded-full bg-primary px-2 py-2 text-center text-[10px] font-semibold text-primary-foreground md:min-w-14 md:text-xs">
+                        {event.year}
+                      </div>
+                      <div className="flex-1 rounded-xl border border-border bg-card p-4 shadow-none">
+                        <h3 className="font-heading mb-1 font-semibold">{event.title}</h3>
+                        {event.description && (
+                          <p className="text-sm leading-relaxed whitespace-pre-line text-muted-foreground">
                             {event.description}
                           </p>
-                        </div>
+                        )}
                       </div>
-                    </ScrollReveal>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -278,51 +215,68 @@ export default function AboutPage() {
           </section>
         )}
 
-        {/* Team Section */}
-        {team && team.length > 0 && (
-          <section className="py-20 md:py-28">
+        {/* Team */}
+        {team.length > 0 && (
+          <section id="team" className="scroll-mt-24 py-16 md:py-24">
             <div className="container">
-              <ScrollReveal>
-                <div className="mx-auto mb-12 max-w-3xl text-center">
-                  <h2 className="font-accent mb-4 text-2xl font-medium md:text-3xl">Meet our team</h2>
-                  <p className="text-lg text-muted-foreground">
-                    The passionate people behind your journeys
-                  </p>
-                </div>
-              </ScrollReveal>
-
-              <StaggerChildren>
-                <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                  {team.map((member: any, index: number) => (
-                    <ScrollReveal key={index} delay={index * 100}>
-                      <Card className="border-border shadow-none transition-shadow hover:shadow-sm">
-                        <CardContent className="p-6 text-center">
-                          <div className="relative mx-auto mb-4 h-32 w-32 overflow-hidden rounded-full">
-                            {member.image ? (
-                              <Image
-                                src={optimizeImageUrl(member.image, 400, 400)}
-                                alt={member.name}
-                                fill
-                                className="object-cover"
-                              />
-                            ) : (
-                              <div className="flex h-full w-full items-center justify-center bg-muted">
-                                <Users className="h-16 w-16 text-muted-foreground" />
-                              </div>
-                            )}
+              <div className="mx-auto mb-10 max-w-2xl text-center">
+                <h2 className="font-accent mb-3 text-2xl font-medium md:text-3xl">Our team</h2>
+                <p className="text-muted-foreground">The people behind your journey</p>
+              </div>
+              <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3">
+                {team.map((member, index) => (
+                  <Card key={`${member.name}-${index}`} className="border-border shadow-none">
+                    <CardContent className="p-4 text-center sm:p-6">
+                      <div className="relative mx-auto mb-3 size-20 overflow-hidden rounded-full bg-muted sm:mb-4 sm:size-28">
+                        {member.image ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={optimizeImageUrl(member.image, 400, 400)}
+                            alt={member.name}
+                            className="size-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex size-full items-center justify-center">
+                            <Users className="size-8 text-muted-foreground sm:size-12" />
                           </div>
-                          <h3 className="mb-1 font-heading text-xl font-semibold">{member.name}</h3>
-                          <p className="mb-3 text-sm font-medium text-primary">{member.role}</p>
-                          <p className="text-sm leading-relaxed text-muted-foreground">{member.bio}</p>
-                        </CardContent>
-                      </Card>
-                    </ScrollReveal>
-                  ))}
-                </div>
-              </StaggerChildren>
+                        )}
+                      </div>
+                      <h3 className="font-heading mb-1 text-sm font-semibold sm:text-lg">
+                        {member.name}
+                      </h3>
+                      {member.role && (
+                        <p className="mb-2 text-xs font-medium text-primary sm:text-sm">
+                          {member.role}
+                        </p>
+                      )}
+                      {member.bio && (
+                        <p className="text-xs leading-relaxed text-muted-foreground sm:text-sm">
+                          {member.bio}
+                        </p>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             </div>
           </section>
         )}
+
+        <section className="border-t border-border py-14">
+          <div className="container flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
+            <div>
+              <h2 className="font-heading mb-2 text-xl font-semibold">Ready to plan a trip?</h2>
+              <p className="text-muted-foreground">We&apos;d love to hear what you have in mind.</p>
+            </div>
+            <Link
+              href="/contact#contact-form"
+              className={cn(buttonVariants({ size: 'lg' }), 'gap-2')}
+            >
+              Contact us
+              <ArrowRight className="size-4" />
+            </Link>
+          </div>
+        </section>
       </main>
 
       <Footer />

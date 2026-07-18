@@ -144,25 +144,25 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
             <div className="container">
               <div className="mx-auto max-w-5xl">
                 <h2 className="font-accent mb-10 text-2xl font-medium md:text-3xl">Related articles</h2>
-                <div className="grid gap-8 md:grid-cols-3">
+                <div className="grid grid-cols-2 gap-3 sm:gap-6 md:grid-cols-3 md:gap-8">
                   {relatedPosts.map((post) => (
-                    <Link key={post.id} href={`/blog/${post.slug}`} className="group">
-                      <Card className="h-full overflow-hidden border-border py-0 shadow-none transition-shadow hover:shadow-md">
-                        <div className="relative h-44 overflow-hidden bg-muted">
+                    <Link key={post.id} href={`/blog/${post.slug}`} className="group h-full">
+                      <Card className="flex h-full flex-col overflow-hidden border-border py-0 shadow-none transition-shadow hover:shadow-md">
+                        <div className="relative aspect-[4/3] overflow-hidden bg-muted sm:h-44 sm:aspect-auto">
                           <img
                             src={optimizeImageUrl(post.featured_image_url, 600, 400)}
                             alt={post.title}
                             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                           />
                         </div>
-                        <CardContent className="space-y-2 p-5">
-                          <p className="text-xs font-medium uppercase tracking-[0.15em] text-muted-foreground">
+                        <CardContent className="space-y-1 p-3 sm:space-y-2 sm:p-5">
+                          <p className="truncate text-[10px] font-medium tracking-wider text-muted-foreground uppercase sm:text-xs sm:tracking-[0.15em]">
                             {post.category}
                           </p>
-                          <h3 className="line-clamp-2 font-heading font-semibold transition-colors group-hover:text-primary">
+                          <h3 className="font-heading line-clamp-2 text-sm font-semibold transition-colors group-hover:text-primary sm:text-base">
                             {post.title}
                           </h3>
-                          <p className="line-clamp-2 text-sm text-muted-foreground">{post.excerpt}</p>
+                          <p className="hidden line-clamp-2 text-sm text-muted-foreground sm:block">{post.excerpt}</p>
                         </CardContent>
                       </Card>
                     </Link>

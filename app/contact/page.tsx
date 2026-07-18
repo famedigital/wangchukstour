@@ -4,7 +4,6 @@ import { Navigation } from '@/components/public/Navigation';
 import { Footer } from '@/components/public/Footer';
 import { buttonVariants } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { ScrollReveal, StaggerChildren } from '@/components/ui/scroll-reveal';
 import { ContactForm } from '@/components/contact/ContactForm';
 import {
   Mail,
@@ -18,251 +17,186 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const contactContent = {
-  hero: {
-    title: 'Start Your Bhutan Journey',
-    subtitle: 'Get in touch with our travel experts',
-    description:
-      "Whether you're dreaming of mountain temples, cultural festivals, or spiritual journeys, we're here to help make your Bhutan experience unforgettable.",
-  },
-  contactInfo: {
-    email: 'info@wangchuktour.com',
-    phone: '+975 17 00 00 00',
-    address: 'Thimphu, Bhutan',
-    officeHours: 'Mon-Fri: 9:00 AM - 6:00 PM',
-    responseTime: 'We respond within 24 hours',
-  },
-};
-
-const optimizeImageUrl = (url: string, width: number, height: number) => {
-  if (!url) return '';
-  if (url.includes('cloudinary')) {
-    const transformations = `q_auto,f_auto,w_${width},h_${height},c_fill`;
-    return url.replace('/image/upload/', `/image/upload/${transformations}/`);
-  }
-  return url;
+const contactInfo = {
+  email: 'info@wangchuktour.com',
+  phone: '+975 17 00 00 00',
+  address: 'Thimphu, Bhutan',
+  officeHours: 'Mon–Fri, 9:00 AM – 6:00 PM',
+  responseTime: 'We reply within 24 hours',
 };
 
 const contactItems = [
   {
     icon: Mail,
-    title: 'Email Us',
-    detail: contactContent.contactInfo.email,
-    note: contactContent.contactInfo.responseTime,
+    title: 'Email',
+    detail: contactInfo.email,
+    note: contactInfo.responseTime,
   },
   {
     icon: Phone,
-    title: 'Call Us',
-    detail: contactContent.contactInfo.phone,
-    note: contactContent.contactInfo.officeHours,
+    title: 'Phone',
+    detail: contactInfo.phone,
+    note: contactInfo.officeHours,
   },
   {
     icon: MapPin,
-    title: 'Visit Us',
-    detail: contactContent.contactInfo.address,
-    note: 'Located in the heart of Thimphu',
+    title: 'Office',
+    detail: contactInfo.address,
+    note: 'Thimphu, Bhutan',
   },
 ];
 
 export default function ContactPage() {
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      <Navigation />
+      <Navigation forceSolid />
 
-      <main className="flex-1">
-        <section className="relative overflow-hidden">
-          <div className="absolute inset-0">
-            <img
-              src={optimizeImageUrl(
-                'https://res.cloudinary.com/hckgrdeh/image/upload/q_auto,f_auto/v1782911267/tigernest_paro_wdenqu.jpg',
-                1920,
-                1080
-              )}
-              alt="Tiger's Nest Monastery"
-              className="h-full w-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/45 to-black/30" />
-          </div>
-
-          <div className="relative container pt-32 pb-16 md:pt-40 md:pb-24">
-            <ScrollReveal direction="down">
-              <div className="mx-auto max-w-3xl">
-                <p className="mb-4 text-sm font-medium uppercase tracking-[0.2em] text-white/70">
-                  Contact
-                </p>
-                <h1 className="font-accent mb-6 text-4xl font-medium tracking-tight text-white md:text-5xl lg:text-6xl">
-                  {contactContent.hero.title}
-                </h1>
-                <p className="max-w-2xl text-lg leading-relaxed text-white/85">
-                  {contactContent.hero.description}
-                </p>
-              </div>
-            </ScrollReveal>
+      <main className="safe-bottom-padding flex-1 pt-16 pb-4 xl:pt-[4.5rem] lg:pb-0">
+        {/* Compact intro — form first on mobile */}
+        <section className="border-b border-border bg-muted/30">
+          <div className="container py-10 md:py-14">
+            <p className="mb-2 text-sm font-medium tracking-[0.2em] text-muted-foreground uppercase">
+              Contact
+            </p>
+            <h1 className="font-accent mb-3 text-3xl font-medium tracking-tight md:text-4xl lg:text-5xl">
+              Start your Bhutan journey
+            </h1>
+            <p className="max-w-2xl text-base leading-relaxed text-muted-foreground md:text-lg">
+              Tell us what you&apos;re looking for — we&apos;ll help plan temples, treks, and festivals
+              with a local team based in Thimphu.
+            </p>
           </div>
         </section>
 
-        <section className="py-20 md:py-28">
+        <section className="py-10 md:py-16">
           <div className="container">
-            <div className="grid gap-16 lg:grid-cols-2 lg:gap-20">
-              <ScrollReveal>
-                <div className="space-y-10">
-                  <div>
-                    <p className="mb-3 text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
-                      Get in touch
-                    </p>
-                    <h2 className="font-accent mb-4 text-3xl font-medium md:text-4xl">
-                      Let&apos;s plan your journey
-                    </h2>
-                    <p className="text-lg leading-relaxed text-muted-foreground">
-                      Have questions about traveling to Bhutan? Our team of local experts is ready to
-                      help you create your perfect Himalayan adventure.
-                    </p>
-                  </div>
-
-                  <StaggerChildren className="space-y-4">
-                    {contactItems.map((item) => {
-                      const Icon = item.icon;
-                      return (
-                        <ScrollReveal key={item.title}>
-                          <Card className="border-border shadow-none">
-                            <CardContent className="flex gap-4 p-6">
-                              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                                <Icon className="h-5 w-5 text-primary" />
-                              </div>
-                              <div>
-                                <h3 className="mb-1 font-heading font-semibold">{item.title}</h3>
-                                <p className="text-foreground">{item.detail}</p>
-                                <p className="mt-1 text-sm text-muted-foreground">{item.note}</p>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        </ScrollReveal>
-                      );
-                    })}
-                  </StaggerChildren>
-
-                  <div className="border-t border-border pt-8">
-                    <h3 className="mb-4 font-heading text-lg font-semibold">Why choose us</h3>
-                    <div className="space-y-3">
-                      {[
-                        { icon: Users, text: 'Local Bhutanese experts with 15+ years experience' },
-                        { icon: Mountain, text: 'Authentic cultural experiences' },
-                        { icon: Compass, text: 'Personalized itineraries tailored to you' },
-                        { icon: MessageCircle, text: '24/7 support during your journey' },
-                      ].map((item, index) => (
-                        <div key={index} className="flex items-start gap-3">
-                          <item.icon className="mt-0.5 h-5 w-5 shrink-0 text-accent" />
-                          <p className="text-muted-foreground">{item.text}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </ScrollReveal>
-
-              <ScrollReveal direction="up">
-                <Card className="border-border shadow-sm" id="contact-form">
-                  <CardContent className="p-8 md:p-10">
-                    <div className="mb-8">
-                      <h3 className="font-accent mb-2 text-2xl font-medium">Send us a message</h3>
-                      <p className="text-muted-foreground">
-                        Fill out the form below and we&apos;ll get back to you within 24 hours.
+            <div className="grid gap-10 lg:grid-cols-5 lg:gap-14">
+              {/* Form first on mobile so Book/Inquire lands on the message */}
+              <div className="order-1 lg:order-2 lg:col-span-3">
+                <Card
+                  id="contact-form"
+                  className="scroll-mt-24 border-border shadow-sm lg:scroll-mt-28"
+                >
+                  <CardContent className="p-6 md:p-8">
+                    <div className="mb-6">
+                      <h2 className="font-heading mb-1 text-xl font-semibold md:text-2xl">
+                        Send a message
+                      </h2>
+                      <p className="text-sm text-muted-foreground">
+                        Booking requests and inquiries usually get a reply within 24 hours.
                       </p>
                     </div>
-
-                    <Suspense fallback={<div className="py-8 text-center text-muted-foreground">Loading form...</div>}>
+                    <Suspense
+                      fallback={
+                        <div className="py-10 text-center text-sm text-muted-foreground">
+                          Loading form…
+                        </div>
+                      }
+                    >
                       <ContactForm />
                     </Suspense>
                   </CardContent>
                 </Card>
-              </ScrollReveal>
+              </div>
+
+              <aside className="order-2 space-y-6 lg:order-1 lg:col-span-2">
+                <div>
+                  <h2 className="font-heading mb-4 text-lg font-semibold">Get in touch</h2>
+                  <ul className="space-y-4">
+                    {contactItems.map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <li key={item.title} className="flex gap-3">
+                          <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                            <Icon className="size-4 text-primary" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium">{item.title}</p>
+                            <p className="text-foreground">{item.detail}</p>
+                            <p className="text-sm text-muted-foreground">{item.note}</p>
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+
+                <div className="rounded-xl border border-border bg-card p-5">
+                  <h3 className="font-heading mb-3 text-sm font-semibold">Why travelers choose us</h3>
+                  <ul className="space-y-3 text-sm text-muted-foreground">
+                    {[
+                      { icon: Users, text: 'Bhutanese-owned team with 15+ years experience' },
+                      { icon: Mountain, text: 'Authentic cultural itineraries' },
+                      { icon: Compass, text: 'Personalized routes, not packages off a shelf' },
+                      { icon: MessageCircle, text: 'Support before and during your trip' },
+                    ].map((item) => (
+                      <li key={item.text} className="flex items-start gap-2.5">
+                        <item.icon className="mt-0.5 size-4 shrink-0 text-accent" />
+                        <span>{item.text}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </aside>
             </div>
           </div>
         </section>
 
-        <section className="border-t border-border bg-muted/40 py-20 md:py-28">
+        <section className="border-t border-border bg-muted/40 py-14 md:py-20">
           <div className="container">
-            <ScrollReveal>
-              <div className="mb-12 max-w-2xl">
-                <p className="mb-3 text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
-                  FAQ
-                </p>
-                <h2 className="font-accent text-3xl font-medium md:text-4xl">Frequently asked questions</h2>
-              </div>
-            </ScrollReveal>
-
-            <StaggerChildren className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2">
+            <h2 className="font-accent mb-8 text-2xl font-medium md:text-3xl">Quick answers</h2>
+            <div className="grid gap-4 md:grid-cols-2">
               {[
                 {
-                  q: 'Do I need a visa to visit Bhutan?',
-                  a: 'Yes, all international tourists (except Indians, Bangladeshis, and Maldivians) need a visa to enter Bhutan. We can help arrange your visa as part of your tour package.',
+                  q: 'Do I need a visa for Bhutan?',
+                  a: 'Most international visitors need a visa. We can arrange it as part of your tour.',
                 },
                 {
-                  q: "What's the best time to visit Bhutan?",
-                  a: 'Spring (March-May) and autumn (September-November) offer the best weather with clear skies and comfortable temperatures. However, each season has its own unique charm.',
+                  q: 'When is the best time to visit?',
+                  a: 'Spring (Mar–May) and autumn (Sep–Nov) are clearest; each season has its own character.',
                 },
                 {
-                  q: 'How much does a trip to Bhutan cost?',
-                  a: 'Bhutan has a daily tariff system that includes accommodation, meals, transport, and guide services. Contact us for a personalized quote based on your travel preferences.',
+                  q: 'How much does a trip cost?',
+                  a: 'Pricing depends on season, group size, and itinerary. Send a short brief for a quote.',
                 },
                 {
-                  q: 'Is Bhutan safe for tourists?',
-                  a: 'Bhutan is considered one of the safest destinations in the world. Crime rates are very low, and the people are known for their warmth and hospitality towards visitors.',
+                  q: 'Is Bhutan safe for travelers?',
+                  a: 'Yes — Bhutan is widely regarded as one of the safest destinations in the region.',
                 },
-              ].map((faq, index) => (
-                <ScrollReveal key={index}>
-                  <Card className="h-full border-border shadow-none">
-                    <CardContent className="p-6">
-                      <h3 className="mb-3 font-heading font-semibold">{faq.q}</h3>
-                      <p className="leading-relaxed text-muted-foreground">{faq.a}</p>
-                    </CardContent>
-                  </Card>
-                </ScrollReveal>
+              ].map((faq) => (
+                <Card key={faq.q} className="border-border shadow-none">
+                  <CardContent className="p-5">
+                    <h3 className="font-heading mb-2 font-semibold">{faq.q}</h3>
+                    <p className="text-sm leading-relaxed text-muted-foreground">{faq.a}</p>
+                  </CardContent>
+                </Card>
               ))}
-            </StaggerChildren>
+            </div>
           </div>
         </section>
 
-        <section className="relative overflow-hidden py-20 md:py-28">
-          <div className="absolute inset-0">
-            <img
-              src={optimizeImageUrl(
-                'https://res.cloudinary.com/hckgrdeh/image/upload/q_auto,f_auto/v1782911256/buddhapoint_z2kucc.jpg',
-                1920,
-                1080
-              )}
-              alt="Buddha Point, Thimphu"
-              className="h-full w-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/50 to-transparent" />
-          </div>
-
-          <div className="relative container">
-            <ScrollReveal>
-              <div className="max-w-2xl">
-                <h2 className="font-accent mb-5 text-3xl font-medium text-white md:text-4xl">
-                  Ready to start your Bhutan adventure?
-                </h2>
-                <p className="mb-8 text-lg leading-relaxed text-white/85">
-                  Let us help you create memories that will last a lifetime in the Land of the Thunder Dragon.
-                </p>
-                <div className="flex flex-wrap gap-3">
-                  <Link href="#contact-form" className={cn(buttonVariants({ size: 'lg' }), 'gap-2')}>
-                    Get Started
-                    <ArrowRight className="size-4" />
-                  </Link>
-                  <Link
-                    href="/tours"
-                    className={cn(
-                      buttonVariants({ variant: 'outline', size: 'lg' }),
-                      'border-white/30 bg-white/10 text-white hover:bg-white/15 hover:text-white'
-                    )}
-                  >
-                    Browse Tours
-                  </Link>
-                </div>
-              </div>
-            </ScrollReveal>
+        <section className="border-t border-border py-14 md:py-16">
+          <div className="container flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
+            <div>
+              <h2 className="font-heading mb-2 text-xl font-semibold md:text-2xl">
+                Prefer to browse first?
+              </h2>
+              <p className="text-muted-foreground">Explore tours, then come back when you&apos;re ready.</p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Link href="/tours" className={cn(buttonVariants({ size: 'lg' }), 'gap-2')}>
+                Browse tours
+                <ArrowRight className="size-4" />
+              </Link>
+              <a
+                href="https://wa.me/97517643416"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={cn(buttonVariants({ variant: 'outline', size: 'lg' }))}
+              >
+                WhatsApp us
+              </a>
+            </div>
           </div>
         </section>
       </main>

@@ -82,12 +82,13 @@ export async function POST(request: NextRequest) {
     let result;
 
     if (existing) {
-      // Update existing content
+      // Update existing content — keep page publicly visible
       const { data, error } = await supabase
         .from('content_pages')
         .update({
           content,
           metadata: metadata || {},
+          is_active: true,
           updated_at: new Date().toISOString(),
           updated_by: currentUser.userId,
         })
@@ -105,6 +106,7 @@ export async function POST(request: NextRequest) {
           page_type: pageType,
           content,
           metadata: metadata || {},
+          is_active: true,
           created_by: currentUser.userId,
           updated_by: currentUser.userId,
         })

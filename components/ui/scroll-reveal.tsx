@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
-import { motion, useInView, UseInViewOptions } from 'framer-motion';
+import { motion, useInView, useReducedMotion, type UseInViewOptions } from 'framer-motion';
 
 interface ScrollRevealProps {
   children: React.ReactNode;
@@ -10,6 +10,7 @@ interface ScrollRevealProps {
   direction?: 'up' | 'down' | 'left' | 'right' | 'none';
   duration?: number;
   once?: boolean;
+  /** Positive values trigger earlier (before fully in view). */
   viewportMargin?: string;
 }
 
@@ -18,22 +19,29 @@ export function ScrollReveal({
   className = '',
   delay = 0,
   direction = 'up',
-  duration = 0.6,
+  duration = 0.28,
   once = true,
-  viewportMargin = '-100px',
+  // Expand root so items reveal as they approach the viewport (not after they're blank)
+  viewportMargin = '100px 0px',
 }: ScrollRevealProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const reduceMotion = useReducedMotion();
   const isInView = useInView(ref, {
     once,
-    amount: 0.3,
+    amount: 0.05,
     margin: viewportMargin,
   } as UseInViewOptions);
 
+  if (reduceMotion) {
+    return <div className={className}>{children}</div>;
+  }
+
+  const offset = 16;
   const variants = {
     hidden: {
-      opacity: 0,
-      x: direction === 'left' ? -60 : direction === 'right' ? 60 : 0,
-      y: direction === 'up' ? 60 : direction === 'down' ? -60 : 0,
+      opacity: 0.01, // avoid fully invisible blank flash if detection lags
+      x: direction === 'left' ? -offset : direction === 'right' ? offset : 0,
+      y: direction === 'up' ? offset : direction === 'down' ? -offset : 0,
     },
     visible: {
       opacity: 1,
@@ -50,8 +58,8 @@ export function ScrollReveal({
       variants={variants}
       transition={{
         duration,
-        delay,
-        ease: 'easeOut',
+        delay: Math.min(delay, 0.15),
+        ease: [0.22, 1, 0.36, 1],
       }}
       className={className}
     >
@@ -72,35 +80,40 @@ export function StaggerChildren({
   children,
   className = '',
   delay = 0,
-  staggerDelay = 0.1,
+  staggerDelay = 0.04,
   once = true,
 }: StaggerChildrenProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const reduceMotion = useReducedMotion();
   const isInView = useInView(ref, {
     once,
-    amount: 0.1,
-    margin: '-50px',
+    amount: 0.02,
+    margin: '100px 0px',
   } as UseInViewOptions);
 
+  if (reduceMotion) {
+    return <div className={className}>{children}</div>;
+  }
+
   const containerVariants = {
-    hidden: { opacity: 0 },
+    hidden: { opacity: 1 },
     visible: {
       opacity: 1,
       transition: {
-        delayChildren: delay,
-        staggerChildren: staggerDelay,
+        delayChildren: Math.min(delay, 0.08),
+        staggerChildren: Math.min(staggerDelay, 0.06),
       },
     },
   };
 
   const itemVariants = {
     hidden: {
-      opacity: 0,
-      y: 30
+      opacity: 0.01,
+      y: 12,
     },
     visible: {
       opacity: 1,
-      y: 0
+      y: 0,
     },
   };
 
@@ -117,7 +130,7 @@ export function StaggerChildren({
             <motion.div
               key={index}
               variants={itemVariants}
-              transition={{ duration: 0.5, ease: 'easeOut' }}
+              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
             >
               {child}
             </motion.div>

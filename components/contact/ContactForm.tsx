@@ -41,6 +41,30 @@ export function ContactForm() {
     }
   }, [tourTitle, tourSlug, isBooking]);
 
+  // Scroll form into view when arriving from Book / Inquire (or #contact-form hash)
+  useEffect(() => {
+    const shouldFocus =
+      searchParams.has('intent') ||
+      searchParams.has('tour') ||
+      (typeof window !== 'undefined' && window.location.hash === '#contact-form');
+
+    if (!shouldFocus) return;
+
+    const scrollToForm = () => {
+      const el = document.getElementById('contact-form');
+      if (!el) return;
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
+    // Wait for layout (hero + suspense) then scroll; retry once for mobile
+    const t1 = window.setTimeout(scrollToForm, 100);
+    const t2 = window.setTimeout(scrollToForm, 450);
+    return () => {
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
+    };
+  }, [searchParams]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 

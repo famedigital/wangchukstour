@@ -3,9 +3,7 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
-import { buttonVariants } from '@/components/ui/button';
-import { ArrowRight, Clock, TrendingUp } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Clock, TrendingUp } from 'lucide-react';
 
 interface TourCardProps {
   tour: any;
@@ -26,62 +24,53 @@ export function TourCard({ tour, index }: TourCardProps) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 24 }}
+      initial={{ opacity: 0.01, y: 12 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-40px' }}
-      transition={{ duration: 0.45, delay: index * 0.08 }}
+      viewport={{ once: true, amount: 0.05, margin: '100px 0px' }}
+      transition={{ duration: 0.25, delay: Math.min(index * 0.04, 0.12), ease: [0.22, 1, 0.36, 1] }}
+      className="h-full"
     >
-      <Card className="group overflow-hidden border-border bg-card py-0 shadow-none transition-shadow hover:shadow-md">
-        <Link href={`/tours/${tour.slug}`} className="block">
+      <Card className="group h-full overflow-hidden border-border bg-card py-0 shadow-none transition-shadow hover:shadow-md">
+        <Link href={`/tours/${tour.slug}`} className="flex h-full flex-col">
           <div className="aspect-[4/3] overflow-hidden bg-muted">
             <img
               src={heroImage}
               alt={tour.title}
-              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
               loading="lazy"
             />
           </div>
 
-          <CardContent className="space-y-4 p-6">
-            <div className="space-y-2">
-              <p className="text-xs font-medium uppercase tracking-[0.15em] text-muted-foreground">
+          <CardContent className="flex flex-1 flex-col space-y-2 p-3 sm:space-y-3 sm:p-5">
+            <div className="min-w-0 flex-1 space-y-1 sm:space-y-2">
+              <p className="truncate text-[10px] font-medium tracking-wider text-muted-foreground uppercase sm:text-xs sm:tracking-[0.15em]">
                 {category}
               </p>
-              <h3 className="font-accent text-xl leading-snug text-foreground transition-colors group-hover:text-primary">
+              <h3 className="font-accent line-clamp-2 text-sm leading-snug text-foreground transition-colors group-hover:text-primary sm:text-lg md:text-xl">
                 {tour.title}
               </h3>
               {tagline && (
-                <p className="line-clamp-2 text-sm leading-relaxed text-muted-foreground">{tagline}</p>
+                <p className="hidden line-clamp-2 text-sm leading-relaxed text-muted-foreground sm:block">
+                  {tagline}
+                </p>
               )}
             </div>
 
-            <div className="flex items-center justify-between border-t border-border pt-4">
-              <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                <span className="inline-flex items-center gap-1.5">
-                  <Clock className="size-3.5 text-accent" />
-                  {duration} days
+            <div className="flex flex-wrap items-center justify-between gap-1 border-t border-border pt-2 sm:pt-3">
+              <div className="flex min-w-0 items-center gap-2 text-[10px] text-muted-foreground sm:gap-3 sm:text-xs">
+                <span className="inline-flex items-center gap-1">
+                  <Clock className="size-3 text-accent sm:size-3.5" />
+                  {duration}d
                 </span>
-                <span className="inline-flex items-center gap-1.5 capitalize">
+                <span className="hidden items-center gap-1 capitalize sm:inline-flex">
                   <TrendingUp className="size-3.5 text-accent" />
                   {difficulty}
                 </span>
               </div>
               {price > 0 && (
-                <p className="text-sm font-medium text-primary">
-                  From ${price}
-                </p>
+                <p className="text-[11px] font-medium text-primary sm:text-sm">${price}</p>
               )}
             </div>
-
-            <span
-              className={cn(
-                buttonVariants({ variant: 'outline', size: 'sm' }),
-                'inline-flex w-full gap-2 group-hover:border-primary group-hover:text-primary'
-              )}
-            >
-              View journey
-              <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
-            </span>
           </CardContent>
         </Link>
       </Card>

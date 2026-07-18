@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { ScrollReveal } from '@/components/ui/scroll-reveal';
 import { Heart, Shield, Mountain, Clock } from 'lucide-react';
 
@@ -43,12 +42,8 @@ export function DifferentiatorsSection() {
 
       <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-2 lg:grid-cols-4 lg:gap-12">
         {differentiators.map((item, index) => (
-          <ScrollReveal key={item.title} direction="up" delay={index * 0.1}>
-            <motion.div
-              className="group text-center"
-              whileHover={{ y: -6 }}
-              transition={{ type: 'spring', stiffness: 300 }}
-            >
+          <ScrollReveal key={item.title} direction="up" delay={index * 0.04}>
+            <div className="group text-center transition-transform duration-200 hover:-translate-y-1">
               <div className="mx-auto mb-6 flex size-16 items-center justify-center rounded-xl bg-primary/10">
                 <item.icon className="size-7 text-primary" />
               </div>
@@ -56,7 +51,7 @@ export function DifferentiatorsSection() {
                 {item.title}
               </h3>
               <p className="text-sm leading-relaxed text-muted-foreground">{item.description}</p>
-            </motion.div>
+            </div>
           </ScrollReveal>
         ))}
       </div>

@@ -16,7 +16,7 @@ const baseNavLinks = [
 
 type TourCategory = { name: string; slug: string };
 
-export function Navigation() {
+export function Navigation({ forceSolid = false }: { forceSolid?: boolean }) {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -45,7 +45,7 @@ export function Navigation() {
   }, []);
 
   const isToursActive = pathname === '/tours' || pathname.startsWith('/tours');
-  const navSolid = !mounted || scrolled;
+  const navSolid = forceSolid || !mounted || scrolled;
 
   const desktopLink = (active?: boolean) =>
     cn(
@@ -135,7 +135,7 @@ export function Navigation() {
               ))}
 
             <Link
-              href="/contact"
+              href="/contact#contact-form"
               className={cn(buttonVariants({ size: 'sm' }), 'ml-4')}
             >
               Get Quote

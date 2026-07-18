@@ -38,10 +38,10 @@ export function TestimonialsSection({ testimonials }: TestimonialsSectionProps) 
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTestimonial}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0.01, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.5 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
               className="text-center"
             >
               <div className="relative overflow-hidden rounded-xl bg-card p-10 ring-1 ring-foreground/10 md:p-14">

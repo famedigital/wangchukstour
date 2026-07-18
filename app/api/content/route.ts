@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
+import { mergeAboutContent } from '@/lib/content/about';
 
 // GET /api/content - Public endpoint to fetch active page content
 export async function GET(request: NextRequest) {
@@ -17,83 +18,83 @@ export async function GET(request: NextRequest) {
     } catch (error) {
       console.error('Supabase connection error, using default content:', error);
       return NextResponse.json({
-        content: getDefaultContent(pageType),
-        metadata: {}
+        content: normalizePublicContent(pageType, null),
+        metadata: {},
       });
     }
 
-    // Fetch active page content
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from('content_pages')
       .select('content, metadata')
       .eq('page_type', pageType)
       .eq('is_active', true)
-      .single();
+      .maybeSingle();
 
-    if (error) {
-      // If no content found or any error, return default structure
-      console.log('Database error or no content found, using default content:', error.message);
+    // Fall back if is_active filter misses a saved row
+    if (error || !data?.content) {
+      const fallback = await supabase
+        .from('content_pages')
+        .select('content, metadata')
+        .eq('page_type', pageType)
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (fallback.data?.content) {
+        data = fallback.data;
+        error = null;
+      }
+    }
+
+    if (error || !data?.content) {
+      console.log('No CMS content found, using defaults:', error?.message);
       return NextResponse.json({
-        content: getDefaultContent(pageType),
-        metadata: {}
+        content: normalizePublicContent(pageType, null),
+        metadata: {},
       });
     }
 
-    return NextResponse.json(data);
+    return NextResponse.json({
+      content: normalizePublicContent(pageType, data.content),
+      metadata: data.metadata || {},
+    });
   } catch (error) {
     console.error('Error fetching public content:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
-// Helper function to get default content structure
+function normalizePublicContent(pageType: string, raw: unknown) {
+  if (pageType === 'about') {
+    return mergeAboutContent(raw);
+  }
+  return raw || getDefaultContent(pageType);
+}
+
 function getDefaultContent(pageType: string) {
   const defaults: Record<string, any> = {
-    about: {
-      hero: {
-        title: 'About Us',
-        subtitle: 'Discover the Last Shangri-La',
-        backgroundImage: 'https://res.cloudinary.com/hckgrdeh/image/upload/v1782911267/tigernest_paro_wdenqu.jpg'
-      },
-      story: {
-        title: 'Our Story',
-        content: 'Wangchuk Tours & Treks is your gateway to experiencing the authentic beauty of Bhutan.'
-      },
-      values: [
-        { title: 'Authentic Experiences', description: 'Genuine cultural experiences' },
-        { title: 'Sustainable Tourism', description: 'Responsible travel practices' },
-        { title: 'Personalized Service', description: 'Customized journeys' },
-        { title: 'Expert Local Guides', description: 'Knowledgeable Bhutanese guides' }
-      ],
-      statistics: [
-        { number: '500+', label: 'Happy Travelers' },
-        { number: '15+', label: 'Years Experience' },
-        { number: '50+', label: 'Unique Tours' },
-        { number: '100%', label: 'Bhutanese Owned' }
-      ],
-      timeline: [],
-      team: []
-    },
+    about: mergeAboutContent(null),
     contact: {
       hero: {
         title: 'Contact Us',
-        subtitle: 'We\'re here to help you plan your perfect Bhutanese adventure',
-        backgroundImage: 'https://res.cloudinary.com/hckgrdeh/image/upload/v1782965945/punakhadzong_xkcrcu.jpg'
+        subtitle: "We're here to help you plan your perfect Bhutanese adventure",
+        backgroundImage:
+          'https://res.cloudinary.com/hckgrdeh/image/upload/v1782965945/punakhadzong_xkcrcu.jpg',
       },
       contactInfo: {
         email: 'info@wangchuktour.com',
         phone: '+975 17643416',
         address: 'Thimphu, Bhutan',
-        whatsapp: '+97517643416'
+        whatsapp: '+97517643416',
       },
       officeHours: {
         weekdays: '9:00 AM - 6:00 PM',
         saturdays: '10:00 AM - 4:00 PM',
-        sundays: 'Closed'
+        sundays: 'Closed',
       },
       socialMedia: {
         facebook: 'https://facebook.com/wangchuktours',
-        instagram: 'https://instagram.com/wangchuktours'
+        instagram: 'https://instagram.com/wangchuktours',
       },
       formFields: {
         showName: true,
@@ -102,24 +103,25 @@ function getDefaultContent(pageType: string) {
         showTravelDates: true,
         showGroupSize: true,
         showMessage: true,
-        requiredFields: ['name', 'email', 'message']
-      }
+        requiredFields: ['name', 'email', 'message'],
+      },
     },
     faq: {
       hero: {
         title: 'Frequently Asked Questions',
         subtitle: 'Find answers to common questions about traveling to Bhutan',
-        backgroundImage: 'https://res.cloudinary.com/hckgrdeh/image/upload/v1782911267/tigernest_paro_wdenqu.jpg'
+        backgroundImage:
+          'https://res.cloudinary.com/hckgrdeh/image/upload/v1782911267/tigernest_paro_wdenqu.jpg',
       },
-      categories: ['General', 'Safety', 'Preparation', 'Booking']
+      categories: ['General', 'Safety', 'Preparation', 'Booking'],
     },
     'travel-info': {
       hero: {
         title: 'Travel Information',
-        subtitle: 'Essential tips and information for your Bhutan journey'
+        subtitle: 'Essential tips and information for your Bhutan journey',
       },
-      sections: []
-    }
+      sections: [],
+    },
   };
 
   return defaults[pageType] || {};

@@ -151,7 +151,7 @@ export function ToursPageClient({ tours }: { tours: any[] }) {
 
             {filteredTours.length > 0 ? (
               <StaggerChildren>
-                <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="grid grid-cols-2 gap-3 sm:gap-6 xl:grid-cols-3 xl:gap-8">
                   {filteredTours.map((tour, index) => (
                     <TourCard key={tour.id} tour={tour} index={index} />
                   ))}

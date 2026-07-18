@@ -22,10 +22,10 @@ export function CTASection() {
       <div className="container relative z-10 px-6 text-center">
         <motion.div
           className="mx-auto max-w-3xl"
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0.01, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          viewport={{ once: true, amount: 0.15, margin: '80px 0px' }}
+          transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
         >
           <h2 className="font-accent mb-5 text-4xl font-medium leading-tight text-white md:text-5xl lg:text-6xl">
             Ready to explore Bhutan?

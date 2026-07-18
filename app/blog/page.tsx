@@ -40,9 +40,9 @@ export default async function BlogPage() {
   }
 
   const PostCard = ({ post }: { post: (typeof posts)[0] }) => (
-    <Link href={`/blog/${post.slug}`}>
-      <Card className="group h-full overflow-hidden border-border py-0 shadow-none transition-shadow hover:shadow-md">
-        <div className="relative aspect-[16/10] overflow-hidden bg-muted">
+    <Link href={`/blog/${post.slug}`} className="h-full">
+      <Card className="group flex h-full flex-col overflow-hidden border-border py-0 shadow-none transition-shadow hover:shadow-md">
+        <div className="relative aspect-[4/3] overflow-hidden bg-muted sm:aspect-[16/10]">
           {post.featured_image_url ? (
             <img
               src={optimizeImageUrl(post.featured_image_url, 800, 500)}
@@ -51,42 +51,42 @@ export default async function BlogPage() {
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-muted">
-              <span className="text-5xl">🏔️</span>
+              <span className="text-3xl sm:text-5xl">🏔️</span>
             </div>
           )}
         </div>
 
-        <CardContent className="space-y-4 p-6">
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+        <CardContent className="flex flex-1 flex-col space-y-2 p-3 sm:space-y-4 sm:p-6">
+          <div className="hidden items-center gap-3 text-xs text-muted-foreground sm:flex sm:gap-4 sm:text-sm">
             <span className="inline-flex items-center gap-1">
-              <User className="h-4 w-4" />
+              <User className="h-3.5 w-3.5" />
               {post.author_name}
             </span>
             <span className="inline-flex items-center gap-1">
-              <Calendar className="h-4 w-4" />
+              <Calendar className="h-3.5 w-3.5" />
               {post.published_at ? format(new Date(post.published_at), 'MMM d, yyyy') : 'Draft'}
             </span>
           </div>
 
-          <div>
-            <p className="mb-2 text-xs font-medium uppercase tracking-[0.15em] text-muted-foreground">
+          <div className="min-w-0 flex-1">
+            <p className="mb-1 truncate text-[10px] font-medium tracking-wider text-muted-foreground uppercase sm:mb-2 sm:text-xs sm:tracking-[0.15em]">
               {post.category}
             </p>
-            <h3 className="font-accent line-clamp-2 text-xl leading-snug transition-colors group-hover:text-primary">
+            <h3 className="font-accent line-clamp-2 text-sm leading-snug transition-colors group-hover:text-primary sm:text-xl">
               {post.title}
             </h3>
           </div>
 
-          <p className="line-clamp-2 text-muted-foreground">
+          <p className="hidden line-clamp-2 text-sm text-muted-foreground sm:block">
             {post.excerpt || post.content?.substring(0, 150) + '...'}
           </p>
 
-          <div className="flex items-center justify-between border-t border-border pt-4">
-            <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
-              <Clock className="h-4 w-4" />
-              {post.read_time ? `${post.read_time} min read` : '5 min read'}
+          <div className="flex items-center justify-between border-t border-border pt-2 sm:pt-4">
+            <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground sm:text-sm">
+              <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
+              {post.read_time ? `${post.read_time} min` : '5 min'}
             </span>
-            <ArrowRight className="h-4 w-4 text-primary transition-transform group-hover:translate-x-0.5" />
+            <ArrowRight className="h-3.5 w-3.5 text-primary transition-transform group-hover:translate-x-0.5 sm:h-4 sm:w-4" />
           </div>
         </CardContent>
       </Card>
@@ -140,7 +140,7 @@ export default async function BlogPage() {
                 </div>
               </ScrollReveal>
 
-              <StaggerChildren className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+              <StaggerChildren className="grid grid-cols-2 gap-3 sm:gap-6 md:gap-8 lg:grid-cols-3">
                 {featuredPosts.map((post) => (
                   <ScrollReveal key={post.id}>
                     <PostCard post={post} />
@@ -162,7 +162,7 @@ export default async function BlogPage() {
               </div>
             </ScrollReveal>
 
-            <StaggerChildren className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            <StaggerChildren className="grid grid-cols-2 gap-3 sm:gap-6 md:gap-8 lg:grid-cols-3">
               {posts.map((post) => (
                 <ScrollReveal key={post.id}>
                   <PostCard post={post} />

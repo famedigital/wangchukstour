@@ -44,9 +44,9 @@ function HeroContent({
   return (
     <div className="max-w-2xl space-y-6">
       <motion.div
-        initial={{ opacity: 0, y: 12 }}
+        initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
+        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
         className="space-y-2"
       >
         <p className="text-sm font-medium uppercase tracking-[0.2em] text-white/70">
@@ -62,7 +62,7 @@ function HeroContent({
           className="max-w-lg text-base leading-relaxed text-white/80 sm:text-lg"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.15, duration: 0.5 }}
+          transition={{ delay: 0.08, duration: 0.3 }}
         >
           {tagline}
         </motion.p>
@@ -71,7 +71,7 @@ function HeroContent({
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.25, duration: 0.5 }}
+        transition={{ delay: 0.12, duration: 0.3 }}
         className="flex flex-wrap gap-3"
       >
         <Link

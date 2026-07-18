@@ -359,7 +359,7 @@ export function ToursGrid({ tours }: ToursGridProps) {
               {/* Tours Grid */}
               {filteredTours.length > 0 ? (
                 <StaggerChildren>
-                  <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-3">
+                  <div className="grid grid-cols-2 gap-3 sm:gap-6 xl:grid-cols-3 xl:gap-8">
                     {filteredTours.map((tour) => (
                       <Link key={tour.id} href={`/tours/${tour.slug}`} className="group">
                         <div className="bg-card rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-3">

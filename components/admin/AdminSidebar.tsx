@@ -23,6 +23,7 @@ import {
   Search,
   PanelLeftClose,
   PanelLeft,
+  BookOpen,
 } from 'lucide-react';
 import type { AdminUser } from '@/lib/auth/rbac';
 import { Button } from '@/components/ui/button';
@@ -51,6 +52,7 @@ const navigationSections: { title: string; items: NavItem[] }[] = [
     title: 'Overview',
     items: [
       { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, href: '/admin/dashboard' },
+      { id: 'docs', label: 'Docs & manual', icon: BookOpen, href: '/admin/docs' },
     ],
   },
   {

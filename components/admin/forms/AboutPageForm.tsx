@@ -12,63 +12,10 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { MediaPickerModal } from '@/components/admin/MediaPickerModal';
 
-interface AboutContent {
-  hero: {
-    title: string;
-    subtitle: string;
-    backgroundImage: string;
-    cta: {
-      text: string;
-      link: string;
-    };
-  };
-  story: {
-    title: string;
-    content: string;
-    founded: string;
-  };
-  values: Array<{
-    title: string;
-    description: string;
-    icon?: string;
-  }>;
-  statistics: Array<{
-    number: string;
-    label: string;
-  }>;
-  timeline: Array<{
-    year: string;
-    title: string;
-    description: string;
-  }>;
-  team: Array<{
-    name: string;
-    role: string;
-    bio: string;
-    image: string;
-  }>;
-}
+import { ABOUT_DEFAULTS, mergeAboutContent } from '@/lib/content/about';
+import type { AboutContent } from '@/lib/content/about';
 
-const defaultContent: AboutContent = {
-  hero: {
-    title: 'Discover the Last Shangri-La',
-    subtitle: 'Experience authentic Bhutanese culture and breathtaking Himalayan landscapes',
-    backgroundImage: 'https://res.cloudinary.com/hckgrdeh/image/upload/v1782911267/tigernest_paro_wdenqu.jpg',
-    cta: {
-      text: 'Explore Our Tours',
-      link: '/tours'
-    }
-  },
-  story: {
-    title: 'Our Story',
-    content: 'Wangchuk Tours & Treks is a Bhutanese-owned and operated tour company dedicated to showing travelers the authentic beauty of the Land of the Thunder Dragon.',
-    founded: '2010'
-  },
-  values: [],
-  statistics: [],
-  timeline: [],
-  team: []
-};
+const defaultContent: AboutContent = ABOUT_DEFAULTS;
 
 export function AboutPageForm() {
   const [content, setContent] = useState<AboutContent>(defaultContent);
@@ -92,24 +39,7 @@ export function AboutPageForm() {
       const data = await response.json();
 
       if (response.ok && data.content) {
-        // Ensure the content has all required properties
-        const safeContent = {
-          ...defaultContent,
-          ...data.content,
-          hero: {
-            ...defaultContent.hero,
-            ...data.content.hero,
-            cta: {
-              ...defaultContent.hero.cta,
-              ...(data.content.hero?.cta || {})
-            }
-          },
-          story: {
-            ...defaultContent.story,
-            ...data.content.story
-          }
-        };
-        setContent(safeContent);
+        setContent(mergeAboutContent(data.content));
       }
     } catch (error) {
       console.error('Error fetching About content:', error);
