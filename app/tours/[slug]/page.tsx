@@ -124,6 +124,17 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
     return null; // Should not reach here due to early return
   }
 
+  const includedItems = (tour.included_items || tour.inclusions || []).filter(
+    (item): item is string => Boolean(item && String(item).trim())
+  );
+  const excludedItems = (tour.excluded_items || tour.exclusions || []).filter(
+    (item): item is string => Boolean(item && String(item).trim())
+  );
+  const galleryUrls = (tour.gallery_urls || []).filter(
+    (url): url is string => Boolean(url && String(url).trim())
+  );
+  const detailedDescription = (tour.long_description || '').trim();
+
   if (tour.tour_type === 'custom') {
     return (
       <div className="flex min-h-screen flex-col bg-background">
@@ -143,9 +154,9 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
                     tailored to your interests, schedule, and preferences.
                   </p>
                   <div className="py-6">
-                    <h3 className="font-bold text-xl mb-6">What's Included:</h3>
+                    <h3 className="font-bold text-xl mb-6">What&apos;s Included:</h3>
                     <ul className="grid gap-3 text-left">
-                      {tour.inclusions?.map((inclusion, i) => (
+                      {includedItems.map((inclusion, i) => (
                         <li key={i} className="flex items-start gap-3">
                           <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full" style={{ background: 'var(--primary)' }}>
                             <Check className="h-3 w-3 text-white" />
@@ -292,7 +303,41 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
                   <p className="text-base text-foreground/80 leading-relaxed">
                     {tour.description || 'Experience the magic of Bhutan with this unforgettable journey.'}
                   </p>
+                  {detailedDescription && (
+                    <div className="mt-6 space-y-3">
+                      <h3 className="font-heading text-xl font-semibold text-foreground">
+                        Detailed Description
+                      </h3>
+                      <p className="whitespace-pre-line text-base leading-relaxed text-foreground/80">
+                        {detailedDescription}
+                      </p>
+                    </div>
+                  )}
                 </div>
+
+              {/* Gallery */}
+              {galleryUrls.length > 0 && (
+                <div>
+                  <h2 className="font-heading mb-6 text-2xl font-bold text-foreground md:text-3xl">
+                    Gallery
+                  </h2>
+                  <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">
+                    {galleryUrls.map((url, i) => (
+                      <div
+                        key={`${url}-${i}`}
+                        className="aspect-[4/3] overflow-hidden rounded-xl bg-muted"
+                      >
+                        <img
+                          src={url}
+                          alt={`${tour.title} gallery ${i + 1}`}
+                          className="h-full w-full object-cover transition-transform duration-500 hover:scale-[1.03]"
+                          loading="lazy"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Highlights */}
               {tour.highlights && tour.highlights.length > 0 && (
@@ -380,18 +425,18 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
               )}
 
               {/* Inclusions & Exclusions */}
-              {(tour.inclusions || tour.exclusions) && (
+              {(includedItems.length > 0 || excludedItems.length > 0) && (
                 <div className="grid gap-6 md:grid-cols-2">
-                  {tour.inclusions && tour.inclusions.length > 0 && (
-                    <div className="bg-muted rounded-xl p-6">
-                      <h3 className="font-heading font-semibold text-lg mb-4 flex items-center gap-2 text-foreground">
+                  {includedItems.length > 0 && (
+                    <div className="rounded-xl bg-background p-6 ring-1 ring-border">
+                      <h3 className="font-heading mb-4 flex items-center gap-2 text-lg font-semibold text-foreground">
                         <Check className="h-5 w-5" style={{ color: '#10B981' }} />
-                        What's Included
+                        What&apos;s Included
                       </h3>
                       <ul className="space-y-2">
-                        {tour.inclusions.map((item, i) => (
+                        {includedItems.map((item, i) => (
                           <li key={i} className="flex items-start gap-2 text-sm">
-                            <Check className="h-4 w-4 shrink-0 mt-0.5" style={{ color: '#10B981' }} />
+                            <Check className="mt-0.5 h-4 w-4 shrink-0" style={{ color: '#10B981' }} />
                             <span className="text-foreground/80">{item}</span>
                           </li>
                         ))}
@@ -399,16 +444,16 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
                     </div>
                   )}
 
-                  {tour.exclusions && tour.exclusions.length > 0 && (
-                    <div className="bg-muted rounded-xl p-6">
-                      <h3 className="font-heading font-semibold text-lg mb-4 flex items-center gap-2 text-foreground">
+                  {excludedItems.length > 0 && (
+                    <div className="rounded-xl bg-background p-6 ring-1 ring-border">
+                      <h3 className="font-heading mb-4 flex items-center gap-2 text-lg font-semibold text-foreground">
                         <X className="h-5 w-5 text-muted-foreground" />
-                        What's Excluded
+                        What&apos;s Excluded
                       </h3>
                       <ul className="space-y-2">
-                        {tour.exclusions.map((item, i) => (
+                        {excludedItems.map((item, i) => (
                           <li key={i} className="flex items-start gap-2 text-sm">
-                            <X className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                            <X className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
                             <span className="text-foreground/80">{item}</span>
                           </li>
                         ))}
