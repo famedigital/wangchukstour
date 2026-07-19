@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { authGet } from '@/lib/auth/fetch';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -96,12 +97,12 @@ export default function AdminDashboardPage() {
         setLoading(true);
         setError(null);
 
-        // Fetch all data in parallel
+        // Fetch all data in parallel (authGet refreshes expired access tokens)
         const [statsRes, bookingsRes, toursRes, inquiriesRes] = await Promise.all([
-          fetch('/api/admin/dashboard/stats'),
-          fetch('/api/admin/dashboard/bookings'),
-          fetch('/api/admin/dashboard/tours'),
-          fetch('/api/admin/dashboard/inquiries'),
+          authGet('/api/admin/dashboard/stats'),
+          authGet('/api/admin/dashboard/bookings'),
+          authGet('/api/admin/dashboard/tours'),
+          authGet('/api/admin/dashboard/inquiries'),
         ]);
 
         // Check for errors

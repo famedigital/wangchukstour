@@ -1,64 +1,60 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/utils/supabase/server';
+import { createAdminClient } from '@/utils/supabase/admin';
 import { getCurrentUser } from '@/lib/auth/jwt';
-import { requirePermission, Permissions, type AdminUser } from '@/lib/auth/rbac';
+import { hasPermission, Permissions, type AdminUser } from '@/lib/auth/rbac';
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
-    // Authentication check
     const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // RBAC permission check
     const adminUser: AdminUser = {
       id: user.userId,
       email: user.email,
       name: user.name,
       role: user.role,
-      permissions: user.permissions || [],
+      permissions: Array.isArray(user.permissions) ? user.permissions : [],
     };
 
-    requirePermission(adminUser, Permissions.ANALYTICS_VIEW);
+    if (!hasPermission(adminUser, Permissions.ANALYTICS_VIEW)) {
+      return NextResponse.json(
+        { error: 'Insufficient permissions' },
+        { status: 403 }
+      );
+    }
 
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
-    // Get total bookings count
     const { count: totalBookings } = await supabase
       .from('bookings')
       .select('*', { count: 'exact', head: true });
 
-    // Get pending bookings
     const { count: pendingBookings } = await supabase
       .from('bookings')
       .select('*', { count: 'exact', head: true })
       .eq('status', 'pending');
 
-    // Get confirmed bookings
     const { count: confirmedBookings } = await supabase
       .from('bookings')
       .select('*', { count: 'exact', head: true })
       .eq('status', 'confirmed');
 
-    // Get cancelled bookings
     const { count: cancelledBookings } = await supabase
       .from('bookings')
       .select('*', { count: 'exact', head: true })
       .eq('status', 'cancelled');
 
-    // Get total tours
     const { count: activeTours } = await supabase
       .from('tours')
       .select('*', { count: 'exact', head: true })
       .eq('is_active', true);
 
-    // Get total inquiries
     const { count: totalInquiries } = await supabase
       .from('inquiries')
       .select('*', { count: 'exact', head: true });
 
-    // Calculate revenue (basic calculation)
     const { data: bookings } = await supabase
       .from('bookings')
       .select('total_amount')
@@ -66,7 +62,6 @@ export async function GET(request: NextRequest) {
 
     const totalRevenue = bookings?.reduce((sum, booking) => sum + (booking.total_amount || 0), 0) || 0;
 
-    // Calculate monthly revenue (current month)
     const now = new Date();
     const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 

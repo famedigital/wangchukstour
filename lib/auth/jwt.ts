@@ -206,8 +206,14 @@ export async function refreshAccessToken(): Promise<string | null> {
       return null;
     }
 
+    // Normalize permissions so JSONB `{}` never stays in the access token
+    const normalizedPayload: TokenPayload = {
+      ...payload,
+      permissions: Array.isArray(payload.permissions) ? payload.permissions : [],
+    };
+
     // Generate new access token
-    const newAccessToken = generateAccessToken(payload);
+    const newAccessToken = generateAccessToken(normalizedPayload);
 
     // Set new access token cookie
     cookieStore.set('access_token', newAccessToken, {

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { refreshAccessToken, verifyToken } from '@/lib/auth/jwt';
 import { createAdminClient } from '@/utils/supabase/admin';
-import type { AdminUser } from '@/lib/auth/rbac';
+import { normalizePermissions, type AdminUser } from '@/lib/auth/rbac';
 
 export async function POST(_request: NextRequest) {
   try {
@@ -37,7 +37,7 @@ export async function POST(_request: NextRequest) {
       email: user.email,
       name: user.name || 'Admin',
       role: user.role || 'admin',
-      permissions: Array.isArray(user.permissions) ? user.permissions : [],
+      permissions: normalizePermissions(user.permissions),
     };
 
     return NextResponse.json({

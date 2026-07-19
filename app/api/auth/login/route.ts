@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/utils/supabase/admin';
 import { comparePassword, generateAuthTokens, setAuthCookies } from '@/lib/auth/jwt';
+import { normalizePermissions } from '@/lib/auth/rbac';
 import { z } from 'zod';
 
 const loginSchema = z.object({
@@ -52,7 +53,7 @@ export async function POST(request: NextRequest) {
       email: user.email,
       role: user.role,
       name: user.name || 'Admin',
-      permissions: user.permissions || [],
+      permissions: normalizePermissions(user.permissions),
     });
 
     await setAuthCookies(tokens);

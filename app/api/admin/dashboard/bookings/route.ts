@@ -1,30 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/utils/supabase/server';
+import { createAdminClient } from '@/utils/supabase/admin';
 import { getCurrentUser } from '@/lib/auth/jwt';
-import { requirePermission, Permissions, type AdminUser } from '@/lib/auth/rbac';
+import { hasPermission, Permissions, type AdminUser } from '@/lib/auth/rbac';
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
-    // Authentication check
     const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // RBAC permission check
     const adminUser: AdminUser = {
       id: user.userId,
       email: user.email,
       name: user.name,
       role: user.role,
-      permissions: user.permissions || [],
+      permissions: Array.isArray(user.permissions) ? user.permissions : [],
     };
 
-    requirePermission(adminUser, Permissions.BOOKING_READ);
+    if (!hasPermission(adminUser, Permissions.BOOKING_READ)) {
+      return NextResponse.json(
+        { error: 'Insufficient permissions' },
+        { status: 403 }
+      );
+    }
 
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
-    // Get recent bookings with tour information
     const { data: bookings, error } = await supabase
       .from('bookings')
       .select(`
@@ -53,7 +55,6 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Format the bookings for display (id must be the DB uuid for deep links)
     const formattedBookings = bookings?.map(booking => ({
       id: booking.id,
       bookingNumber: booking.booking_number,

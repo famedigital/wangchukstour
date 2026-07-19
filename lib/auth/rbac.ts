@@ -13,23 +13,27 @@ export interface AdminUser {
 }
 
 /**
+ * Normalize permissions from DB/JWT (JSONB default may be `{}`).
+ */
+export function normalizePermissions(permissions: unknown): string[] {
+  return Array.isArray(permissions) ? permissions.filter((p): p is string => typeof p === 'string') : [];
+}
+
+/**
  * Check if user has specific permission
  * @param user - Admin user object
  * @param permission - Permission string to check
  * @returns true if user has permission or is admin
  */
 export function hasPermission(user: AdminUser, permission: string): boolean {
-  // Admins have all permissions
-  if (user.role === 'admin') {
+  // Admins and super_admins have all permissions (case-insensitive)
+  const role = user.role?.toLowerCase() ?? '';
+  if (role === 'admin' || role === 'super_admin') {
     return true;
   }
 
-  // Check if user has specific permission
-  if (user.permissions && Array.isArray(user.permissions)) {
-    return user.permissions.includes(permission);
-  }
-
-  return false;
+  const permissions = normalizePermissions(user.permissions);
+  return permissions.includes(permission);
 }
 
 /**

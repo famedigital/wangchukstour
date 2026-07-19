@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/jwt';
 import { createAdminClient } from '@/utils/supabase/admin';
-import type { AdminUser } from '@/lib/auth/rbac';
+import { normalizePermissions, type AdminUser } from '@/lib/auth/rbac';
 
 export async function GET() {
   try {
@@ -30,7 +30,7 @@ export async function GET() {
       email: user.email,
       name: user.name || 'Admin',
       role: user.role || 'admin',
-      permissions: Array.isArray(user.permissions) ? user.permissions : [],
+      permissions: normalizePermissions(user.permissions),
     };
 
     return NextResponse.json({ user: adminUser });

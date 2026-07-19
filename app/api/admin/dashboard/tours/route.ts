@@ -1,30 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/utils/supabase/server';
+import { createAdminClient } from '@/utils/supabase/admin';
 import { getCurrentUser } from '@/lib/auth/jwt';
-import { requirePermission, Permissions, type AdminUser } from '@/lib/auth/rbac';
+import { hasPermission, Permissions, type AdminUser } from '@/lib/auth/rbac';
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
-    // Authentication check
     const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // RBAC permission check
     const adminUser: AdminUser = {
       id: user.userId,
       email: user.email,
       name: user.name,
       role: user.role,
-      permissions: user.permissions || [],
+      permissions: Array.isArray(user.permissions) ? user.permissions : [],
     };
 
-    requirePermission(adminUser, Permissions.TOUR_READ);
+    if (!hasPermission(adminUser, Permissions.TOUR_READ)) {
+      return NextResponse.json(
+        { error: 'Insufficient permissions' },
+        { status: 403 }
+      );
+    }
 
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
-    // Get tours with booking counts
     const { data: tours, error } = await supabase
       .from('tours')
       .select(`
@@ -50,7 +52,6 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Format the tours for display
     const formattedTours = tours?.map(tour => ({
       id: tour.id,
       title: tour.title,
@@ -59,7 +60,7 @@ export async function GET(request: NextRequest) {
       difficulty: tour.difficulty_level,
       price: tour.price,
       status: tour.is_active && tour.is_published ? 'active' : 'inactive',
-      bookings: tour.view_count || 0, // Using view_count as proxy since we don't have booking counts yet
+      bookings: tour.view_count || 0,
     })) || [];
 
     return NextResponse.json(formattedTours);
