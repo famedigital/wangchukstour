@@ -8,20 +8,25 @@ export interface Tour {
   slug: string;
   tagline?: string | null;
   description?: string | null;
+  long_description?: string | null;
   hero_image_public_id?: string | null;
   hero_image_url?: string | null;
   thumbnail_public_id?: string | null;
   thumbnail_url?: string | null;
   gallery_public_ids?: string[] | null;
+  gallery_urls?: string[] | null;
   category?: string | null;
   duration?: number | null;
   price?: number | null;
   difficulty_level?: string | null;
+  max_group_size?: number | null;
+  min_group_size?: number | null;
   is_featured?: boolean | null;
   is_active?: boolean | null;
+  is_published?: boolean | null;
   tour_type?: string | null;
   duration_nights?: number | null;
-  locations?: string[] | null;
+  locations?: string[] | Array<Record<string, unknown>> | null;
   highlights?: string[] | null;
   itinerary?: Array<{
     day: string | number;
@@ -32,8 +37,17 @@ export interface Tour {
     meals?: string;
     accommodation?: string;
   }> | null;
+  /** Preferred DB column names */
+  included_items?: string[] | null;
+  excluded_items?: string[] | null;
+  /** Legacy aliases */
   inclusions?: string[] | null;
   exclusions?: string[] | null;
+  departure_dates?: unknown[] | null;
+  faqs?: Array<{ question: string; answer: string }> | null;
+  meta_title?: string | null;
+  meta_description?: string | null;
+  meta_keywords?: string[] | null;
   best_season?: string[] | null;
   altitude_range?: string | null;
   min_participants?: number | null;

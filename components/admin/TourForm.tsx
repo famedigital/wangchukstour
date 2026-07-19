@@ -12,6 +12,13 @@ import { MediaPickerModal } from '@/components/admin/MediaPickerModal';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import {
+  TOUR_LOCATIONS,
+  MEAL_OPTIONS,
+  ACCOMMODATION_OPTIONS,
+  TOUR_INCLUSION_OPTIONS,
+  createEmptyItineraryDay,
+} from '@/lib/tour-options';
 
 function CategorySelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const [options, setOptions] = useState<{ slug: string; name: string }[]>([
@@ -128,9 +135,9 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
     hero_image_url: tour?.hero_image_url || '',
     thumbnail_url: tour?.thumbnail_url || '',
     gallery_urls: tour?.gallery_urls || [],
-    highlights: tour?.highlights || [''],
-    included_items: tour?.included_items || [''],
-    excluded_items: tour?.excluded_items || [''],
+    highlights: tour?.highlights?.length ? tour.highlights : [''],
+    included_items: Array.isArray(tour?.included_items) ? tour.included_items : [],
+    excluded_items: Array.isArray(tour?.excluded_items) ? tour.excluded_items : [],
     is_featured: tour?.is_featured || false,
     is_active: tour?.is_active || true,
     is_published: tour?.is_published || true,
@@ -147,7 +154,6 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
   const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
   const [mediaPickerTarget, setMediaPickerTarget] = useState<{
     field: string;
-    index?: number;
   } | null>(null);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
@@ -167,10 +173,32 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
       return;
     }
 
-    // Final submission
+    // Final submission — normalize arrays / itinerary for DB
     setLoading(true);
     try {
-      await onSubmit(formData);
+      const payload = {
+        ...formData,
+        highlights: formData.highlights.filter((h: string) => h?.trim()),
+        included_items: formData.included_items.filter((h: string) => h?.trim()),
+        excluded_items: formData.excluded_items.filter((h: string) => h?.trim()),
+        gallery_urls: formData.gallery_urls.filter((u: string) => u?.trim()),
+        itinerary: formData.itinerary.map((day: any, index: number) => {
+          const base =
+            typeof day === 'object' && day !== null
+              ? day
+              : createEmptyItineraryDay(index + 1);
+          return {
+            day: index + 1,
+            title: base.title || '',
+            location: base.location || '',
+            description: base.description || '',
+            meals: base.meals || '',
+            accommodation: base.accommodation || '',
+            activities: base.activities || [],
+          };
+        }),
+      };
+      await onSubmit(payload);
       toast.success('Tour saved successfully!');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to save tour';
@@ -228,24 +256,74 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
     setFormData({ ...formData, [field]: newArray });
   };
 
-  const openMediaPicker = (field: string, index?: number) => {
-    setMediaPickerTarget({ field, index });
+  const openMediaPicker = (field: string) => {
+    setMediaPickerTarget({ field });
     setMediaPickerOpen(true);
   };
 
-  const handleMediaSelect = (media: any) => {
+  const mediaUrl = (item: unknown): string => {
+    if (typeof item === 'string') return item;
+    if (item && typeof item === 'object') {
+      const m = item as { secure_url?: string; url?: string; thumbnail_url?: string };
+      return m.secure_url || m.url || m.thumbnail_url || '';
+    }
+    return '';
+  };
+
+  const handleMediaSelect = (media: unknown) => {
     if (!mediaPickerTarget) return;
 
-    const { field, index } = mediaPickerTarget;
-    const imageUrl = typeof media === 'string' ? media : media.secure_url;
+    const { field } = mediaPickerTarget;
+    const items = Array.isArray(media) ? media : [media];
+    const urls = items.map(mediaUrl).filter(Boolean);
 
-    if (index !== undefined) {
-      updateArrayItem(field, index, imageUrl);
+    if (urls.length === 0) {
+      toast.error('Could not read selected image URL');
+      return;
+    }
+
+    if (field === 'gallery_urls') {
+      const existing = (formData.gallery_urls || []).filter(Boolean);
+      const merged = [...existing];
+      for (const url of urls) {
+        if (!merged.includes(url)) merged.push(url);
+      }
+      const next: Record<string, unknown> = { gallery_urls: merged };
+      // Auto-fill empty thumbnail from first selected gallery image
+      if (!formData.thumbnail_url && merged[0]) {
+        next.thumbnail_url = merged[0];
+      }
+      setFormData({ ...formData, ...next });
     } else {
-      updateField(field, imageUrl);
+      const url = urls[0];
+      const next: Record<string, unknown> = { [field]: url };
+      if (field === 'hero_image_url' && !formData.thumbnail_url) {
+        next.thumbnail_url = url;
+      }
+      setFormData({ ...formData, ...next });
+      setValidationErrors({ ...validationErrors, [field]: '' });
     }
 
     setMediaPickerOpen(false);
+    setMediaPickerTarget(null);
+  };
+
+  const addItineraryDay = () => {
+    setFormData({
+      ...formData,
+      itinerary: [
+        ...formData.itinerary,
+        createEmptyItineraryDay(formData.itinerary.length + 1),
+      ],
+    });
+  };
+
+  const toggleInclusionItem = (listField: 'included_items' | 'excluded_items', item: string) => {
+    const current = formData[listField] as string[];
+    const next = current.includes(item)
+      ? current.filter((v) => v !== item)
+      : [...current, item];
+    updateField(listField, next);
   };
 
   const generateSlug = () => {
@@ -259,7 +337,7 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
   };
 
   return (
-    <div className="flex gap-6">
+    <div className="flex min-w-0 flex-col gap-4 lg:flex-row lg:gap-6">
       {/* Steps Sidebar */}
       <div className="hidden w-56 shrink-0 lg:block">
         <div className="sticky top-4 space-y-1">
@@ -363,7 +441,7 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-6">
+          <form onSubmit={handleSubmit} className="p-3 sm:p-6">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentStep}
@@ -539,50 +617,59 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
                 {currentStep === 2 && (
                   <div className="space-y-6">
                     <div>
-                      <label className="block text-sm font-medium mb-2">Hero Image</label>
-                      <div className="relative rounded-xl overflow-hidden h-64 bg-muted">
+                      <label className="mb-2 block text-sm font-medium">Hero Image</label>
+                      <div className="relative h-48 overflow-hidden rounded-xl bg-muted sm:h-64">
                         {formData.hero_image_url ? (
                           <img
                             src={formData.hero_image_url}
                             alt="Hero preview"
-                            className="w-full h-full object-cover"
+                            className="h-full w-full object-cover"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display = 'none';
+                            }}
                           />
                         ) : (
-                          <div className="flex items-center justify-center h-full">
+                          <div className="flex h-full items-center justify-center">
                             <Upload className="h-12 w-12 text-muted-foreground" />
                           </div>
                         )}
                         <button
                           type="button"
                           onClick={() => openMediaPicker('hero_image_url')}
-                          className="absolute top-4 right-4 bg-white/90 hover:bg-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                          className="absolute top-3 right-3 rounded-lg bg-white/90 px-3 py-1.5 text-sm font-medium transition-colors hover:bg-white sm:top-4 sm:right-4 sm:px-4 sm:py-2"
                         >
                           Change Image
                         </button>
                       </div>
                       {validationErrors.hero_image_url && (
-                        <p className="text-red-600 text-sm mt-2">{validationErrors.hero_image_url}</p>
+                        <p className="mt-2 text-sm text-red-600">{validationErrors.hero_image_url}</p>
                       )}
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-2">Thumbnail Image</label>
-                      <div className="relative rounded-xl overflow-hidden h-40 bg-muted">
+                      <label className="mb-2 block text-sm font-medium">Thumbnail Image</label>
+                      <div className="relative h-36 max-w-sm overflow-hidden rounded-xl bg-muted sm:h-40">
                         {formData.thumbnail_url ? (
                           <img
                             src={formData.thumbnail_url}
                             alt="Thumbnail preview"
-                            className="w-full h-full object-cover"
+                            className="h-full w-full object-cover"
+                            onError={(e) => {
+                              const el = e.target as HTMLImageElement;
+                              if (formData.hero_image_url && el.src !== formData.hero_image_url) {
+                                el.src = formData.hero_image_url;
+                              }
+                            }}
                           />
                         ) : (
-                          <div className="flex items-center justify-center h-full">
+                          <div className="flex h-full items-center justify-center">
                             <Upload className="h-8 w-8 text-muted-foreground" />
                           </div>
                         )}
                         <button
                           type="button"
                           onClick={() => openMediaPicker('thumbnail_url')}
-                          className="absolute top-3 right-3 bg-white/90 hover:bg-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+                          className="absolute top-3 right-3 rounded-lg bg-white/90 px-3 py-1.5 text-sm font-medium transition-colors hover:bg-white"
                         >
                           Change Image
                         </button>
@@ -590,42 +677,47 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
                     </div>
 
                     <div>
-                      <div className="flex items-center justify-between mb-4">
-                        <label className="block text-sm font-medium">Gallery Images</label>
+                      <div className="mb-4 flex items-center justify-between gap-2">
+                        <label className="block text-sm font-medium">
+                          Gallery Images
+                          {formData.gallery_urls.length > 0 && (
+                            <span className="ml-2 text-muted-foreground">
+                              ({formData.gallery_urls.length})
+                            </span>
+                          )}
+                        </label>
                         <button
                           type="button"
-                          onClick={() => {
-                            setMediaPickerTarget({ field: 'gallery_urls', index: formData.gallery_urls.length });
-                            setMediaPickerOpen(true);
-                          }}
+                          onClick={() => openMediaPicker('gallery_urls')}
                           className="flex items-center gap-1 text-sm text-primary hover:text-primary/80"
                         >
                           <Plus className="h-4 w-4" />
-                          Add Image
+                          Add Images
                         </button>
                       </div>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 md:gap-4">
                         {formData.gallery_urls.map((url: string, index: number) => (
-                          <div key={index} className="relative group">
-                            <div className="aspect-square rounded-lg overflow-hidden bg-muted">
+                          <div key={`${url}-${index}`} className="group relative">
+                            <div className="aspect-square overflow-hidden rounded-lg bg-muted">
                               <img
                                 src={url}
                                 alt={`Gallery ${index + 1}`}
-                                className="w-full h-full object-cover"
+                                className="h-full w-full object-cover"
+                                loading="lazy"
                               />
                             </div>
                             <button
                               type="button"
                               onClick={() => removeArrayItem('gallery_urls', index)}
-                              className="absolute top-2 right-2 p-2 bg-red-600 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                              className="absolute top-2 right-2 rounded-lg bg-red-600 p-2 text-white opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100"
                             >
                               <Trash2 className="h-4 w-4" />
                             </button>
                           </div>
                         ))}
                         {formData.gallery_urls.length === 0 && (
-                          <div className="col-span-full text-center py-8 text-muted-foreground">
-                            No gallery images added yet
+                          <div className="col-span-full rounded-xl border-2 border-dashed py-8 text-center text-muted-foreground">
+                            No gallery images yet. Select multiple images and click Insert.
                           </div>
                         )}
                       </div>
@@ -636,11 +728,11 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
                 {/* Step 4: Itinerary */}
                 {currentStep === 3 && (
                   <div className="space-y-6">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between gap-2">
                       <label className="block text-sm font-medium">Daily Itinerary</label>
                       <button
                         type="button"
-                        onClick={() => addArrayItem('itinerary')}
+                        onClick={addItineraryDay}
                         className="flex items-center gap-1 text-sm text-primary hover:text-primary/80"
                       >
                         <Plus className="h-4 w-4" />
@@ -649,65 +741,123 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
                     </div>
 
                     <div className="space-y-4">
-                      {formData.itinerary.map((day: any, index: number) => (
-                        <Card key={index} className="p-4">
-                          <div className="flex items-start gap-4">
-                            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground">
-                              D{index + 1}
-                            </div>
-                            <div className="flex-1 space-y-3">
-                              <div className="grid gap-3 md:grid-cols-2">
-                                <FormField
-                                  label="Title"
-                                  value={day.title || ''}
-                                  onChange={(e) => updateArrayItem('itinerary', index, { ...day, title: e.target.value })}
-                                  placeholder="e.g., Arrival in Paro"
-                                />
-                                <FormField
-                                  label="Location"
-                                  value={day.location || ''}
-                                  onChange={(e) => updateArrayItem('itinerary', index, { ...day, location: e.target.value })}
-                                  placeholder="e.g., Paro"
-                                />
+                      {formData.itinerary.map((day: any, index: number) => {
+                        const dayData =
+                          typeof day === 'object' && day !== null
+                            ? day
+                            : createEmptyItineraryDay(index + 1);
+
+                        return (
+                          <Card key={index} className="p-3 sm:p-4">
+                            <div className="flex items-start gap-3 sm:gap-4">
+                              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground sm:h-16 sm:w-16 sm:text-base">
+                                D{index + 1}
                               </div>
-                              <FormField
-                                label="Description"
-                                value={day.description || ''}
-                                onChange={(e) => updateArrayItem('itinerary', index, { ...day, description: e.target.value })}
-                                textarea
-                                rows={3}
-                                placeholder="Day activities..."
-                              />
-                              <div className="grid gap-3 md:grid-cols-2">
+                              <div className="min-w-0 flex-1 space-y-3">
+                                <div className="grid gap-3 sm:grid-cols-2">
+                                  <FormField
+                                    label="Title"
+                                    value={dayData.title || ''}
+                                    onChange={(e) =>
+                                      updateArrayItem('itinerary', index, {
+                                        ...dayData,
+                                        day: index + 1,
+                                        title: e.target.value,
+                                      })
+                                    }
+                                    placeholder="e.g., Arrival in Paro"
+                                  />
+                                  <FormField
+                                    label="Location"
+                                    value={dayData.location || ''}
+                                    onChange={(e) =>
+                                      updateArrayItem('itinerary', index, {
+                                        ...dayData,
+                                        day: index + 1,
+                                        location: e.target.value,
+                                      })
+                                    }
+                                    select
+                                    options={[
+                                      { value: '', label: 'Select location' },
+                                      ...TOUR_LOCATIONS.map((loc) => ({
+                                        value: loc,
+                                        label: loc,
+                                      })),
+                                    ]}
+                                  />
+                                </div>
                                 <FormField
-                                  label="Meals Included"
-                                  value={day.meals || ''}
-                                  onChange={(e) => updateArrayItem('itinerary', index, { ...day, meals: e.target.value })}
-                                  placeholder="e.g., Breakfast, Lunch"
+                                  label="Description"
+                                  value={dayData.description || ''}
+                                  onChange={(e) =>
+                                    updateArrayItem('itinerary', index, {
+                                      ...dayData,
+                                      day: index + 1,
+                                      description: e.target.value,
+                                    })
+                                  }
+                                  textarea
+                                  rows={3}
+                                  placeholder="Day activities..."
                                 />
-                                <FormField
-                                  label="Accommodation"
-                                  value={day.accommodation || ''}
-                                  onChange={(e) => updateArrayItem('itinerary', index, { ...day, accommodation: e.target.value })}
-                                  placeholder="e.g., Hotel Name"
-                                />
+                                <div className="grid gap-3 sm:grid-cols-2">
+                                  <FormField
+                                    label="Meals Included"
+                                    value={dayData.meals || ''}
+                                    onChange={(e) =>
+                                      updateArrayItem('itinerary', index, {
+                                        ...dayData,
+                                        day: index + 1,
+                                        meals: e.target.value,
+                                      })
+                                    }
+                                    select
+                                    options={[
+                                      { value: '', label: 'Select meals' },
+                                      ...MEAL_OPTIONS.map((o) => ({
+                                        value: o.value,
+                                        label: o.label,
+                                      })),
+                                    ]}
+                                  />
+                                  <FormField
+                                    label="Accommodation"
+                                    value={dayData.accommodation || ''}
+                                    onChange={(e) =>
+                                      updateArrayItem('itinerary', index, {
+                                        ...dayData,
+                                        day: index + 1,
+                                        accommodation: e.target.value,
+                                      })
+                                    }
+                                    select
+                                    options={[
+                                      { value: '', label: 'Select accommodation' },
+                                      ...ACCOMMODATION_OPTIONS.map((o) => ({
+                                        value: o.value,
+                                        label: o.label,
+                                      })),
+                                    ]}
+                                  />
+                                </div>
                               </div>
+                              <button
+                                type="button"
+                                onClick={() => removeArrayItem('itinerary', index)}
+                                className="shrink-0 rounded-lg p-2 text-red-600 transition-colors hover:bg-red-50"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
                             </div>
-                            <button
-                              type="button"
-                              onClick={() => removeArrayItem('itinerary', index)}
-                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
-                          </div>
-                        </Card>
-                      ))}
+                          </Card>
+                        );
+                      })}
                     </div>
 
                     {formData.itinerary.length === 0 && (
-                      <div className="text-center py-8 text-muted-foreground border-2 border-dashed rounded-xl">
-                        No itinerary days added yet. Click "Add Day" to start planning.
+                      <div className="rounded-xl border-2 border-dashed py-8 text-center text-muted-foreground">
+                        No itinerary days added yet. Click &quot;Add Day&quot; to start planning.
                       </div>
                     )}
                   </div>
@@ -715,77 +865,104 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
 
                 {/* Step 5: Pricing & Options */}
                 {currentStep === 4 && (
-                  <div className="space-y-6">
+                  <div className="space-y-8">
                     <div>
-                      <div className="flex items-center justify-between mb-4">
-                        <label className="block text-sm font-medium">Included Items</label>
-                        <button
-                          type="button"
-                          onClick={() => addArrayItem('included_items')}
-                          className="text-sm text-green-600 hover:text-green-700 flex items-center gap-1"
-                        >
-                          <Plus className="h-4 w-4" />
-                          Add Item
-                        </button>
+                      <label className="mb-3 block text-sm font-medium">Included Items</label>
+                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                        {TOUR_INCLUSION_OPTIONS.map((item) => {
+                          const checked = formData.included_items.includes(item);
+                          return (
+                            <label
+                              key={`inc-${item}`}
+                              className={cn(
+                                'flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2.5 text-sm transition-colors',
+                                checked
+                                  ? 'border-green-600/40 bg-green-50 text-green-900 dark:bg-green-950/30 dark:text-green-100'
+                                  : 'border-border hover:bg-muted/50'
+                              )}
+                            >
+                              <input
+                                type="checkbox"
+                                className="size-4 accent-green-600"
+                                checked={checked}
+                                onChange={() => toggleInclusionItem('included_items', item)}
+                              />
+                              <Check className={cn('size-4 shrink-0', checked ? 'text-green-600' : 'text-muted-foreground/40')} />
+                              <span>{item}</span>
+                            </label>
+                          );
+                        })}
                       </div>
-                      <div className="space-y-2">
-                        {formData.included_items.map((item: string, index: number) => (
-                          <div key={index} className="flex gap-3">
-                            <div className="flex-shrink-0 mt-3">
-                              <Check className="h-5 w-5 text-green-600" />
-                            </div>
-                            <FormField
-                              value={item}
-                              onChange={(e) => updateArrayItem('included_items', index, e.target.value)}
-                              placeholder="e.g., All accommodations"
-                              className="flex-1"
-                            />
+                      {/* Custom extras beyond the preset list */}
+                      {formData.included_items
+                        .filter((item: string) => !(TOUR_INCLUSION_OPTIONS as readonly string[]).includes(item))
+                        .map((item: string) => (
+                          <div key={`inc-custom-${item}`} className="mt-2 flex items-center gap-2 text-sm">
+                            <Check className="size-4 text-green-600" />
+                            <span className="flex-1">{item}</span>
                             <button
                               type="button"
-                              onClick={() => removeArrayItem('included_items', index)}
-                              className="p-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              onClick={() =>
+                                updateField(
+                                  'included_items',
+                                  formData.included_items.filter((v: string) => v !== item)
+                                )
+                              }
+                              className="rounded-lg p-2 text-red-600 hover:bg-red-50"
                             >
                               <Trash2 className="h-4 w-4" />
                             </button>
                           </div>
                         ))}
-                      </div>
                     </div>
 
                     <div>
-                      <div className="flex items-center justify-between mb-4">
-                        <label className="block text-sm font-medium">Excluded Items</label>
-                        <button
-                          type="button"
-                          onClick={() => addArrayItem('excluded_items')}
-                          className="text-sm text-red-600 hover:text-red-700 flex items-center gap-1"
-                        >
-                          <Plus className="h-4 w-4" />
-                          Add Item
-                        </button>
+                      <label className="mb-3 block text-sm font-medium">Excluded Items</label>
+                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                        {TOUR_INCLUSION_OPTIONS.map((item) => {
+                          const checked = formData.excluded_items.includes(item);
+                          return (
+                            <label
+                              key={`exc-${item}`}
+                              className={cn(
+                                'flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2.5 text-sm transition-colors',
+                                checked
+                                  ? 'border-red-600/40 bg-red-50 text-red-900 dark:bg-red-950/30 dark:text-red-100'
+                                  : 'border-border hover:bg-muted/50'
+                              )}
+                            >
+                              <input
+                                type="checkbox"
+                                className="size-4 accent-red-600"
+                                checked={checked}
+                                onChange={() => toggleInclusionItem('excluded_items', item)}
+                              />
+                              <X className={cn('size-4 shrink-0', checked ? 'text-red-600' : 'text-muted-foreground/40')} />
+                              <span>{item}</span>
+                            </label>
+                          );
+                        })}
                       </div>
-                      <div className="space-y-2">
-                        {formData.excluded_items.map((item: string, index: number) => (
-                          <div key={index} className="flex gap-3">
-                            <div className="flex-shrink-0 mt-3">
-                              <X className="h-5 w-5 text-red-600" />
-                            </div>
-                            <FormField
-                              value={item}
-                              onChange={(e) => updateArrayItem('excluded_items', index, e.target.value)}
-                              placeholder="e.g., International flights"
-                              className="flex-1"
-                            />
+                      {formData.excluded_items
+                        .filter((item: string) => !(TOUR_INCLUSION_OPTIONS as readonly string[]).includes(item))
+                        .map((item: string) => (
+                          <div key={`exc-custom-${item}`} className="mt-2 flex items-center gap-2 text-sm">
+                            <X className="size-4 text-red-600" />
+                            <span className="flex-1">{item}</span>
                             <button
                               type="button"
-                              onClick={() => removeArrayItem('excluded_items', index)}
-                              className="p-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              onClick={() =>
+                                updateField(
+                                  'excluded_items',
+                                  formData.excluded_items.filter((v: string) => v !== item)
+                                )
+                              }
+                              className="rounded-lg p-2 text-red-600 hover:bg-red-50"
                             >
                               <Trash2 className="h-4 w-4" />
                             </button>
                           </div>
                         ))}
-                      </div>
                     </div>
                   </div>
                 )}
@@ -922,23 +1099,24 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
             </AnimatePresence>
 
             {/* Navigation Buttons */}
-            <div className="mt-8 flex items-center justify-between border-t pt-6">
-              <Button type="button" onClick={onCancel} variant="outline">
+            <div className="mt-6 flex flex-col-reverse gap-3 border-t pt-4 sm:mt-8 sm:flex-row sm:items-center sm:justify-between sm:pt-6">
+              <Button type="button" onClick={onCancel} variant="outline" className="w-full sm:w-auto">
                 Cancel
               </Button>
 
-              <div className="flex gap-2">
+              <div className="flex w-full gap-2 sm:w-auto">
                 {currentStep > 0 && (
                   <Button
                     type="button"
                     onClick={() => setCurrentStep(currentStep - 1)}
                     variant="outline"
+                    className="flex-1 sm:flex-none"
                   >
                     Previous
                   </Button>
                 )}
 
-                <Button type="submit" disabled={loading}>
+                <Button type="submit" disabled={loading} className="flex-1 sm:flex-none">
                   {loading ? (
                     <>
                       <Loader2 className="size-4 animate-spin" />

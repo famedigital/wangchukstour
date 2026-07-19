@@ -213,7 +213,19 @@ export function MediaPickerModal({
 
   // Handle confirm selection
   const handleConfirm = () => {
-    const selectedItems = media.filter(item => selectedMedia.has(item.public_id));
+    // Prefer full library, fall back to filtered view so search selections still resolve
+    const pool = media.length > 0 ? media : filteredMedia;
+    const selectedItems = pool
+      .filter((item) => selectedMedia.has(item.public_id))
+      .map((item) => ({
+        ...item,
+        secure_url: item.secure_url || item.url,
+        url: item.url || item.secure_url,
+        thumbnail_url: item.thumbnail_url || item.secure_url || item.url,
+      }))
+      .filter((item) => Boolean(item.secure_url || item.url));
+
+    if (selectedItems.length === 0) return;
 
     if (multiple) {
       onSelect(selectedItems);
@@ -242,11 +254,11 @@ export function MediaPickerModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) handleClose(); }}>
-      <DialogContent className="sm:max-w-4xl w-full" showCloseButton>
-        <DialogHeader>
+      <DialogContent className="flex max-h-[90dvh] w-[calc(100vw-1rem)] max-w-4xl flex-col overflow-x-hidden overflow-y-auto p-3 sm:w-full sm:max-w-4xl sm:p-6" showCloseButton>
+        <DialogHeader className="pr-8">
           <DialogTitle>Media Library</DialogTitle>
         </DialogHeader>
-      <div className="space-y-6">
+      <div className="min-w-0 space-y-4 sm:space-y-6">
         {/* Header Actions */}
         <div className="flex items-center justify-between gap-4">
           {/* Search */}
@@ -368,9 +380,15 @@ export function MediaPickerModal({
                   {viewMode === 'grid' ? (
                     <>
                       <img
-                        src={item.thumbnail_url || item.secure_url}
+                        src={item.thumbnail_url || item.secure_url || item.url}
                         alt={item.alt_text || item.public_id}
-                        className="w-full h-32 object-cover"
+                        className="h-32 w-full object-cover"
+                        loading="lazy"
+                        onError={(e) => {
+                          const el = e.currentTarget;
+                          const fallback = item.secure_url || item.url;
+                          if (fallback && el.src !== fallback) el.src = fallback;
+                        }}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
                         <div className="absolute bottom-2 left-2 right-2">
@@ -415,7 +433,7 @@ export function MediaPickerModal({
         )}
 
         {/* Footer Actions */}
-        <div className="flex items-center justify-between pt-4 border-t border-border">
+        <div className="flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-muted-foreground">
             {selectedMedia.size > 0 && (
               <>
@@ -423,16 +441,18 @@ export function MediaPickerModal({
               </>
             )}
           </p>
-          <div className="flex items-center gap-3">
+          <div className="flex w-full items-center gap-2 sm:w-auto sm:gap-3">
             <Button
               variant="secondary"
               onClick={handleClose}
+              className="flex-1 sm:flex-none"
             >
               Cancel
             </Button>
             <Button
               onClick={handleConfirm}
               disabled={selectedMedia.size === 0}
+              className="flex-1 sm:flex-none"
             >
               {selectedMedia.size > 0 ? (
                 <>

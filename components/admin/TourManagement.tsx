@@ -395,16 +395,18 @@ export function TourManagement() {
 
       <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
         <DialogContent
-          className="max-h-[90vh] w-full overflow-y-auto sm:max-w-6xl"
+          className="flex max-h-[92dvh] w-[calc(100vw-1rem)] max-w-6xl flex-col gap-3 overflow-x-hidden overflow-y-auto p-3 sm:w-full sm:max-w-6xl sm:p-6"
           showCloseButton
         >
-          <DialogHeader>
+          <DialogHeader className="pr-8">
             <DialogTitle>Create New Tour</DialogTitle>
           </DialogHeader>
-          <TourForm
-            onSubmit={handleCreate}
-            onCancel={() => setShowCreateModal(false)}
-          />
+          <div className="min-w-0">
+            <TourForm
+              onSubmit={handleCreate}
+              onCancel={() => setShowCreateModal(false)}
+            />
+          </div>
         </DialogContent>
       </Dialog>
 
@@ -416,10 +418,10 @@ export function TourManagement() {
         }}
       >
         <DialogContent
-          className="max-h-[90vh] w-full overflow-y-auto sm:max-w-6xl"
+          className="flex max-h-[92dvh] w-[calc(100vw-1rem)] max-w-6xl flex-col gap-3 overflow-x-hidden overflow-y-auto p-3 sm:w-full sm:max-w-6xl sm:p-6"
           showCloseButton
         >
-          <DialogHeader>
+          <DialogHeader className="pr-8">
             <DialogTitle>Edit Tour</DialogTitle>
           </DialogHeader>
           {editLoading || !editingTour ? (
@@ -427,15 +429,17 @@ export function TourManagement() {
               <div className="size-10 animate-spin rounded-full border-2 border-primary border-t-transparent" />
             </div>
           ) : (
-            <TourForm
-              key={editingTour.id}
-              tour={editingTour}
-              onSubmit={handleUpdate}
-              onCancel={() => {
-                setShowEditModal(false);
-                setEditingTour(null);
-              }}
-            />
+            <div className="min-w-0">
+              <TourForm
+                key={editingTour.id}
+                tour={editingTour}
+                onSubmit={handleUpdate}
+                onCancel={() => {
+                  setShowEditModal(false);
+                  setEditingTour(null);
+                }}
+              />
+            </div>
           )}
         </DialogContent>
       </Dialog>
