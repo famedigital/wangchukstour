@@ -13,6 +13,7 @@ import { buttonVariants } from '@/components/ui/button';
 import { ScrollReveal, StaggerChildren } from '@/components/ui/scroll-reveal';
 import { Compass, X, ArrowRight, Mail, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { categoryMatches } from '@/lib/tour-category';
 
 export function ToursPageClient({ tours }: { tours: any[] }) {
   const searchParams = useSearchParams();
@@ -52,7 +53,7 @@ export function ToursPageClient({ tours }: { tours: any[] }) {
   };
 
   const filteredTours = tours.filter((tour) => {
-    if (selectedCategory !== 'all' && tour.category !== selectedCategory) {
+    if (!categoryMatches(tour.category, selectedCategory)) {
       return false;
     }
 

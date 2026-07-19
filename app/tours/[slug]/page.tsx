@@ -27,6 +27,9 @@ import {
   ArrowLeft,
 } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function generateStaticParams() {
   // Return empty array to disable static generation
   // Routes will be generated on-demand

@@ -6,6 +6,7 @@ const publicAdminRoutes = [
   '/admin/login',
   '/admin/forgot-password',
   '/admin/reset-password',
+  '/admin/sw.js', // PWA service worker must be publicly fetchable
 ];
 
 function getJwtSecret() {

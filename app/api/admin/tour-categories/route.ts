@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { createAdminClient } from '@/utils/supabase/admin';
 import { isAuthError, requireAuth } from '@/lib/auth/require-auth';
 
@@ -91,6 +92,9 @@ export async function PUT(request: NextRequest) {
       });
       if (error) throw error;
     }
+
+    revalidatePath('/tours');
+    revalidatePath('/');
 
     return NextResponse.json({ categories });
   } catch (error) {

@@ -58,7 +58,9 @@ export type TourCurrency = 'USD' | 'INR';
 /** International → USD, Regional → INR */
 export function getCurrencyForCategory(category?: string | null): TourCurrency {
   const c = (category || '').toLowerCase().trim();
-  if (c === 'regional' || c.includes('regional')) return 'INR';
+  if (c === 'regional' || c.startsWith('regional') || c.includes('regional')) {
+    return 'INR';
+  }
   return 'USD';
 }
 

@@ -18,6 +18,7 @@ import {
   Heart,
 } from 'lucide-react';
 import { formatTourPrice, isTourPriceVisible } from '@/lib/tour-options';
+import { categoryMatches } from '@/lib/tour-category';
 
 interface Tour {
   id: string;
@@ -90,8 +91,8 @@ export function ToursGrid({ tours }: ToursGridProps) {
   };
 
   const filteredTours = tours.filter((tour) => {
-    // Category filter
-    if (selectedCategory !== 'all' && tour.category !== selectedCategory) {
+    // Category filter (handles renamed slugs e.g. international-package)
+    if (!categoryMatches(tour.category, selectedCategory)) {
       return false;
     }
 

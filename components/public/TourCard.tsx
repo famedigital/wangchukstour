@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Clock, TrendingUp } from 'lucide-react';
 import { formatTourPrice, isTourPriceVisible } from '@/lib/tour-options';
+import { normalizeCategoryKey } from '@/lib/tour-category';
 
 interface TourCardProps {
   tour: any;
@@ -17,7 +18,13 @@ export function TourCard({ tour, index }: TourCardProps) {
   const imageUrl =
     tour.hero_image_url || tour.hero_image || tour.thumbnail_url || tour.thumbnail || '/placeholder.jpg';
   const heroImage = optimizeImageUrl(imageUrl);
-  const category = tour.category || 'tour';
+  const categoryKey = normalizeCategoryKey(tour.category) || 'tour';
+  const categoryLabel =
+    categoryKey === 'international'
+      ? 'International'
+      : categoryKey === 'regional'
+        ? 'Regional'
+        : tour.category || 'Tour';
   const price = tour.price || 0;
   const duration = tour.duration || 0;
   const difficulty = tour.difficulty_level || tour.difficulty || 'easy';
@@ -45,7 +52,7 @@ export function TourCard({ tour, index }: TourCardProps) {
           <CardContent className="flex flex-1 flex-col space-y-2 p-3 sm:space-y-3 sm:p-5">
             <div className="min-w-0 flex-1 space-y-1 sm:space-y-2">
               <p className="truncate text-[10px] font-medium tracking-wider text-muted-foreground uppercase sm:text-xs sm:tracking-[0.15em]">
-                {category}
+                {categoryLabel}
               </p>
               <h3 className="font-accent line-clamp-2 text-sm leading-snug text-foreground transition-colors group-hover:text-primary sm:text-lg md:text-xl">
                 {tour.title}
@@ -70,7 +77,7 @@ export function TourCard({ tour, index }: TourCardProps) {
               </div>
               {isTourPriceVisible(tour) ? (
                 <p className="text-[11px] font-medium text-primary sm:text-sm">
-                  {formatTourPrice(price, category)}
+                  {formatTourPrice(price, tour.category)}
                 </p>
               ) : (
                 <p className="text-[11px] font-medium text-muted-foreground sm:text-sm">

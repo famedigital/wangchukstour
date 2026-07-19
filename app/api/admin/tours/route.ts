@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { createAdminClient } from '@/utils/supabase/admin';
 import { getCurrentUser } from '@/lib/auth/jwt';
+
+function revalidateTourPages(slug?: string | null) {
+  revalidatePath('/tours');
+  revalidatePath('/');
+  if (slug) revalidatePath(`/tours/${slug}`);
+}
 
 const TOUR_FIELDS = [
   'title',
@@ -160,6 +167,8 @@ export async function POST(request: NextRequest) {
       ip_address: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || null,
       user_agent: request.headers.get('user-agent') || null,
     });
+
+    revalidateTourPages(tour.slug);
 
     return NextResponse.json(tour, { status: 201 });
   } catch (error) {

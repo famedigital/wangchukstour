@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
+import { AdminPwaRegister } from '@/components/admin/AdminPwaRegister';
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -136,6 +137,8 @@ export default function AdminLoginPage() {
                 Back to Website
               </Link>
             </div>
+
+            <AdminPwaRegister />
           </CardContent>
         </Card>
       </div>
