@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
 import { Navigation } from '@/components/public/Navigation';
 import { Footer } from '@/components/public/Footer';
 import { MagneticButton } from '@/components/ui/magnetic-button';
@@ -7,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { getTourBySlug, getAllTours, Tour } from '@/lib/database';
 import { formatTourPrice, isTourPriceVisible } from '@/lib/tour-options';
+import { buildSocialMetadata, SITE_NAME } from '@/lib/seo';
 import {
   Clock,
   Calendar,
@@ -34,6 +36,36 @@ export async function generateStaticParams() {
   // Return empty array to disable static generation
   // Routes will be generated on-demand
   return [];
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const tour = await getTourBySlug(slug);
+
+  if (!tour) {
+    return {
+      title: `Tour not found | ${SITE_NAME}`,
+    };
+  }
+
+  const title = tour.meta_title?.trim() || tour.title;
+  const description =
+    tour.meta_description?.trim() ||
+    tour.description?.trim() ||
+    tour.tagline?.trim() ||
+    `Explore ${tour.title} with ${SITE_NAME}.`;
+  const image = tour.thumbnail_url || tour.hero_image_url;
+
+  return buildSocialMetadata({
+    title,
+    description,
+    path: `/tours/${slug}`,
+    image,
+  });
 }
 
 export default async function TourDetailPage({ params }: { params: Promise<{ slug: string }> }) {

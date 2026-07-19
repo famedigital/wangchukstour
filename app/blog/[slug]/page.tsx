@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
 import { Navigation } from '@/components/public/Navigation';
 import { Footer } from '@/components/public/Footer';
 import { buttonVariants } from '@/components/ui/button';
@@ -10,6 +11,7 @@ import { format } from 'date-fns';
 import { getBlogPostBySlug, getPublishedBlogPosts } from '@/lib/database';
 import { BlogMarkdown } from '@/components/public/BlogMarkdown';
 import { cn } from '@/lib/utils';
+import { buildSocialMetadata, SITE_NAME } from '@/lib/seo';
 
 const optimizeImageUrl = (url: string | null | undefined, width: number, height: number) => {
   if (!url) return '/placeholder.jpg';
@@ -19,6 +21,27 @@ const optimizeImageUrl = (url: string | null | undefined, width: number, height:
   }
   return url;
 };
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const blog = await getBlogPostBySlug(slug);
+
+  if (!blog) {
+    return { title: `Post not found | ${SITE_NAME}` };
+  }
+
+  return buildSocialMetadata({
+    title: blog.title,
+    description: blog.meta_description || blog.excerpt || `Read ${blog.title} on ${SITE_NAME}.`,
+    path: `/blog/${slug}`,
+    image: blog.featured_image_url,
+    type: 'article',
+  });
+}
 
 export default async function BlogDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

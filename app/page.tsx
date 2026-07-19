@@ -15,17 +15,22 @@ import { CTASection } from '@/components/public/CTASection';
 import { ArrowRight } from 'lucide-react';
 import type { Metadata } from 'next';
 import { cn } from '@/lib/utils';
+import { buildSocialMetadata, SITE_DESCRIPTION, SITE_NAME } from '@/lib/seo';
 
-// Enhanced metadata for SEO
 export const metadata: Metadata = {
-  title: 'Wangchuks Tours & Treks - Discover the Last Shangri-La',
-  description: 'Experience authentic Bhutan with Wangchuks Tours & Treks. Cultural journeys, trekking adventures, and festival tours in the Land of the Thunder Dragon.',
-  keywords: ['Bhutan tour', 'Bhutan travel', 'Bhutan trekking', 'Bhutan festival', 'Wangchuks Tours & Treks', 'Bhutan adventures'],
-  openGraph: {
-    title: 'Wangchuks Tours & Treks - Discover the Last Shangri-La',
-    description: 'Experience authentic Bhutan with Wangchuks Tours & Treks. Cultural journeys, trekking adventures, and festival tours in the Land of the Thunder Dragon.',
-    type: 'website',
-  },
+  ...buildSocialMetadata({
+    title: `${SITE_NAME} - Discover the Last Shangri-La`,
+    description: SITE_DESCRIPTION,
+    path: '/',
+  }),
+  keywords: [
+    'Bhutan tour',
+    'Bhutan travel',
+    'Bhutan trekking',
+    'Bhutan festival',
+    'Wangchuks Tours & Treks',
+    'Bhutan adventures',
+  ],
 };
 
 const fallbackTestimonials = [

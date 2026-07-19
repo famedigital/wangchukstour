@@ -1,9 +1,15 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans, Inter, Playfair_Display, Geist } from "next/font/google";
 import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import {
+  DEFAULT_OG_IMAGE,
+  SITE_DESCRIPTION,
+  SITE_NAME,
+  getSiteUrl,
+} from "@/lib/seo";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
 
@@ -28,26 +34,61 @@ const playfair = Playfair_Display({
   weight: ["400", "500", "600", "700"],
 });
 
+const siteUrl = getSiteUrl();
+
 export const metadata: Metadata = {
-  title: "Wangchuks Tours & Treks - Discover the Last Shangri-La",
-  description: "Experience authentic Bhutan with Wangchuks Tours & Treks. Cultural journeys, trekking adventures, and festival tours in the Land of the Thunder Dragon.",
-  keywords: ["Bhutan tour", "Bhutan travel", "Bhutan trekking", "Bhutan festival", "Wangchuks Tours & Treks", "Bhutan adventures"],
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: `${SITE_NAME} - Discover the Last Shangri-La`,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  keywords: [
+    "Bhutan tour",
+    "Bhutan travel",
+    "Bhutan trekking",
+    "Bhutan festival",
+    "Wangchuks Tours & Treks",
+    "Bhutan adventures",
+  ],
   icons: {
     icon: [
-      {
-        url: "https://res.cloudinary.com/hckgrdeh/image/upload/v1782962660/wangchukstlogo_usxclz.png",
-        sizes: "any",
-        type: "image/png"
-      }
+      { url: "/favicon.png", sizes: "32x32", type: "image/png" },
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
     ],
-    apple: [
+    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+    shortcut: ["/favicon.png"],
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: siteUrl,
+    siteName: SITE_NAME,
+    title: `${SITE_NAME} - Discover the Last Shangri-La`,
+    description: SITE_DESCRIPTION,
+    images: [
       {
-        url: "https://res.cloudinary.com/hckgrdeh/image/upload/v1782962660/wangchukstlogo_usxclz.png",
-        sizes: "180x180",
-        type: "image/png"
-      }
-    ]
-  }
+        url: DEFAULT_OG_IMAGE,
+        width: 1200,
+        height: 630,
+        alt: `${SITE_NAME} — Bhutan tours`,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${SITE_NAME} - Discover the Last Shangri-La`,
+    description: SITE_DESCRIPTION,
+    images: [DEFAULT_OG_IMAGE],
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#9f1239",
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({
