@@ -3,15 +3,16 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { Navigation } from '@/components/public/Navigation';
 import { Footer } from '@/components/public/Footer';
-import { MagneticButton } from '@/components/ui/magnetic-button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { getTourBySlug, getAllTours, Tour } from '@/lib/database';
+import { TourGallery } from '@/components/public/TourGallery';
+import { ScrollReveal } from '@/components/ui/scroll-reveal';
+import { buttonVariants } from '@/components/ui/button';
+import { getTourBySlug, Tour } from '@/lib/database';
 import { formatTourPrice, isTourPriceVisible } from '@/lib/tour-options';
 import { buildSocialMetadata, SITE_NAME } from '@/lib/seo';
+import { normalizeCategoryKey } from '@/lib/tour-category';
+import { cn } from '@/lib/utils';
 import {
   Clock,
-  Calendar,
   TrendingUp,
   Users,
   MapPin,
@@ -20,11 +21,6 @@ import {
   X,
   Utensils,
   Bed,
-  Car,
-  Star,
-  Heart,
-  Phone,
-  Mail,
   ArrowRight,
   ArrowLeft,
 } from 'lucide-react';
@@ -33,8 +29,6 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export async function generateStaticParams() {
-  // Return empty array to disable static generation
-  // Routes will be generated on-demand
   return [];
 }
 
@@ -68,81 +62,76 @@ export async function generateMetadata({
   });
 }
 
+function categoryLabel(category?: string | null) {
+  const key = normalizeCategoryKey(category);
+  if (key === 'international') return 'International';
+  if (key === 'regional') return 'Regional';
+  return category || 'Tour';
+}
+
+/** Render long_description with ✓ lines as checklist rows. */
+function DetailedDescription({ text }: { text: string }) {
+  const lines = text.split(/\r?\n/);
+
+  return (
+    <div className="mt-6 space-y-2">
+      <h3 className="font-heading text-lg font-semibold text-foreground">Detailed Description</h3>
+      <div className="space-y-2 text-base leading-relaxed text-foreground/80">
+        {lines.map((line, i) => {
+          const trimmed = line.trim();
+          if (!trimmed) {
+            return <div key={i} className="h-2" />;
+          }
+          if (trimmed.startsWith('✓') || trimmed.startsWith('✔')) {
+            const content = trimmed.replace(/^[✓✔]\s*/, '');
+            return (
+              <div key={i} className="flex items-start gap-2.5">
+                <Check className="mt-0.5 size-4 shrink-0 text-primary" />
+                <span>{content}</span>
+              </div>
+            );
+          }
+          return (
+            <p key={i} className="font-medium text-foreground/90">
+              {trimmed}
+            </p>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export default async function TourDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   let tour: Tour | null = null;
-  let errorOccurred = false;
 
   try {
     const { slug } = await params;
-    console.log('[PAGE] Starting tour detail page for slug:', slug);
-
     tour = await getTourBySlug(slug);
 
     if (!tour) {
-      console.log('[PAGE] Tour not found for slug:', slug);
       notFound();
     }
-
-    console.log('[PAGE] Tour loaded successfully:', {
-      id: tour.id,
-      title: tour.title,
-      slug: tour.slug
-    });
   } catch (error) {
-    console.error('[PAGE] Error in tour detail page:', {
-      error: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined
-    });
-    errorOccurred = true;
+    console.error('[PAGE] Error in tour detail page:', error);
 
-    // Return a custom error page instead of crashing
     return (
       <div className="flex min-h-screen flex-col bg-background">
         <Navigation />
-        <main className="flex-1 flex items-center justify-center">
-          <div className="text-center px-6 py-20">
-            <div className="max-w-md mx-auto">
-              <div className="mb-8">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 mb-4">
-                  <span className="text-3xl">⚠️</span>
-                </div>
-                <h1 className="text-3xl font-bold text-foreground mb-4">
-                  Unable to Load Tour
-                </h1>
-                <p className="text-lg text-muted-foreground mb-8">
-                  We encountered an issue while loading this tour. This might be a temporary problem.
-                </p>
-                <div className="space-y-4">
-                  <div className="bg-muted rounded-lg p-4 text-left">
-                    <p className="text-sm text-muted-foreground mb-2">
-                      <strong>Error details:</strong>
-                    </p>
-                    <p className="text-xs text-muted-foreground font-mono">
-                      {error instanceof Error ? error.message : 'Unknown error occurred'}
-                    </p>
-                  </div>
-                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                    <Link href="/tours">
-                      <MagneticButton
-                        className="rounded-lg px-6 py-3 text-sm font-medium"
-                        style={{
-                          background: 'var(--primary)',
-                          color: '#FFFFFF'
-                        }}
-                      >
-                        View All Tours
-                      </MagneticButton>
-                    </Link>
-                    <Link href="/contact">
-                      <MagneticButton
-                        className="rounded-lg px-6 py-3 text-sm font-medium"
-                        variant="outline"
-                      >
-                        Contact Support
-                      </MagneticButton>
-                    </Link>
-                  </div>
-                </div>
+        <main className="flex flex-1 items-center justify-center">
+          <div className="px-6 py-20 text-center">
+            <div className="mx-auto max-w-md">
+              <h1 className="mb-4 text-3xl font-bold text-foreground">Unable to Load Tour</h1>
+              <p className="mb-8 text-lg text-muted-foreground">
+                We encountered an issue while loading this tour. This might be a temporary problem.
+              </p>
+              <div className="flex flex-col justify-center gap-3 sm:flex-row">
+                <Link href="/tours" className={cn(buttonVariants({ size: 'lg' }))}>
+                  View All Tours
+                </Link>
+                <Link href="/contact" className={cn(buttonVariants({ variant: 'outline', size: 'lg' }))}>
+                  Contact Support
+                </Link>
               </div>
             </div>
           </div>
@@ -150,10 +139,6 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
         <Footer />
       </div>
     );
-  }
-
-  if (errorOccurred) {
-    return null; // Should not reach here due to early return
   }
 
   const includedItems = (tour.included_items || tour.inclusions || []).filter(
@@ -166,61 +151,53 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
     (url): url is string => Boolean(url && String(url).trim())
   );
   const detailedDescription = (tour.long_description || '').trim();
+  const bookHref = `/contact?intent=book&tour=${tour.slug}&title=${encodeURIComponent(tour.title || '')}#contact-form`;
+  const inquireHref = `/contact?intent=inquire&tour=${tour.slug}&title=${encodeURIComponent(tour.title || '')}#contact-form`;
+  const priceLabel = isTourPriceVisible(tour)
+    ? formatTourPrice(tour.price, tour.category)
+    : 'Contact for price';
+  const metaLine = [
+    tour.duration ? `${tour.duration} days` : null,
+    tour.difficulty_level ? String(tour.difficulty_level) : null,
+    categoryLabel(tour.category),
+  ]
+    .filter(Boolean)
+    .join(' · ');
 
   if (tour.tour_type === 'custom') {
     return (
       <div className="flex min-h-screen flex-col bg-background">
         <Navigation />
         <main className="flex-1">
-          <section className="py-32 bg-background">
+          <section className="bg-background py-32">
             <div className="container">
               <div className="mx-auto max-w-3xl text-center">
-                <div className="mx-auto mb-8 flex h-24 w-24 items-center justify-center rounded-2xl" style={{ background: 'var(--primary)' }}>
-                  <Users className="h-12 w-12 text-white" />
+                <div className="mx-auto mb-8 flex h-24 w-24 items-center justify-center rounded-2xl bg-primary">
+                  <Users className="h-12 w-12 text-primary-foreground" />
                 </div>
-                <h1 className="font-heading text-4xl md:text-5xl font-bold mb-6">{tour.title}</h1>
-                <p className="text-xl text-muted-foreground mb-12 leading-relaxed">{tour.description}</p>
-                <div className="bg-muted/30 rounded-2xl p-8 mb-10">
-                  <p className="text-lg text-muted-foreground mb-6">
-                    This is a custom tour option. Let us design your perfect Bhutanese experience
-                    tailored to your interests, schedule, and preferences.
-                  </p>
-                  <div className="py-6">
-                    <h3 className="font-bold text-xl mb-6">What&apos;s Included:</h3>
-                    <ul className="grid gap-3 text-left">
+                <h1 className="font-accent mb-6 text-4xl font-medium md:text-5xl">{tour.title}</h1>
+                <p className="mb-12 text-xl leading-relaxed text-muted-foreground">{tour.description}</p>
+                {includedItems.length > 0 && (
+                  <div className="mb-10 rounded-2xl bg-muted/30 p-8 text-left">
+                    <h3 className="font-heading mb-6 text-xl font-semibold">What&apos;s Included</h3>
+                    <ul className="grid gap-3">
                       {includedItems.map((inclusion, i) => (
                         <li key={i} className="flex items-start gap-3">
-                          <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full" style={{ background: 'var(--primary)' }}>
-                            <Check className="h-3 w-3 text-white" />
-                          </div>
+                          <Check className="mt-0.5 size-4 shrink-0 text-primary" />
                           <span className="text-muted-foreground">{inclusion}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-6 justify-center">
-                  <Link href="/contact">
-                    <MagneticButton
-                      className="rounded-xl px-10 py-6 text-lg font-semibold"
-                      style={{
-                        background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary) 100%)',
-                        border: 'none',
-                        color: '#FFFFFF'
-                      }}
-                    >
-                      Request Custom Tour
-                      <ArrowRight className="w-5 h-5" />
-                    </MagneticButton>
+                )}
+                <div className="flex flex-col justify-center gap-3 sm:flex-row">
+                  <Link href="/contact" className={cn(buttonVariants({ size: 'lg' }), 'gap-2')}>
+                    Request Custom Tour
+                    <ArrowRight className="size-4" />
                   </Link>
-                  <Link href="/tours">
-                    <MagneticButton
-                      className="rounded-xl px-10 py-6 text-lg font-semibold shadow-lg"
-                      variant="outline"
-                    >
-                      View All Tours
-                      <ArrowRight className="w-5 h-5" />
-                    </MagneticButton>
+                  <Link href="/tours" className={cn(buttonVariants({ variant: 'outline', size: 'lg' }), 'gap-2')}>
+                    View All Tours
+                    <ArrowRight className="size-4" />
                   </Link>
                 </div>
               </div>
@@ -237,383 +214,368 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
       <Navigation />
 
       <main className="flex-1">
-        {/* Hero Section - Modern & Minimal */}
-        <section className="relative h-[60vh] min-h-[500px] overflow-hidden">
+        {/* Hero */}
+        <section className="relative flex min-h-[70vh] items-end overflow-hidden md:min-h-[75vh]">
           <div className="absolute inset-0">
             <img
-              src={tour.hero_image_url || tour.thumbnail_url || '/placeholder.jpg'}
+              src={tour.hero_image_url || tour.thumbnail_url || '/og-default.jpg'}
               alt={tour.title}
-              className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
+              className="h-full w-full object-cover"
               style={{ objectPosition: 'center 40%' }}
             />
-            <div className="absolute inset-0 bg-black/50" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/25" />
           </div>
 
-          <div className="relative h-full flex items-center justify-center pt-32 pb-20">
-            <div className="text-center px-6 max-w-4xl">
+          <div className="relative w-full px-6 pb-12 pt-32 md:px-12 md:pb-16 lg:px-16">
+            <div className="mx-auto max-w-4xl">
               <Link
                 href="/tours"
-                className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-all mb-6 text-sm font-medium"
+                className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-white/75 transition-colors hover:text-white"
               >
-                <ArrowLeft className="w-4 h-4" />
+                <ArrowLeft className="size-4" />
                 Back to Tours
               </Link>
 
-              <Badge
-                className="mb-4 px-4 py-1.5 text-xs font-medium"
-                style={{
-                  background: 'var(--primary)',
-                  color: '#FFFFFF'
-                }}
-              >
-                {tour.category || 'Tour'}
-              </Badge>
-
-              <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-white leading-tight">
+              <h1 className="font-accent text-4xl font-medium tracking-tight text-white md:text-5xl lg:text-6xl">
                 {tour.title}
               </h1>
 
-              <p className="text-base md:text-lg text-white/90 leading-relaxed">
-                {tour.tagline || 'Discover the beauty of Bhutan'}
-              </p>
+              {(tour.tagline || tour.description) && (
+                <p className="mt-4 max-w-2xl text-base leading-relaxed text-white/85 md:text-lg">
+                  {tour.tagline || tour.description}
+                </p>
+              )}
+
+              {metaLine && (
+                <p className="mt-4 text-sm font-medium tracking-wide text-white/70 uppercase">
+                  {metaLine}
+                </p>
+              )}
+
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <Link href={bookHref} className={cn(buttonVariants({ size: 'lg' }), 'gap-2')}>
+                  Book Now
+                  <ArrowRight className="size-4" />
+                </Link>
+                <Link
+                  href={inquireHref}
+                  className={cn(
+                    buttonVariants({ variant: 'outline', size: 'lg' }),
+                    'gap-2 border-white/30 bg-white/10 text-white hover:bg-white/15 hover:text-white'
+                  )}
+                >
+                  Inquire
+                </Link>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Mobile Booking Card - Top on mobile */}
-        <div className="lg:hidden sticky top-0 z-40 bg-background/95 backdrop-blur-md px-4 md:px-6 py-3 border-b border-border shadow-sm">
-          <div className="flex flex-row items-center justify-between gap-3">
-            {/* Price Info */}
-            <div className="flex flex-col">
-              <div className="text-xs text-muted-foreground">
+        {/* Mobile sticky book bar */}
+        <div className="sticky top-0 z-40 border-b border-border bg-background/95 px-4 py-3 shadow-sm backdrop-blur-md md:px-6 lg:hidden">
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-xs text-muted-foreground">
                 {isTourPriceVisible(tour) ? 'Starting from' : 'Pricing'}
-              </div>
-              <div className="text-base font-bold" style={{ color: 'var(--primary)' }}>
-                {isTourPriceVisible(tour)
-                  ? formatTourPrice(tour.price, tour.category)
-                  : 'Contact for price'}
-              </div>
-              <div className="text-xs text-muted-foreground">{tour.duration || 'N/A'} days • {tour.difficulty_level || 'N/A'}</div>
+              </p>
+              <p className="truncate text-base font-semibold text-primary">{priceLabel}</p>
+              <p className="truncate text-xs text-muted-foreground">{metaLine}</p>
             </div>
-
-            {/* Action Buttons */}
-            <div className="flex flex-row gap-2">
-              <Link href={`/contact?intent=book&tour=${tour.slug}&title=${encodeURIComponent(tour.title || '')}#contact-form`}>
-                <MagneticButton
-                  className="rounded-lg px-4 py-2 text-sm font-medium"
-                  style={{
-                    background: 'var(--primary)',
-                    color: '#FFFFFF'
-                  }}
-                >
-                  Book Now
-                </MagneticButton>
+            <div className="flex shrink-0 gap-2">
+              <Link href={bookHref} className={cn(buttonVariants({ size: 'sm' }))}>
+                Book
               </Link>
-              <Link href={`/contact?intent=inquire&tour=${tour.slug}&title=${encodeURIComponent(tour.title || '')}#contact-form`}>
-                <MagneticButton
-                  className="rounded-lg px-4 py-2 text-sm font-medium"
-                  variant="outline"
-                >
-                  Inquire
-                </MagneticButton>
+              <Link href={inquireHref} className={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}>
+                Inquire
               </Link>
             </div>
           </div>
         </div>
 
-        {/* Main Content - Two Column Layout */}
-        <section className="py-16 bg-muted">
+        {/* Main content */}
+        <section className="bg-background py-14 md:py-20">
           <div className="container mx-auto px-6 md:px-12 lg:px-16">
-            <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-              {/* Left Column - Journey Overview and Content */}
-              <div className="w-full lg:w-[80%] space-y-12" style={{ width: '80%' }}>
+            <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-14 xl:grid-cols-[minmax(0,1fr)_320px]">
+              <div className="min-w-0 space-y-16">
                 {/* Overview */}
-                <div>
-                  <h2 className="font-heading text-2xl md:text-3xl font-bold mb-4 text-foreground">
-                    Journey Overview
-                  </h2>
-                  <p className="text-base text-foreground/80 leading-relaxed">
-                    {tour.description || 'Experience the magic of Bhutan with this unforgettable journey.'}
-                  </p>
-                  {detailedDescription && (
-                    <div className="mt-6 space-y-3">
-                      <h3 className="font-heading text-xl font-semibold text-foreground">
-                        Detailed Description
-                      </h3>
-                      <p className="whitespace-pre-line text-base leading-relaxed text-foreground/80">
-                        {detailedDescription}
+                <ScrollReveal>
+                  <div>
+                    <p className="mb-2 text-sm font-medium tracking-[0.18em] text-muted-foreground uppercase">
+                      The journey
+                    </p>
+                    <h2 className="font-accent text-3xl font-medium tracking-tight text-foreground md:text-4xl">
+                      Overview
+                    </h2>
+                    <p className="mt-4 text-base leading-relaxed text-foreground/80 md:text-lg">
+                      {tour.description ||
+                        'Experience the magic of Bhutan with this unforgettable journey.'}
+                    </p>
+                    {detailedDescription && <DetailedDescription text={detailedDescription} />}
+                  </div>
+                </ScrollReveal>
+
+                {/* Gallery */}
+                {galleryUrls.length > 0 && (
+                  <ScrollReveal>
+                    <div>
+                      <p className="mb-2 text-sm font-medium tracking-[0.18em] text-muted-foreground uppercase">
+                        Moments
                       </p>
+                      <h2 className="font-accent mb-2 text-3xl font-medium tracking-tight text-foreground md:text-4xl">
+                        Gallery
+                      </h2>
+                      <p className="mb-6 text-sm text-muted-foreground">
+                        Tap any photo to view it larger
+                      </p>
+                      <TourGallery images={galleryUrls} title={tour.title} />
                     </div>
-                  )}
-                </div>
+                  </ScrollReveal>
+                )}
 
-              {/* Gallery */}
-              {galleryUrls.length > 0 && (
-                <div>
-                  <h2 className="font-heading mb-6 text-2xl font-bold text-foreground md:text-3xl">
-                    Gallery
-                  </h2>
-                  <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">
-                    {galleryUrls.map((url, i) => (
-                      <div
-                        key={`${url}-${i}`}
-                        className="aspect-[4/3] overflow-hidden rounded-xl bg-muted"
-                      >
-                        <img
-                          src={url}
-                          alt={`${tour.title} gallery ${i + 1}`}
-                          className="h-full w-full object-cover transition-transform duration-500 hover:scale-[1.03]"
-                          loading="lazy"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Highlights */}
-              {tour.highlights && tour.highlights.length > 0 && (
-                <div>
-                  <h2 className="font-heading text-2xl md:text-3xl font-bold mb-6 text-foreground">
-                    Tour Highlights
-                  </h2>
-                  <div className="grid gap-4 md:grid-cols-2">
-                    {tour.highlights.map((highlight, i) => (
-                      <div key={i} className="flex items-start gap-3">
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg mt-0.5" style={{ background: 'var(--primary)' }}>
-                          <Star className="h-4 w-4 text-white" />
-                        </div>
-                        <p className="text-sm text-foreground/80">{highlight}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Itinerary */}
-              {tour.itinerary && tour.itinerary.length > 0 && (
-                <div>
-                  <h2 className="font-heading text-2xl md:text-3xl font-bold mb-8 text-foreground">
-                    Day-by-Day Itinerary
-                  </h2>
-                  <div className="space-y-10">
-                    {tour.itinerary.map((day, i) => {
-                      const itineraryLength = tour.itinerary?.length || 1;
-                      const progress = i / (itineraryLength - 1);
-                      const borderColor = progress === 0 ? 'var(--primary)' :
-                                        progress < 0.5 ? 'var(--primary)' :
-                                        progress < 0.75 ? '#8B0000' :
-                                        '#660000';
-
-                      return (
-                        <div key={day.day} className="relative pl-10 pb-8 last:pb-0" style={{ borderLeft: i < itineraryLength - 1 ? `3px solid ${borderColor}` : 'none' }}>
-                          <div className="absolute left-0 top-0 flex h-8 w-8 -translate-x-1/2 items-center justify-center rounded-full text-sm font-bold shadow-sm" style={{ background: `linear-gradient(135deg, ${borderColor} 0%, ${borderColor}99 100%)`, color: '#FFFFFF', border: '3px solid #FFFFFF' }}>
-                            {day.day}
+                {/* Highlights */}
+                {tour.highlights && tour.highlights.length > 0 && (
+                  <ScrollReveal>
+                    <div>
+                      <p className="mb-2 text-sm font-medium tracking-[0.18em] text-muted-foreground uppercase">
+                        Why this tour
+                      </p>
+                      <h2 className="font-accent mb-6 text-3xl font-medium tracking-tight text-foreground md:text-4xl">
+                        Highlights
+                      </h2>
+                      <div className="grid gap-x-8 gap-y-4 sm:grid-cols-2">
+                        {tour.highlights.map((highlight, i) => (
+                          <div key={i} className="flex items-start gap-3 border-t border-border pt-4">
+                            <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-accent" />
+                            <p className="text-sm leading-relaxed text-foreground/85 md:text-base">
+                              {highlight}
+                            </p>
                           </div>
+                        ))}
+                      </div>
+                    </div>
+                  </ScrollReveal>
+                )}
 
-                          <div className="space-y-4">
-                            <div>
-                              <h3 className="font-heading font-semibold text-xl mb-2 text-foreground">{day.title}</h3>
-                              {day.location && (
-                                <p className="text-sm text-muted-foreground flex items-center gap-2">
-                                  <MapPin className="h-4 w-4" style={{ color: borderColor }} />
-                                  {day.location}
+                {/* Itinerary */}
+                {tour.itinerary && tour.itinerary.length > 0 && (
+                  <div>
+                    <ScrollReveal>
+                      <p className="mb-2 text-sm font-medium tracking-[0.18em] text-muted-foreground uppercase">
+                        Day by day
+                      </p>
+                      <h2 className="font-accent mb-8 text-3xl font-medium tracking-tight text-foreground md:text-4xl">
+                        Itinerary
+                      </h2>
+                    </ScrollReveal>
+
+                    <div className="relative space-y-0 border-l border-border/80 pl-8">
+                      {tour.itinerary.map((day, i) => (
+                        <ScrollReveal key={`${day.day}-${i}`} delay={Math.min(i * 0.04, 0.2)}>
+                          <div className="relative pb-10 last:pb-0">
+                            <div className="absolute top-0 -left-8 flex size-8 -translate-x-1/2 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground ring-4 ring-background">
+                              {day.day}
+                            </div>
+                            <div className="space-y-3">
+                              <div>
+                                <h3 className="font-heading text-xl font-semibold text-foreground">
+                                  {day.title}
+                                </h3>
+                                {day.location && (
+                                  <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
+                                    <MapPin className="size-3.5 text-accent" />
+                                    {day.location}
+                                  </p>
+                                )}
+                              </div>
+                              {day.description && (
+                                <p className="text-base leading-relaxed text-foreground/80">
+                                  {day.description}
                                 </p>
                               )}
-                            </div>
-
-                            <p className="text-base text-foreground/80 leading-relaxed">{day.description}</p>
-
-                          {day.activities && day.activities.length > 0 && (
-                            <div className="flex flex-wrap gap-2">
-                              {day.activities.map((activity, i) => (
-                                <Badge key={i} className="text-xs px-3 py-1 font-medium" style={{ background: borderColor, color: '#FFFFFF', border: 'none' }}>
-                                  {activity}
-                                </Badge>
-                              ))}
-                            </div>
-                          )}
-
-                          <div className="flex flex-wrap gap-6 text-sm text-muted-foreground pt-2">
-                            {day.meals && (
-                              <div className="flex items-center gap-2">
-                                <Utensils className="h-5 w-5" style={{ color: borderColor }} />
-                                <span>{day.meals}</span>
+                              <div className="flex flex-wrap gap-4 pt-1 text-sm text-muted-foreground">
+                                {day.meals && (
+                                  <span className="inline-flex items-center gap-1.5">
+                                    <Utensils className="size-4 text-accent" />
+                                    {day.meals}
+                                  </span>
+                                )}
+                                {day.accommodation && (
+                                  <span className="inline-flex items-center gap-1.5">
+                                    <Bed className="size-4 text-accent" />
+                                    {day.accommodation}
+                                  </span>
+                                )}
                               </div>
-                            )}
-                            {day.accommodation && (
-                              <div className="flex items-center gap-2">
-                                <Bed className="h-5 w-5" style={{ color: borderColor }} />
-                                <span>{day.accommodation}</span>
-                              </div>
-                            )}
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* Inclusions & Exclusions */}
-              {(includedItems.length > 0 || excludedItems.length > 0) && (
-                <div className="grid gap-6 md:grid-cols-2">
-                  {includedItems.length > 0 && (
-                    <div className="rounded-xl bg-background p-6 ring-1 ring-border">
-                      <h3 className="font-heading mb-4 flex items-center gap-2 text-lg font-semibold text-foreground">
-                        <Check className="h-5 w-5" style={{ color: '#10B981' }} />
-                        What&apos;s Included
-                      </h3>
-                      <ul className="space-y-2">
-                        {includedItems.map((item, i) => (
-                          <li key={i} className="flex items-start gap-2 text-sm">
-                            <Check className="mt-0.5 h-4 w-4 shrink-0" style={{ color: '#10B981' }} />
-                            <span className="text-foreground/80">{item}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {excludedItems.length > 0 && (
-                    <div className="rounded-xl bg-background p-6 ring-1 ring-border">
-                      <h3 className="font-heading mb-4 flex items-center gap-2 text-lg font-semibold text-foreground">
-                        <X className="h-5 w-5 text-muted-foreground" />
-                        What&apos;s Excluded
-                      </h3>
-                      <ul className="space-y-2">
-                        {excludedItems.map((item, i) => (
-                          <li key={i} className="flex items-start gap-2 text-sm">
-                            <X className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-                            <span className="text-foreground/80">{item}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Best Season */}
-              {tour.best_season && tour.best_season.length > 0 && (
-                <div>
-                  <h2 className="font-heading text-2xl md:text-3xl font-bold mb-4 text-foreground">
-                    Best Time to Visit
-                  </h2>
-                  <div className="flex flex-wrap gap-2">
-                    {tour.best_season.map((season) => (
-                      <Badge key={season} className="capitalize px-4 py-1.5 text-sm font-medium" style={{ background: 'var(--primary)', color: '#FFFFFF', border: 'none' }}>
-                        {season}
-                        </Badge>
+                        </ScrollReveal>
                       ))}
                     </div>
                   </div>
                 )}
 
-                {/* Altitude */}
-                {tour.altitude_range && tour.altitude_range !== 'Variable' && (
-                  <div>
-                    <h2 className="font-heading text-2xl md:text-3xl font-bold mb-4 text-foreground">
-                      Altitude Range
-                    </h2>
-                    <div className="flex items-center gap-4 bg-muted rounded-xl p-4">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg" style={{ background: 'var(--primary)' }}>
-                        <Mountain className="h-5 w-5 text-white" />
-                      </div>
-                      <span className="text-lg font-semibold text-foreground">{tour.altitude_range}</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Right Column - Booking Card - Desktop only */}
-              <div className="hidden lg:block lg:w-[20%] shrink-0" style={{ width: '20%' }}>
-                <div className="lg:sticky lg:top-8 backdrop-blur-md bg-background/90 rounded-2xl shadow-xl p-8">
-                  <h3 className="font-heading font-bold text-xl mb-1 text-foreground">Book This Tour</h3>
-                  <p className="text-sm text-muted-foreground mb-6">Reserve your spot on this amazing journey</p>
-
-                  <div className="space-y-3 pb-6 mb-6" style={{ borderBottom: '1px solid #e5e7eb' }}>
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-muted-foreground">Price per person</span>
-                      <div className="text-right">
-                        {isTourPriceVisible(tour) ? (
-                          <>
-                            <div className="mb-1 text-xs text-muted-foreground">Starting from</div>
-                            <span className="text-lg font-bold" style={{ color: 'var(--primary)' }}>
-                              {formatTourPrice(tour.price, tour.category)}
-                            </span>
-                          </>
-                        ) : (
-                          <span className="text-lg font-bold" style={{ color: 'var(--primary)' }}>
-                            Contact for price
-                          </span>
+                {/* Included / Excluded */}
+                {(includedItems.length > 0 || excludedItems.length > 0) && (
+                  <ScrollReveal>
+                    <div>
+                      <p className="mb-2 text-sm font-medium tracking-[0.18em] text-muted-foreground uppercase">
+                        Practical details
+                      </p>
+                      <h2 className="font-accent mb-8 text-3xl font-medium tracking-tight text-foreground md:text-4xl">
+                        What&apos;s covered
+                      </h2>
+                      <div className="grid gap-10 sm:grid-cols-2">
+                        {includedItems.length > 0 && (
+                          <div>
+                            <h3 className="font-heading mb-4 flex items-center gap-2 text-lg font-semibold text-foreground">
+                              <Check className="size-5 text-emerald-600" />
+                              Included
+                            </h3>
+                            <ul className="space-y-3">
+                              {includedItems.map((item, i) => (
+                                <li key={i} className="flex items-start gap-2.5 text-sm text-foreground/80">
+                                  <Check className="mt-0.5 size-4 shrink-0 text-emerald-600" />
+                                  {item}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {excludedItems.length > 0 && (
+                          <div>
+                            <h3 className="font-heading mb-4 flex items-center gap-2 text-lg font-semibold text-foreground">
+                              <X className="size-5 text-muted-foreground" />
+                              Excluded
+                            </h3>
+                            <ul className="space-y-3">
+                              {excludedItems.map((item, i) => (
+                                <li key={i} className="flex items-start gap-2.5 text-sm text-foreground/80">
+                                  <X className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                                  {item}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
                         )}
                       </div>
                     </div>
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-muted-foreground">Duration</span>
-                      <span className="font-medium text-foreground">{tour.duration || 'N/A'} days</span>
+                  </ScrollReveal>
+                )}
+
+                {/* Best season / altitude */}
+                {((tour.best_season && tour.best_season.length > 0) ||
+                  (tour.altitude_range && tour.altitude_range !== 'Variable')) && (
+                  <ScrollReveal>
+                    <div className="grid gap-8 sm:grid-cols-2">
+                      {tour.best_season && tour.best_season.length > 0 && (
+                        <div>
+                          <h3 className="font-heading mb-3 text-lg font-semibold">Best time to visit</h3>
+                          <p className="text-sm capitalize text-foreground/80">
+                            {tour.best_season.join(', ')}
+                          </p>
+                        </div>
+                      )}
+                      {tour.altitude_range && tour.altitude_range !== 'Variable' && (
+                        <div>
+                          <h3 className="font-heading mb-3 flex items-center gap-2 text-lg font-semibold">
+                            <Mountain className="size-5 text-accent" />
+                            Altitude
+                          </h3>
+                          <p className="text-sm text-foreground/80">{tour.altitude_range}</p>
+                        </div>
+                      )}
                     </div>
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-muted-foreground">Difficulty</span>
-                      <span className="font-medium capitalize text-foreground">{tour.difficulty_level || 'N/A'}</span>
+                  </ScrollReveal>
+                )}
+              </div>
+
+              {/* Desktop book card */}
+              <aside className="hidden lg:block">
+                <div className="sticky top-28 rounded-2xl border border-border bg-background p-6 shadow-sm">
+                  <h3 className="font-heading text-xl font-semibold text-foreground">Book this tour</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">Reserve your place on this journey</p>
+
+                  <div className="mt-6 space-y-3 border-b border-border pb-6">
+                    <div className="flex items-baseline justify-between gap-3">
+                      <span className="text-sm text-muted-foreground">
+                        {isTourPriceVisible(tour) ? 'From' : 'Price'}
+                      </span>
+                      <span className="text-xl font-semibold text-primary">{priceLabel}</span>
                     </div>
+                    {tour.duration ? (
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="inline-flex items-center gap-1.5 text-muted-foreground">
+                          <Clock className="size-3.5" />
+                          Duration
+                        </span>
+                        <span className="font-medium text-foreground">{tour.duration} days</span>
+                      </div>
+                    ) : null}
+                    {tour.difficulty_level ? (
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="inline-flex items-center gap-1.5 capitalize text-muted-foreground">
+                          <TrendingUp className="size-3.5" />
+                          Difficulty
+                        </span>
+                        <span className="font-medium capitalize text-foreground">
+                          {tour.difficulty_level}
+                        </span>
+                      </div>
+                    ) : null}
                   </div>
 
-                  <Link href={`/contact?intent=book&tour=${tour.slug}&title=${encodeURIComponent(tour.title || '')}#contact-form`} className="block mb-3">
-                    <MagneticButton
-                      className="w-full rounded-lg px-6 py-3 text-sm font-medium"
-                      style={{
-                        background: 'var(--primary)',
-                        color: '#FFFFFF'
-                      }}
+                  <div className="mt-5 flex flex-col gap-2">
+                    <Link href={bookHref} className={cn(buttonVariants({ size: 'lg' }), 'w-full')}>
+                      Request booking
+                    </Link>
+                    <Link
+                      href={inquireHref}
+                      className={cn(buttonVariants({ variant: 'outline', size: 'lg' }), 'w-full')}
                     >
-                      Request Booking
-                    </MagneticButton>
-                  </Link>
-
-                  <Link href={`/contact?intent=inquire&tour=${tour.slug}&title=${encodeURIComponent(tour.title || '')}#contact-form`} className="block">
-                    <MagneticButton
-                      className="w-full rounded-lg px-5 py-2.5 text-sm font-medium"
-                      variant="outline"
-                    >
-                      Ask a Question
-                    </MagneticButton>
-                  </Link>
+                      Ask a question
+                    </Link>
+                  </div>
                 </div>
-              </div>
+              </aside>
             </div>
           </div>
         </section>
 
-        {/* CTA Section */}
-        <section className="py-16 md:py-20 bg-gray-900">
-          <div className="container mx-auto px-6 md:px-12 lg:px-16 text-center">
-            <h2 className="font-heading text-2xl md:text-3xl font-bold mb-3 text-white">
-              Ready to Explore Bhutan?
+        {/* Bottom CTA */}
+        <section className="relative overflow-hidden py-20 md:py-28">
+          <div className="absolute inset-0">
+            <img
+              src={
+                galleryUrls[0] ||
+                tour.hero_image_url ||
+                tour.thumbnail_url ||
+                '/og-default.jpg'
+              }
+              alt=""
+              className="h-full w-full object-cover"
+            />
+            <div className="absolute inset-0 bg-black/70" />
+          </div>
+          <div className="relative container mx-auto px-6 text-center md:px-12">
+            <h2 className="font-accent text-3xl font-medium text-white md:text-4xl">
+              Ready to explore Bhutan?
             </h2>
-            <p className="text-sm md:text-base text-white/80 mb-6 max-w-xl mx-auto">
-              Discover other amazing journeys through the Land of the Thunder Dragon
+            <p className="mx-auto mt-3 max-w-lg text-base text-white/80">
+              Discover other journeys through the Land of the Thunder Dragon
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-start">
-              <Link href="/tours">
-                <MagneticButton
-                  className="rounded-lg px-6 py-3 text-sm font-medium"
-                  style={{
-                    background: 'var(--primary)',
-                    color: '#FFFFFF'
-                  }}
-                >
-                  View All Tours
-                </MagneticButton>
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Link href="/tours" className={cn(buttonVariants({ size: 'lg' }), 'gap-2')}>
+                View all tours
+                <ArrowRight className="size-4" />
               </Link>
-              <Link href="/contact">
-                <MagneticButton
-                  className="rounded-lg px-6 py-3 text-sm font-medium bg-background/10 backdrop-blur-sm border border-white/20 text-white"
-                >
-                  Plan Custom Trip
-                </MagneticButton>
+              <Link
+                href="/contact"
+                className={cn(
+                  buttonVariants({ variant: 'outline', size: 'lg' }),
+                  'border-white/30 bg-white/10 text-white hover:bg-white/15 hover:text-white'
+                )}
+              >
+                Plan a custom trip
               </Link>
             </div>
           </div>
