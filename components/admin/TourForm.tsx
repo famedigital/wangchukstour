@@ -22,6 +22,9 @@ import {
   getCurrencyForCategory,
   formatTourPrice,
   currencySymbol,
+  readShowPrice,
+  syncShowPriceKeywords,
+  HIDE_PRICE_KEYWORD,
 } from '@/lib/tour-options';
 
 function CategorySelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
@@ -60,7 +63,12 @@ function StatusSwitches({
   formData,
   updateField,
 }: {
-  formData: { is_active: boolean; is_featured: boolean; is_published: boolean };
+  formData: {
+    is_active: boolean;
+    is_featured: boolean;
+    is_published: boolean;
+    show_price: boolean;
+  };
   updateField: (field: string, value: boolean) => void;
 }) {
   return (
@@ -93,6 +101,16 @@ function StatusSwitches({
         />
         <Label htmlFor="tour-published" className="cursor-pointer font-normal">
           Published
+        </Label>
+      </div>
+      <div className="flex items-center gap-2">
+        <Switch
+          id="tour-show-price"
+          checked={formData.show_price}
+          onCheckedChange={(v) => updateField('show_price', v)}
+        />
+        <Label htmlFor="tour-show-price" className="cursor-pointer font-normal">
+          Show price publicly
         </Label>
       </div>
     </div>
@@ -143,8 +161,9 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
     included_items: Array.isArray(tour?.included_items) ? tour.included_items : [],
     excluded_items: Array.isArray(tour?.excluded_items) ? tour.excluded_items : [],
     is_featured: tour?.is_featured || false,
-    is_active: tour?.is_active || true,
-    is_published: tour?.is_published || true,
+    is_active: tour?.is_active ?? true,
+    is_published: tour?.is_published ?? true,
+    show_price: readShowPrice(tour),
     meta_title: tour?.meta_title || '',
     meta_description: tour?.meta_description || '',
     meta_keywords: tour?.meta_keywords || [],
@@ -189,6 +208,8 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
         included_items: formData.included_items.filter((h: string) => h?.trim()),
         excluded_items: formData.excluded_items.filter((h: string) => h?.trim()),
         gallery_urls: formData.gallery_urls.filter((u: string) => u?.trim()),
+        meta_keywords: syncShowPriceKeywords(formData.meta_keywords, formData.show_price),
+        show_price: formData.show_price,
         itinerary: formData.itinerary.map((day: any, index: number) => {
           const base =
             typeof day === 'object' && day !== null
@@ -540,8 +561,9 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
                           error={validationErrors.price}
                         />
                         <p className="text-xs text-muted-foreground">
-                          Shown as {pricePrefix}
-                          {Number(formData.price || 0).toLocaleString()} per person
+                          {formData.show_price
+                            ? `Public: ${pricePrefix}${Number(formData.price || 0).toLocaleString()} per person`
+                            : 'Public: price hidden (Contact for price)'}
                         </p>
                       </div>
                     </div>
@@ -1041,16 +1063,20 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
                     <div>
                       <label className="block text-sm font-medium mb-2">Meta Keywords</label>
                       <div className="flex flex-wrap gap-2 mb-3">
-                        {formData.meta_keywords.map((keyword: string, index: number) => (
+                        {formData.meta_keywords
+                          .filter((keyword: string) => keyword !== HIDE_PRICE_KEYWORD)
+                          .map((keyword: string, index: number) => (
                           <span
-                            key={index}
+                            key={`${keyword}-${index}`}
                             className="inline-flex items-center gap-2 px-3 py-1 bg-muted rounded-lg text-sm"
                           >
                             {keyword}
                             <button
                               type="button"
                               onClick={() => {
-                                const newKeywords = formData.meta_keywords.filter((_: string, i: number) => i !== index);
+                                const newKeywords = formData.meta_keywords.filter(
+                                  (k: string) => k !== keyword
+                                );
                                 updateField('meta_keywords', newKeywords);
                               }}
                               className="text-red-600 hover:text-red-700"
@@ -1095,7 +1121,9 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
                             />
                             <div className="absolute top-3 right-3">
                               <span className="rounded-md bg-background/90 px-3 py-1 text-sm font-medium ring-1 ring-border">
-                                {formatTourPrice(formData.price, formData.category)}
+                                {formData.show_price
+                                  ? formatTourPrice(formData.price, formData.category)
+                                  : 'Contact for price'}
                               </span>
                             </div>
                           </div>
@@ -1128,6 +1156,7 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
                             <li>Active: {formData.is_active ? 'Yes' : 'No'}</li>
                             <li>Featured: {formData.is_featured ? 'Yes' : 'No'}</li>
                             <li>Published: {formData.is_published ? 'Yes' : 'No'}</li>
+                            <li>Show price publicly: {formData.show_price ? 'Yes' : 'No'}</li>
                           </ul>
                         </div>
 
@@ -1135,7 +1164,12 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
                           <h4 className="mb-2 font-medium">Summary</h4>
                           <div className="space-y-1 text-sm text-muted-foreground">
                             <p>Duration: {formData.duration} days</p>
-                            <p>Price: {formatTourPrice(formData.price, formData.category)} ({priceCurrency})</p>
+                            <p>
+                              Price:{' '}
+                              {formData.show_price
+                                ? `${formatTourPrice(formData.price, formData.category)} (${priceCurrency})`
+                                : 'Hidden on public pages'}
+                            </p>
                             <p>Group size: {formData.min_group_size}-{formData.max_group_size}</p>
                             <p>Itinerary days: {formData.itinerary.length}</p>
                             <p>Gallery images: {formData.gallery_urls.length}</p>

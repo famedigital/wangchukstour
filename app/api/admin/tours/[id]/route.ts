@@ -23,6 +23,7 @@ const TOUR_FIELDS = [
   'is_featured',
   'is_active',
   'is_published',
+  'show_price',
   'meta_title',
   'meta_description',
   'meta_keywords',
@@ -38,6 +39,11 @@ function pickTourFields(body: Record<string, unknown>) {
     if (body[key] !== undefined) data[key] = body[key];
   }
   return data;
+}
+
+function isMissingShowPriceColumn(error: { message?: string } | null | undefined) {
+  const msg = error?.message || '';
+  return msg.includes('show_price') && (msg.includes('column') || msg.includes('schema cache'));
 }
 
 // GET /api/admin/tours/[id] - Get single tour
@@ -98,16 +104,28 @@ export async function PATCH(
 
     const payload = pickTourFields(body);
 
-    const { data: updatedTour, error } = await supabase
+    const updateRow = {
+      ...payload,
+      updated_by: user.userId,
+      updated_at: new Date().toISOString(),
+    };
+
+    let { data: updatedTour, error } = await supabase
       .from('tours')
-      .update({
-        ...payload,
-        updated_by: user.userId,
-        updated_at: new Date().toISOString(),
-      })
+      .update(updateRow)
       .eq('id', id)
       .select()
       .single();
+
+    if (error && isMissingShowPriceColumn(error) && 'show_price' in updateRow) {
+      const { show_price: _omit, ...withoutShowPrice } = updateRow;
+      ({ data: updatedTour, error } = await supabase
+        .from('tours')
+        .update(withoutShowPrice)
+        .eq('id', id)
+        .select()
+        .single());
+    }
 
     if (error) throw error;
 

@@ -18,6 +18,8 @@ export interface Tour {
   category?: string | null;
   duration?: number | null;
   price?: number | null;
+  /** When false, public pages hide the price. Defaults to true. */
+  show_price?: boolean | null;
   difficulty_level?: string | null;
   max_group_size?: number | null;
   min_group_size?: number | null;

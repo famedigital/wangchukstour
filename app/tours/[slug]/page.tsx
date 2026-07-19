@@ -6,7 +6,7 @@ import { MagneticButton } from '@/components/ui/magnetic-button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { getTourBySlug, getAllTours, Tour } from '@/lib/database';
-import { formatTourPrice } from '@/lib/tour-options';
+import { formatTourPrice, isTourPriceVisible } from '@/lib/tour-options';
 import {
   Clock,
   Calendar,
@@ -239,9 +239,13 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
           <div className="flex flex-row items-center justify-between gap-3">
             {/* Price Info */}
             <div className="flex flex-col">
-              <div className="text-xs text-muted-foreground">Starting from</div>
+              <div className="text-xs text-muted-foreground">
+                {isTourPriceVisible(tour) ? 'Starting from' : 'Pricing'}
+              </div>
               <div className="text-base font-bold" style={{ color: 'var(--primary)' }}>
-                {formatTourPrice(tour.price, tour.category)}
+                {isTourPriceVisible(tour)
+                  ? formatTourPrice(tour.price, tour.category)
+                  : 'Contact for price'}
               </div>
               <div className="text-xs text-muted-foreground">{tour.duration || 'N/A'} days • {tour.difficulty_level || 'N/A'}</div>
             </div>
@@ -453,10 +457,18 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-muted-foreground">Price per person</span>
                       <div className="text-right">
-                        <div className="text-xs text-muted-foreground mb-1">Starting from</div>
-                        <span className="text-lg font-bold" style={{ color: 'var(--primary)' }}>
-                          {formatTourPrice(tour.price, tour.category)}
-                        </span>
+                        {isTourPriceVisible(tour) ? (
+                          <>
+                            <div className="mb-1 text-xs text-muted-foreground">Starting from</div>
+                            <span className="text-lg font-bold" style={{ color: 'var(--primary)' }}>
+                              {formatTourPrice(tour.price, tour.category)}
+                            </span>
+                          </>
+                        ) : (
+                          <span className="text-lg font-bold" style={{ color: 'var(--primary)' }}>
+                            Contact for price
+                          </span>
+                        )}
                       </div>
                     </div>
                     <div className="flex justify-between items-center text-sm">

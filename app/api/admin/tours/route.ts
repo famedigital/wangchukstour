@@ -23,6 +23,7 @@ const TOUR_FIELDS = [
   'is_featured',
   'is_active',
   'is_published',
+  'show_price',
   'meta_title',
   'meta_description',
   'meta_keywords',
@@ -38,6 +39,11 @@ function pickTourFields(body: Record<string, unknown>) {
     if (body[key] !== undefined) data[key] = body[key];
   }
   return data;
+}
+
+function isMissingShowPriceColumn(error: { message?: string } | null | undefined) {
+  const msg = error?.message || '';
+  return msg.includes('show_price') && (msg.includes('column') || msg.includes('schema cache'));
 }
 
 // GET /api/admin/tours - List all tours with filters
@@ -118,15 +124,27 @@ export async function POST(request: NextRequest) {
 
     const supabase = createAdminClient();
 
-    const { data: tour, error } = await supabase
+    const insertRow = {
+      ...payload,
+      created_by: user.userId,
+      updated_by: user.userId,
+    };
+
+    let { data: tour, error } = await supabase
       .from('tours')
-      .insert({
-        ...payload,
-        created_by: user.userId,
-        updated_by: user.userId,
-      })
+      .insert(insertRow)
       .select()
       .single();
+
+    // Graceful fallback until show_price column is added in Supabase
+    if (error && isMissingShowPriceColumn(error) && 'show_price' in insertRow) {
+      const { show_price: _omit, ...withoutShowPrice } = insertRow;
+      ({ data: tour, error } = await supabase
+        .from('tours')
+        .insert(withoutShowPrice)
+        .select()
+        .single());
+    }
 
     if (error) throw error;
 

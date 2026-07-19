@@ -17,7 +17,7 @@ import {
   Camera,
   Heart,
 } from 'lucide-react';
-import { formatTourPrice } from '@/lib/tour-options';
+import { formatTourPrice, isTourPriceVisible } from '@/lib/tour-options';
 
 interface Tour {
   id: string;
@@ -29,6 +29,7 @@ interface Tour {
   category: string;
   duration: number;
   price: number;
+  show_price?: boolean | null;
   difficulty_level: string;
   is_featured: boolean;
   locations?: string[];
@@ -398,13 +399,21 @@ export function ToursGrid({ tours }: ToursGridProps) {
                             </div>
 
                             {/* Price Overlay */}
-                            {tour.price > 0 && (
+                            {isTourPriceVisible(tour) ? (
                               <div className="absolute bottom-4 right-4">
                                 <div className="bg-white/95 backdrop-blur-md rounded-xl px-4 py-2 shadow-lg">
                                   <div className="text-2xl font-bold" style={{ color: 'var(--primary)' }}>
                                     {formatTourPrice(tour.price, tour.category)}
                                   </div>
                                   <div className="text-xs text-muted-foreground text-center">per person</div>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="absolute bottom-4 right-4">
+                                <div className="rounded-xl bg-white/95 px-4 py-2 shadow-lg backdrop-blur-md">
+                                  <div className="text-sm font-semibold text-muted-foreground">
+                                    Contact for price
+                                  </div>
                                 </div>
                               </div>
                             )}

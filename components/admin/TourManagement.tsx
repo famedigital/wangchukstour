@@ -31,7 +31,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { TourForm } from '@/components/admin/TourForm';
-import { formatTourPrice } from '@/lib/tour-options';
+import { formatTourPrice, isTourPriceVisible } from '@/lib/tour-options';
 
 interface Tour {
   id: string;
@@ -43,6 +43,7 @@ interface Tour {
   category: string;
   duration: number;
   price: number;
+  show_price?: boolean | null;
   difficulty_level: string;
   is_featured: boolean;
   is_active: boolean;
@@ -324,9 +325,13 @@ export function TourManagement() {
 
                 <div className="absolute right-3 bottom-3 rounded-md bg-card px-3 py-1 ring-1 ring-border">
                   <div className="text-lg font-semibold text-primary">
-                    {formatTourPrice(tour.price, tour.category)}
+                    {isTourPriceVisible(tour)
+                      ? formatTourPrice(tour.price, tour.category)
+                      : 'Hidden'}
                   </div>
-                  <div className="text-xs text-muted-foreground">per person</div>
+                  <div className="text-xs text-muted-foreground">
+                    {isTourPriceVisible(tour) ? 'per person' : 'not shown publicly'}
+                  </div>
                 </div>
               </div>
 

@@ -71,6 +71,7 @@ const REQUIRED_COLUMNS = [
   'is_featured',
   'is_active',
   'is_published',
+  'show_price',
 ];
 
 async function main() {

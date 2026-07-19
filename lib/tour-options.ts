@@ -83,6 +83,43 @@ export function formatTourPrice(
   return `${currencySymbol(currency)}${amount}`;
 }
 
+/** Sentinel stored in meta_keywords when the show_price column is unavailable. */
+export const HIDE_PRICE_KEYWORD = '__hide_price__';
+
+/** Public pages: hide price when show_price is false (or hide-keyword is set). */
+export function isTourPriceVisible(tour: {
+  show_price?: boolean | null;
+  price?: number | string | null;
+  meta_keywords?: string[] | null;
+}): boolean {
+  if (tour.show_price === false) return false;
+  if (Array.isArray(tour.meta_keywords) && tour.meta_keywords.includes(HIDE_PRICE_KEYWORD)) {
+    return false;
+  }
+  const price = Number(tour.price);
+  return Number.isFinite(price) && price > 0;
+}
+
+export function readShowPrice(tour?: {
+  show_price?: boolean | null;
+  meta_keywords?: string[] | null;
+} | null): boolean {
+  if (!tour) return true;
+  if (typeof tour.show_price === 'boolean') return tour.show_price;
+  if (Array.isArray(tour.meta_keywords) && tour.meta_keywords.includes(HIDE_PRICE_KEYWORD)) {
+    return false;
+  }
+  return true;
+}
+
+export function syncShowPriceKeywords(
+  keywords: string[] | null | undefined,
+  showPrice: boolean
+): string[] {
+  const base = (keywords || []).filter((k) => k !== HIDE_PRICE_KEYWORD);
+  return showPrice ? base : [...base, HIDE_PRICE_KEYWORD];
+}
+
 export type TourLocation = (typeof TOUR_LOCATIONS)[number];
 export type MealOption = (typeof MEAL_OPTIONS)[number]['value'];
 export type AccommodationOption = (typeof ACCOMMODATION_OPTIONS)[number]['value'];
