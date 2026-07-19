@@ -31,6 +31,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { TourForm } from '@/components/admin/TourForm';
+import { formatTourPrice } from '@/lib/tour-options';
 
 interface Tour {
   id: string;
@@ -322,7 +323,9 @@ export function TourManagement() {
                 </div>
 
                 <div className="absolute right-3 bottom-3 rounded-md bg-card px-3 py-1 ring-1 ring-border">
-                  <div className="text-lg font-semibold text-primary">${tour.price}</div>
+                  <div className="text-lg font-semibold text-primary">
+                    {formatTourPrice(tour.price, tour.category)}
+                  </div>
                   <div className="text-xs text-muted-foreground">per person</div>
                 </div>
               </div>

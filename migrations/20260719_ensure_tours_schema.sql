@@ -25,6 +25,9 @@ ALTER TABLE tours ADD COLUMN IF NOT EXISTS gallery_urls TEXT[];
 ALTER TABLE tours ADD COLUMN IF NOT EXISTS category VARCHAR(100);
 ALTER TABLE tours ADD COLUMN IF NOT EXISTS duration INTEGER;
 ALTER TABLE tours ADD COLUMN IF NOT EXISTS price DECIMAL(10, 2);
+-- Currency is derived from category in the app (international → USD, regional → INR).
+-- Optional stored column for future explicit overrides:
+ALTER TABLE tours ADD COLUMN IF NOT EXISTS currency VARCHAR(3);
 ALTER TABLE tours ADD COLUMN IF NOT EXISTS difficulty_level VARCHAR(50);
 ALTER TABLE tours ADD COLUMN IF NOT EXISTS max_group_size INTEGER;
 ALTER TABLE tours ADD COLUMN IF NOT EXISTS min_group_size INTEGER;

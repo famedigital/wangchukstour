@@ -17,7 +17,11 @@ import {
   MEAL_OPTIONS,
   ACCOMMODATION_OPTIONS,
   TOUR_INCLUSION_OPTIONS,
+  TOUR_HIGHLIGHT_OPTIONS,
   createEmptyItineraryDay,
+  getCurrencyForCategory,
+  formatTourPrice,
+  currencySymbol,
 } from '@/lib/tour-options';
 
 function CategorySelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
@@ -135,7 +139,7 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
     hero_image_url: tour?.hero_image_url || '',
     thumbnail_url: tour?.thumbnail_url || '',
     gallery_urls: tour?.gallery_urls || [],
-    highlights: tour?.highlights?.length ? tour.highlights : [''],
+    highlights: Array.isArray(tour?.highlights) ? tour.highlights : [],
     included_items: Array.isArray(tour?.included_items) ? tour.included_items : [],
     excluded_items: Array.isArray(tour?.excluded_items) ? tour.excluded_items : [],
     is_featured: tour?.is_featured || false,
@@ -156,6 +160,9 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
     field: string;
   } | null>(null);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+
+  const priceCurrency = getCurrencyForCategory(formData.category);
+  const pricePrefix = currencySymbol(priceCurrency);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -326,6 +333,14 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
     updateField(listField, next);
   };
 
+  const toggleHighlight = (item: string) => {
+    const current = formData.highlights as string[];
+    const next = current.includes(item)
+      ? current.filter((v) => v !== item)
+      : [...current, item];
+    updateField('highlights', next);
+  };
+
   const generateSlug = () => {
     const slug = formData.title
       .toLowerCase()
@@ -491,11 +506,16 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
 
                     <div className="grid gap-6 md:grid-cols-3">
                       <div>
-                        <label className="block text-sm font-medium mb-2">Tour Category (nav group)</label>
+                        <label className="mb-2 block text-sm font-medium">Tour Category (nav group)</label>
                         <CategorySelect
                           value={formData.category}
                           onChange={(v) => updateField('category', v)}
                         />
+                        <p className="mt-1.5 text-xs text-muted-foreground">
+                          {priceCurrency === 'INR'
+                            ? 'Regional category → price in INR (₹)'
+                            : 'International category → price in USD ($)'}
+                        </p>
                       </div>
 
                       <FormField
@@ -508,16 +528,22 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
                         error={validationErrors.duration}
                       />
 
-                      <FormField
-                        label="Price (USD)"
-                        type="number"
-                        value={formData.price}
-                        onChange={(e) => updateField('price', parseFloat(e.target.value))}
-                        min="0"
-                        step="0.01"
-                        required
-                        error={validationErrors.price}
-                      />
+                      <div className="space-y-2">
+                        <FormField
+                          label={`Price (${priceCurrency})`}
+                          type="number"
+                          value={formData.price}
+                          onChange={(e) => updateField('price', parseFloat(e.target.value))}
+                          min="0"
+                          step="0.01"
+                          required
+                          error={validationErrors.price}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Shown as {pricePrefix}
+                          {Number(formData.price || 0).toLocaleString()} per person
+                        </p>
+                      </div>
                     </div>
 
                     <div className="grid gap-6 md:grid-cols-3">
@@ -579,36 +605,60 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
                     />
 
                     <div>
-                      <div className="flex items-center justify-between mb-4">
-                        <label className="block text-sm font-medium">Tour Highlights</label>
-                        <button
-                          type="button"
-                          onClick={() => addArrayItem('highlights')}
-                          className="flex items-center gap-1 text-sm text-primary hover:text-primary/80"
-                        >
-                          <Plus className="h-4 w-4" />
-                          Add Highlight
-                        </button>
+                      <label className="mb-3 block text-sm font-medium">Tour Highlights</label>
+                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                        {TOUR_HIGHLIGHT_OPTIONS.map((item) => {
+                          const checked = formData.highlights.includes(item);
+                          return (
+                            <label
+                              key={item}
+                              className={cn(
+                                'flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2.5 text-sm transition-colors',
+                                checked
+                                  ? 'border-primary/40 bg-primary/5 text-foreground'
+                                  : 'border-border hover:bg-muted/50'
+                              )}
+                            >
+                              <input
+                                type="checkbox"
+                                className="size-4 accent-primary"
+                                checked={checked}
+                                onChange={() => toggleHighlight(item)}
+                              />
+                              <Star
+                                className={cn(
+                                  'size-4 shrink-0',
+                                  checked ? 'text-primary' : 'text-muted-foreground/40'
+                                )}
+                              />
+                              <span>{item}</span>
+                            </label>
+                          );
+                        })}
                       </div>
-                      <div className="space-y-3">
-                        {formData.highlights.map((highlight: string, index: number) => (
-                          <div key={index} className="flex gap-3">
-                            <FormField
-                              value={highlight}
-                              onChange={(e) => updateArrayItem('highlights', index, e.target.value)}
-                              placeholder="e.g., Visit Tiger's Nest Monastery"
-                              className="flex-1"
-                            />
+                      {formData.highlights
+                        .filter(
+                          (item: string) =>
+                            !(TOUR_HIGHLIGHT_OPTIONS as readonly string[]).includes(item)
+                        )
+                        .map((item: string) => (
+                          <div key={`hl-custom-${item}`} className="mt-2 flex items-center gap-2 text-sm">
+                            <Star className="size-4 text-primary" />
+                            <span className="flex-1">{item}</span>
                             <button
                               type="button"
-                              onClick={() => removeArrayItem('highlights', index)}
-                              className="p-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              onClick={() =>
+                                updateField(
+                                  'highlights',
+                                  formData.highlights.filter((v: string) => v !== item)
+                                )
+                              }
+                              className="rounded-lg p-2 text-red-600 hover:bg-red-50"
                             >
                               <Trash2 className="h-4 w-4" />
                             </button>
                           </div>
                         ))}
-                      </div>
                     </div>
                   </div>
                 )}
@@ -1045,7 +1095,7 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
                             />
                             <div className="absolute top-3 right-3">
                               <span className="rounded-md bg-background/90 px-3 py-1 text-sm font-medium ring-1 ring-border">
-                                ${formData.price}
+                                {formatTourPrice(formData.price, formData.category)}
                               </span>
                             </div>
                           </div>
@@ -1085,7 +1135,7 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
                           <h4 className="mb-2 font-medium">Summary</h4>
                           <div className="space-y-1 text-sm text-muted-foreground">
                             <p>Duration: {formData.duration} days</p>
-                            <p>Price: ${formData.price}</p>
+                            <p>Price: {formatTourPrice(formData.price, formData.category)} ({priceCurrency})</p>
                             <p>Group size: {formData.min_group_size}-{formData.max_group_size}</p>
                             <p>Itinerary days: {formData.itinerary.length}</p>
                             <p>Gallery images: {formData.gallery_urls.length}</p>

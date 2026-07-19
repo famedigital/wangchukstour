@@ -6,6 +6,7 @@ import { MagneticButton } from '@/components/ui/magnetic-button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { getTourBySlug, getAllTours, Tour } from '@/lib/database';
+import { formatTourPrice } from '@/lib/tour-options';
 import {
   Clock,
   Calendar,
@@ -239,7 +240,9 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
             {/* Price Info */}
             <div className="flex flex-col">
               <div className="text-xs text-muted-foreground">Starting from</div>
-              <div className="text-base font-bold" style={{ color: 'var(--primary)' }}>${tour.price || 'Contact us'}</div>
+              <div className="text-base font-bold" style={{ color: 'var(--primary)' }}>
+                {formatTourPrice(tour.price, tour.category)}
+              </div>
               <div className="text-xs text-muted-foreground">{tour.duration || 'N/A'} days • {tour.difficulty_level || 'N/A'}</div>
             </div>
 
@@ -451,7 +454,9 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
                       <span className="text-muted-foreground">Price per person</span>
                       <div className="text-right">
                         <div className="text-xs text-muted-foreground mb-1">Starting from</div>
-                        <span className="text-lg font-bold" style={{ color: 'var(--primary)' }}>${tour.price || 'Contact us'}</span>
+                        <span className="text-lg font-bold" style={{ color: 'var(--primary)' }}>
+                          {formatTourPrice(tour.price, tour.category)}
+                        </span>
                       </div>
                     </div>
                     <div className="flex justify-between items-center text-sm">

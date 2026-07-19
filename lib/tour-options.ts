@@ -34,10 +34,60 @@ export const TOUR_INCLUSION_OPTIONS = [
   'Drop & pickup',
 ] as const;
 
+export const TOUR_HIGHLIGHT_OPTIONS = [
+  "Visit Tiger's Nest Monastery",
+  'Explore Punakha Dzong',
+  'Experience Thimphu capital city',
+  'Dochula Pass viewpoints',
+  'Phobjkha Valley & black-necked cranes',
+  'Bumthang temples & heritage',
+  'Traditional Bhutanese cuisine',
+  'Hot stone bath experience',
+  'Archery & local games',
+  'Meet local artisans',
+  'Farmers market visit',
+  'Scenic Himalayan views',
+  'Cultural festival experience',
+  'Paro valley exploration',
+  'Wangdue riverside & villages',
+  'Phuntsholing border town',
+] as const;
+
+export type TourCurrency = 'USD' | 'INR';
+
+/** International → USD, Regional → INR */
+export function getCurrencyForCategory(category?: string | null): TourCurrency {
+  const c = (category || '').toLowerCase().trim();
+  if (c === 'regional' || c.includes('regional')) return 'INR';
+  return 'USD';
+}
+
+export function currencySymbol(currency: TourCurrency): string {
+  return currency === 'INR' ? '₹' : '$';
+}
+
+export function formatTourPrice(
+  price: number | string | null | undefined,
+  categoryOrCurrency?: string | null
+): string {
+  if (price === null || price === undefined || price === '' || Number(price) <= 0) {
+    return 'Contact us';
+  }
+  const currency: TourCurrency =
+    categoryOrCurrency === 'USD' || categoryOrCurrency === 'INR'
+      ? categoryOrCurrency
+      : getCurrencyForCategory(categoryOrCurrency);
+  const amount = Number(price).toLocaleString(undefined, {
+    maximumFractionDigits: 0,
+  });
+  return `${currencySymbol(currency)}${amount}`;
+}
+
 export type TourLocation = (typeof TOUR_LOCATIONS)[number];
 export type MealOption = (typeof MEAL_OPTIONS)[number]['value'];
 export type AccommodationOption = (typeof ACCOMMODATION_OPTIONS)[number]['value'];
 export type TourInclusionOption = (typeof TOUR_INCLUSION_OPTIONS)[number];
+export type TourHighlightOption = (typeof TOUR_HIGHLIGHT_OPTIONS)[number];
 
 export type ItineraryDay = {
   day: number;

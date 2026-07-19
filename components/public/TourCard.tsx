@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Clock, TrendingUp } from 'lucide-react';
+import { formatTourPrice } from '@/lib/tour-options';
 
 interface TourCardProps {
   tour: any;
@@ -68,7 +69,9 @@ export function TourCard({ tour, index }: TourCardProps) {
                 </span>
               </div>
               {price > 0 && (
-                <p className="text-[11px] font-medium text-primary sm:text-sm">${price}</p>
+                <p className="text-[11px] font-medium text-primary sm:text-sm">
+                  {formatTourPrice(price, category)}
+                </p>
               )}
             </div>
           </CardContent>
