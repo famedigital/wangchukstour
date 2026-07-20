@@ -5,6 +5,7 @@ const PRECACHE_URLS = [
   '/admin-pwa/manifest.webmanifest',
   '/admin-pwa/icons/icon-192.png',
   '/admin-pwa/icons/icon-512.png',
+  '/admin-pwa/icons/icon-512-maskable.png',
   '/admin-pwa/icons/apple-touch-icon.png',
 ];
 

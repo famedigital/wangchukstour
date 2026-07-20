@@ -23,7 +23,7 @@ export function getSiteUrl(): string {
 export const DEFAULT_OG_IMAGE =
   'https://res.cloudinary.com/hckgrdeh/image/upload/c_fill,w_1200,h_630,g_auto,f_jpg,q_auto/v1782965945/punakhadzong_xkcrcu.jpg';
 
-/** Logo / brand mark for favicon fallbacks */
+/** Full wordmark for OG/social; favicon/PWA use /brand/wangchuk-emblem.svg */
 export const SITE_LOGO_URL =
   'https://res.cloudinary.com/hckgrdeh/image/upload/c_pad,w_512,h_512,b_rgb:0f172a,f_png/v1782962660/wangchukstlogo_usxclz.png';
 
