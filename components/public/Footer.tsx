@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Separator } from '@/components/ui/separator';
-import { Mail, Phone, MapPin, MessageCircle, Camera, Video } from 'lucide-react';
+import { MapPin, MessageCircle, Camera, Video } from 'lucide-react';
+import { FooterContact } from '@/components/public/FooterContact';
 
 const footerLinks = {
   explore: [
@@ -126,20 +127,7 @@ export function Footer() {
               © {new Date().getFullYear()} Wangchuks Tours & Treks. All rights reserved.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4">
-              <a
-                href="mailto:info@wangchuktour.com"
-                className="flex items-center gap-2 text-secondary-foreground/60 transition-colors hover:text-accent"
-              >
-                <Mail className="h-4 w-4" />
-                info@wangchuktour.com
-              </a>
-              <a
-                href="tel:+97517643416"
-                className="flex items-center gap-2 text-secondary-foreground/60 transition-colors hover:text-accent"
-              >
-                <Phone className="h-4 w-4" />
-                +975 17643416
-              </a>
+              <FooterContact />
               <a
                 href="https://maps.app.goo.gl/augGCB49iedQwe398"
                 target="_blank"
