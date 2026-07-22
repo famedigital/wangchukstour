@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/utils/supabase/admin';
 import { z } from 'zod';
 import { upsertMasterClient } from '@/lib/clients/upsert';
+import { notifyCrmAlert } from '@/lib/notifications/crm-alert';
 
 const schema = z.object({
   name: z.string().min(1),
@@ -100,6 +101,19 @@ export async function POST(request: NextRequest) {
     if (master?.id) inquiryInsert.client_id = master.id;
 
     await supabase.from('inquiries').insert(inquiryInsert);
+
+    // Phone/email alert — do not block the customer response
+    void notifyCrmAlert({
+      kind: 'booking',
+      name,
+      email,
+      phone: phone || null,
+      message,
+      tourTitle: resolvedTitle,
+      travelDates: travelDates || null,
+      groupSize: travelerCount,
+      bookingNumber: booking?.booking_number || null,
+    });
 
     if (bookingError) {
       console.error('Booking insert error (inquiry still saved):', bookingError);
