@@ -15,7 +15,7 @@ export interface UploadOptions {
   folder?: string;
   publicId?: string;
   overwrite?: boolean;
-  resourceType?: 'image' | 'video' | 'auto';
+  resourceType?: 'image' | 'video' | 'raw' | 'auto';
   transformation?: any;
 }
 

@@ -33,6 +33,8 @@ export async function POST(request: NextRequest) {
         .from('tours')
         .select('id, title, price')
         .eq('slug', tourSlug)
+        .eq('is_active', true)
+        .eq('is_published', true)
         .maybeSingle();
       if (tour) {
         tourId = tour.id;

@@ -38,6 +38,7 @@ import {
 import { cn } from '@/lib/utils';
 import type { BookingPayment } from '@/lib/bookings/payments';
 import { openInvoicePrintWindow } from '@/lib/bookings/invoice';
+import { BookingOpsPanel } from '@/components/admin/BookingOpsPanel';
 
 interface Booking {
   id: string;
@@ -672,7 +673,7 @@ export function BookingManagement() {
       </div>
 
       <Dialog open={showDetailModal} onOpenChange={setShowDetailModal}>
-        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
           {selectedBooking && (
             <>
               <DialogHeader>
@@ -810,6 +811,14 @@ export function BookingManagement() {
                       ))}
                     </ul>
                   )}
+                </div>
+
+                <div className="rounded-xl border border-border p-3">
+                  <h3 className="mb-3 font-semibold text-sm">Operations · Documents · Share</h3>
+                  <BookingOpsPanel
+                    bookingId={selectedBooking.id}
+                    bookingStatus={selectedBooking.status}
+                  />
                 </div>
               </div>
 

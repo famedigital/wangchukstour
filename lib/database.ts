@@ -139,6 +139,7 @@ export async function getFeaturedTours(limit: number = 6): Promise<Tour[]> {
       .from('tours')
       .select('*')
       .eq('is_active', true)
+      .eq('is_published', true)
       .order('sort_order', { ascending: true })
       .limit(limit);
 
@@ -158,6 +159,7 @@ export async function getAllTours(): Promise<Tour[]> {
       .from('tours')
       .select('*')
       .eq('is_active', true)
+      .eq('is_published', true)
       .order('sort_order', { ascending: true });
 
     if (error) throw error;
@@ -181,6 +183,7 @@ export async function getTourBySlug(slug: string): Promise<Tour | null> {
       .select('*')
       .eq('slug', slug)
       .eq('is_active', true)
+      .eq('is_published', true)
       .single();
 
     if (error) {

@@ -13,6 +13,14 @@ export async function POST(request: NextRequest) {
     const file = formData.get('file') as File;
     const folder = (formData.get('folder') as string) || 'wangchuk-tour';
     const publicId = (formData.get('publicId') as string) || undefined;
+    const resourceTypeParam = (formData.get('resourceType') as string) || 'auto';
+    const resourceType =
+      resourceTypeParam === 'image' ||
+      resourceTypeParam === 'video' ||
+      resourceTypeParam === 'raw' ||
+      resourceTypeParam === 'auto'
+        ? resourceTypeParam
+        : 'auto';
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
@@ -20,12 +28,14 @@ export async function POST(request: NextRequest) {
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    const base64 = `data:${file.type};base64,${buffer.toString('base64')}`;
+    const mime = file.type || 'application/octet-stream';
+    const base64 = `data:${mime};base64,${buffer.toString('base64')}`;
 
     const result = await uploadImage(base64, {
       folder,
       publicId,
       overwrite: true,
+      resourceType,
     });
 
     return NextResponse.json({
@@ -33,10 +43,13 @@ export async function POST(request: NextRequest) {
       secure_url: (result as any).secure_url || (result as any).secureUrl || (result as any).url,
       url: (result as any).secure_url || (result as any).secureUrl || (result as any).url,
       public_id: (result as any).public_id || (result as any).publicId,
+      mime_type: mime,
+      file_name: file.name,
+      file_size: file.size,
     });
   } catch (error) {
     console.error('Upload error:', error);
-    return NextResponse.json({ error: 'Failed to upload image' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to upload file' }, { status: 500 });
   }
 }
 
