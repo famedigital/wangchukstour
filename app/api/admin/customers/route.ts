@@ -9,6 +9,55 @@ export async function GET() {
 
     const supabase = createAdminClient();
 
+    // Prefer master clients table when available
+    const { data: masterClients, error: clientsError } = await supabase
+      .from('clients')
+      .select('id, name, email, phone, country, nationality, source, created_at, updated_at')
+      .order('updated_at', { ascending: false })
+      .limit(500);
+
+    if (!clientsError && masterClients) {
+      const [{ data: bookings }, { data: inquiries }] = await Promise.all([
+        supabase.from('bookings').select('client_id, client_email, created_at').limit(1000),
+        supabase.from('inquiries').select('client_id, email, client_email, created_at').limit(1000),
+      ]);
+
+      const bookingCount = new Map<string, number>();
+      const inquiryCount = new Map<string, number>();
+      const lastByClient = new Map<string, string>();
+
+      for (const b of bookings || []) {
+        const key = b.client_id || (b.client_email || '').toLowerCase();
+        if (!key) continue;
+        bookingCount.set(key, (bookingCount.get(key) || 0) + 1);
+        const prev = lastByClient.get(key);
+        if (!prev || b.created_at > prev) lastByClient.set(key, b.created_at);
+      }
+      for (const i of inquiries || []) {
+        const email = (i.email || i.client_email || '').toLowerCase();
+        const key = i.client_id || email;
+        if (!key) continue;
+        inquiryCount.set(key, (inquiryCount.get(key) || 0) + 1);
+        const prev = lastByClient.get(key);
+        if (!prev || i.created_at > prev) lastByClient.set(key, i.created_at);
+      }
+
+      const customers = masterClients.map((c) => ({
+        id: c.id,
+        email: c.email,
+        name: c.name,
+        phone: c.phone,
+        bookings: bookingCount.get(c.id) || bookingCount.get(c.email.toLowerCase()) || 0,
+        inquiries: inquiryCount.get(c.id) || inquiryCount.get(c.email.toLowerCase()) || 0,
+        last_contact: lastByClient.get(c.id) || lastByClient.get(c.email.toLowerCase()) || c.updated_at || c.created_at,
+        sources: c.source ? [c.source] : ['client'],
+        is_master: true,
+      }));
+
+      return NextResponse.json({ customers, source: 'clients' });
+    }
+
+    // Fallback: derive from bookings + inquiries (legacy)
     const [{ data: bookings }, { data: inquiries }] = await Promise.all([
       supabase
         .from('bookings')
@@ -77,9 +126,9 @@ export async function GET() {
       a.last_contact < b.last_contact ? 1 : -1
     );
 
-    return NextResponse.json({ customers });
+    return NextResponse.json({ customers, source: 'derived' });
   } catch (error) {
-    console.error('Customers list error:', error);
-    return NextResponse.json({ error: 'Failed to fetch customers' }, { status: 500 });
+    console.error('Customers error:', error);
+    return NextResponse.json({ error: 'Failed to load customers' }, { status: 500 });
   }
 }

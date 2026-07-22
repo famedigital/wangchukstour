@@ -32,7 +32,7 @@ export async function GET(
     const { data: booking, error: bookingError } = await supabase
       .from('bookings')
       .select(
-        'id, booking_number, client_name, travel_date, number_of_adults, number_of_children, total_travelers, tour_title, tour_id, status'
+        'id, booking_number, client_name, travel_date, number_of_adults, number_of_children, total_travelers, tour_title, tour_id, status, itinerary_override'
       )
       .eq('id', link.booking_id)
       .maybeSingle();
@@ -51,6 +51,10 @@ export async function GET(
         .maybeSingle();
       tour = tourRow;
     }
+
+    const override = Array.isArray(booking.itinerary_override) ? booking.itinerary_override : null;
+    const effectiveItinerary =
+      override && override.length > 0 ? override : tour?.itinerary || [];
 
     const { data: operations } = await supabase
       .from('booking_operations')
@@ -90,7 +94,7 @@ export async function GET(
             tagline: tour.tagline,
             duration: tour.duration,
             category: tour.category,
-            itinerary: tour.itinerary || [],
+            itinerary: effectiveItinerary,
             highlights: tour.highlights || [],
             hero_image_url: tour.hero_image_url || tour.thumbnail_url,
           }

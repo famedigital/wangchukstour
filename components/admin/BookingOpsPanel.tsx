@@ -27,7 +27,16 @@ import {
   type HotelStay,
 } from '@/lib/bookings/operations';
 
-type Tab = 'operations' | 'documents' | 'share';
+type Tab = 'operations' | 'itinerary' | 'documents' | 'share';
+
+type ItineraryDay = {
+  day?: string | number;
+  title?: string;
+  location?: string;
+  description?: string;
+  meals?: string;
+  accommodation?: string;
+};
 
 export function BookingOpsPanel({
   bookingId,
@@ -40,8 +49,11 @@ export function BookingOpsPanel({
   const [ops, setOps] = useState<BookingOperations>(emptyOperations(bookingId));
   const [docs, setDocs] = useState<BookingDocument[]>([]);
   const [links, setLinks] = useState<BookingShareLink[]>([]);
+  const [itinerary, setItinerary] = useState<ItineraryDay[]>([]);
+  const [itinerarySource, setItinerarySource] = useState<'override' | 'package'>('package');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [savingItinerary, setSavingItinerary] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [docType, setDocType] = useState<BookingDocType>('room_voucher');
   const [docTitle, setDocTitle] = useState('');
@@ -49,20 +61,26 @@ export function BookingOpsPanel({
   const loadAll = async () => {
     setLoading(true);
     try {
-      const [opsRes, docsRes, linksRes] = await Promise.all([
+      const [opsRes, docsRes, linksRes, itinRes] = await Promise.all([
         fetch(`/api/admin/bookings/${bookingId}/operations`),
         fetch(`/api/admin/bookings/${bookingId}/documents`),
         fetch(`/api/admin/bookings/${bookingId}/share-links`),
+        fetch(`/api/admin/bookings/${bookingId}/itinerary`),
       ]);
       const opsJson = await opsRes.json();
       const docsJson = await docsRes.json();
       const linksJson = await linksRes.json();
+      const itinJson = await itinRes.json();
 
       if (opsRes.ok) setOps(opsJson.operations || emptyOperations(bookingId));
       else if (opsJson.error) toast.error(opsJson.error);
 
       if (docsRes.ok) setDocs(docsJson.documents || []);
       if (linksRes.ok) setLinks(linksJson.links || []);
+      if (itinRes.ok) {
+        setItinerary(itinJson.itinerary || []);
+        setItinerarySource(itinJson.source === 'override' ? 'override' : 'package');
+      }
     } catch {
       toast.error('Failed to load operations data');
     } finally {
@@ -103,6 +121,56 @@ export function BookingOpsPanel({
       toast.error(err instanceof Error ? err.message : 'Failed to save operations');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const updateItineraryDay = (index: number, field: keyof ItineraryDay, value: string) => {
+    setItinerary((prev) => {
+      const next = [...prev];
+      next[index] = { ...next[index], [field]: value };
+      return next;
+    });
+  };
+
+  const saveItinerary = async () => {
+    setSavingItinerary(true);
+    try {
+      const res = await fetch(`/api/admin/bookings/${bookingId}/itinerary`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ itinerary }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Save failed');
+      setItinerary(json.itinerary || []);
+      setItinerarySource(json.has_override ? 'override' : 'package');
+      toast.success('Client itinerary saved');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to save itinerary');
+    } finally {
+      setSavingItinerary(false);
+    }
+  };
+
+  const resetItineraryToPackage = async () => {
+    setSavingItinerary(true);
+    try {
+      const res = await fetch(`/api/admin/bookings/${bookingId}/itinerary`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clear: true }),
+      });
+      const cleared = await res.json();
+      if (!res.ok) throw new Error(cleared.error || 'Reset failed');
+      const reload = await fetch(`/api/admin/bookings/${bookingId}/itinerary`);
+      const json = await reload.json();
+      setItinerary(json.itinerary || []);
+      setItinerarySource('package');
+      toast.success('Reset to tour package itinerary');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to reset itinerary');
+    } finally {
+      setSavingItinerary(false);
     }
   };
 
@@ -220,6 +288,7 @@ export function BookingOpsPanel({
         {(
           [
             ['operations', 'Operations'],
+            ['itinerary', 'Itinerary'],
             ['documents', 'Documents'],
             ['share', 'Share'],
           ] as const
@@ -342,6 +411,113 @@ export function BookingOpsPanel({
           <Button type="button" onClick={saveOps} disabled={saving}>
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             Save operations
+          </Button>
+        </div>
+      ) : null}
+
+      {tab === 'itinerary' ? (
+        <div className="space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-sm text-muted-foreground">
+              {itinerarySource === 'override'
+                ? 'Custom itinerary for this client (shared links use these days).'
+                : 'Showing tour package itinerary — edit and save to customize for this client.'}
+            </p>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  setItinerary((prev) => [
+                    ...prev,
+                    {
+                      day: prev.length + 1,
+                      title: '',
+                      location: '',
+                      description: '',
+                      meals: '',
+                      accommodation: '',
+                    },
+                  ])
+                }
+              >
+                <Plus className="h-4 w-4" />
+                Add day
+              </Button>
+              {itinerarySource === 'override' ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  disabled={savingItinerary}
+                  onClick={resetItineraryToPackage}
+                >
+                  Reset to package
+                </Button>
+              ) : null}
+            </div>
+          </div>
+
+          {itinerary.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No itinerary days yet.</p>
+          ) : (
+            <div className="space-y-3">
+              {itinerary.map((day, index) => (
+                <div key={index} className="space-y-2 rounded-lg border border-border p-3">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-medium text-muted-foreground">Day {day.day ?? index + 1}</p>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setItinerary((prev) => prev.filter((_, i) => i !== index))}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="grid gap-2 md:grid-cols-2">
+                    <Input
+                      placeholder="Day number"
+                      value={String(day.day ?? index + 1)}
+                      onChange={(e) => updateItineraryDay(index, 'day', e.target.value)}
+                    />
+                    <Input
+                      placeholder="Title"
+                      value={day.title || ''}
+                      onChange={(e) => updateItineraryDay(index, 'title', e.target.value)}
+                    />
+                    <Input
+                      placeholder="Location"
+                      value={day.location || ''}
+                      onChange={(e) => updateItineraryDay(index, 'location', e.target.value)}
+                    />
+                    <Input
+                      placeholder="Meals"
+                      value={day.meals || ''}
+                      onChange={(e) => updateItineraryDay(index, 'meals', e.target.value)}
+                    />
+                    <Input
+                      className="md:col-span-2"
+                      placeholder="Accommodation"
+                      value={day.accommodation || ''}
+                      onChange={(e) => updateItineraryDay(index, 'accommodation', e.target.value)}
+                    />
+                  </div>
+                  <textarea
+                    className="min-h-20 w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm"
+                    placeholder="Description"
+                    value={day.description || ''}
+                    onChange={(e) => updateItineraryDay(index, 'description', e.target.value)}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+
+          <Button type="button" onClick={saveItinerary} disabled={savingItinerary}>
+            {savingItinerary ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+            Save client itinerary
           </Button>
         </div>
       ) : null}
