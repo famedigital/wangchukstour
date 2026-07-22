@@ -58,7 +58,8 @@ const cmsGuides = [
     href: '/admin/tours',
     icon: MapPin,
     steps: [
-      'Use Active / Featured / Published switches at the top of the form.',
+      'Create categories first (e.g. International / Regional) — they power the public Tours menu.',
+      'Add New Tour: Basic → Content → Media → Itinerary → Pricing → SEO → Preview.',
       'Published to public = show on /tours. Turn off to keep a draft/private package.',
       'Copy naked itinerary link to share the day-by-day plan with a client (prices hidden).',
       'Clients button on a tour → see everyone who booked/asked, or Add client under that tour.',
