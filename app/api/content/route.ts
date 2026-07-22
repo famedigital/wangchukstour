@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
 import { mergeAboutContent } from '@/lib/content/about';
+import { CONTACT_DEFAULTS, mergeContactContent } from '@/lib/content/contact';
 
 // GET /api/content - Public endpoint to fetch active page content
 export async function GET(request: NextRequest) {
@@ -68,6 +69,9 @@ function normalizePublicContent(pageType: string, raw: unknown) {
   if (pageType === 'about') {
     return mergeAboutContent(raw);
   }
+  if (pageType === 'contact') {
+    return mergeContactContent(raw);
+  }
   return raw || getDefaultContent(pageType);
 }
 
@@ -75,23 +79,7 @@ function getDefaultContent(pageType: string) {
   const defaults: Record<string, any> = {
     about: mergeAboutContent(null),
     contact: {
-      hero: {
-        title: 'Contact Us',
-        subtitle: "We're here to help you plan your perfect Bhutanese adventure",
-        backgroundImage:
-          'https://res.cloudinary.com/hckgrdeh/image/upload/v1782965945/punakhadzong_xkcrcu.jpg',
-      },
-      contactInfo: {
-        email: 'info@wangchuktour.com',
-        phone: '+975 17643416',
-        address: 'Thimphu, Bhutan',
-        whatsapp: '+97517643416',
-      },
-      officeHours: {
-        weekdays: '9:00 AM - 6:00 PM',
-        saturdays: '10:00 AM - 4:00 PM',
-        sundays: 'Closed',
-      },
+      ...CONTACT_DEFAULTS,
       socialMedia: {
         facebook: 'https://facebook.com/wangchuktours',
         instagram: 'https://instagram.com/wangchuktours',
