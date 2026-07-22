@@ -11,6 +11,10 @@ import { getPublishedBlogPosts } from '@/lib/database';
 import { BlogSearch } from '@/components/blog/BlogSearch';
 import { cn } from '@/lib/utils';
 
+// Always fetch fresh posts after admin edits (avoid stale Vercel/RSC cache)
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const optimizeImageUrl = (url: string, width: number, height: number) => {
   if (url.includes('cloudinary')) {
     const transformations = `q_auto,f_auto,w_${width},h_${height},c_fill`;

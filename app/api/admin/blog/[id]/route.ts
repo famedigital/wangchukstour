@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { createAdminClient } from '@/utils/supabase/admin';
 import { isAuthError, requireAuth } from '@/lib/auth/require-auth';
+
+function revalidateBlogPages(slug?: string | null) {
+  revalidatePath('/blog');
+  if (slug) revalidatePath(`/blog/${slug}`);
+}
 
 export async function GET(
   _request: NextRequest,
@@ -69,27 +75,28 @@ export async function PATCH(
       updateData.status = cleanBody.status;
     }
 
-    if (cleanBody.published_date !== undefined) {
-      updateData.published_at = cleanBody.published_date;
-    } else if (cleanBody.is_published && !cleanBody.published_date) {
-      updateData.published_at = new Date().toISOString();
-    }
-
-    if (cleanBody.content && !cleanBody.read_time) {
-      updateData.read_time = Math.ceil(String(cleanBody.content).split(/\s+/).length / 200);
-    }
-
     const { id } = await params;
     const supabase = createAdminClient();
 
     const { data: currentPost, error: fetchError } = await supabase
       .from('blog_posts')
-      .select('id')
+      .select('id, slug, published_at')
       .eq('id', id)
       .single();
 
     if (fetchError || !currentPost) {
       return NextResponse.json({ error: 'Blog post not found' }, { status: 404 });
+    }
+
+    // Keep an existing publish date; only set one when newly publishing
+    if (cleanBody.published_date) {
+      updateData.published_at = cleanBody.published_date;
+    } else if (cleanBody.is_published === true && !currentPost.published_at) {
+      updateData.published_at = new Date().toISOString();
+    }
+
+    if (cleanBody.content && !cleanBody.read_time) {
+      updateData.read_time = Math.ceil(String(cleanBody.content).split(/\s+/).length / 200);
     }
 
     const { data: updatedPost, error } = await supabase
@@ -100,6 +107,11 @@ export async function PATCH(
       .single();
 
     if (error) throw error;
+
+    revalidateBlogPages(updatedPost.slug);
+    if (currentPost.slug && currentPost.slug !== updatedPost.slug) {
+      revalidateBlogPages(currentPost.slug);
+    }
 
     return NextResponse.json({
       ...updatedPost,
@@ -133,7 +145,7 @@ export async function DELETE(
 
     const { data: post, error: fetchError } = await supabase
       .from('blog_posts')
-      .select('id')
+      .select('id, slug')
       .eq('id', id)
       .single();
 
@@ -143,6 +155,8 @@ export async function DELETE(
 
     const { error } = await supabase.from('blog_posts').delete().eq('id', id);
     if (error) throw error;
+
+    revalidateBlogPages(post.slug);
 
     return NextResponse.json({ message: 'Blog post deleted successfully' });
   } catch (error) {

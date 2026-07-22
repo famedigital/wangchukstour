@@ -13,6 +13,10 @@ import { BlogMarkdown } from '@/components/public/BlogMarkdown';
 import { cn } from '@/lib/utils';
 import { buildSocialMetadata, SITE_NAME } from '@/lib/seo';
 
+// Always fetch fresh posts after admin edits (avoid stale Vercel/RSC cache)
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const optimizeImageUrl = (url: string | null | undefined, width: number, height: number) => {
   if (!url) return '/placeholder.jpg';
   if (url.includes('cloudinary')) {
