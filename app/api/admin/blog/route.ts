@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { createAdminClient } from '@/utils/supabase/admin';
 import { isAuthError, requireAuth } from '@/lib/auth/require-auth';
+
+function revalidateBlogPages(slug?: string | null) {
+  revalidatePath('/blog');
+  if (slug) revalidatePath(`/blog/${slug}`);
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -122,6 +128,8 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) throw error;
+
+    revalidateBlogPages(post.slug);
 
     return NextResponse.json(
       {
