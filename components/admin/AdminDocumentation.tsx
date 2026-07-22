@@ -163,6 +163,8 @@ const cmsGuides = [
     icon: Settings,
     steps: [
       'Keep phone, email, WhatsApp, address, and office hours current.',
+      'CRM alerts: set your WhatsApp so new bookings/inquiries ping your phone.',
+      'Use Send test alert after configuring CallMeBot or Twilio in Vercel env.',
       'These details feed contact areas and visitor outreach.',
     ],
   },
