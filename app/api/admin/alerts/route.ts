@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/jwt';
 import { createAdminClient } from '@/utils/supabase/admin';
+import { DEFAULT_CRM_ALERT_TEMPLATE } from '@/lib/notifications/crm-alert-template';
 import { sendTestCrmAlert } from '@/lib/notifications/crm-alert';
 
 const ALERT_KEYS = [
   'crm_alerts_enabled',
   'crm_alert_whatsapp',
   'crm_alert_email',
+  'crm_alert_message_template',
 ] as const;
 
 export async function GET() {
@@ -21,6 +23,10 @@ export async function GET() {
       .in('key', [...ALERT_KEYS]);
 
     const map = Object.fromEntries((data || []).map((r) => [r.key, r.value]));
+    const savedTemplate =
+      typeof map.crm_alert_message_template === 'string'
+        ? map.crm_alert_message_template
+        : '';
 
     return NextResponse.json({
       settings: {
@@ -33,7 +39,11 @@ export async function GET() {
               map.crm_alerts_enabled === '1',
         crm_alert_whatsapp: String(map.crm_alert_whatsapp || process.env.CRM_ALERT_WHATSAPP || ''),
         crm_alert_email: String(map.crm_alert_email || process.env.CRM_ALERT_EMAIL || ''),
+        crm_alert_message_template: savedTemplate.trim()
+          ? savedTemplate
+          : DEFAULT_CRM_ALERT_TEMPLATE,
       },
+      defaultTemplate: DEFAULT_CRM_ALERT_TEMPLATE,
       providers: {
         twilio: Boolean(
           process.env.TWILIO_ACCOUNT_SID &&
@@ -59,6 +69,8 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const supabase = createAdminClient();
 
+    const template = String(body.crm_alert_message_template ?? '').trim();
+
     const rows = [
       {
         key: 'crm_alerts_enabled',
@@ -77,6 +89,12 @@ export async function PUT(request: NextRequest) {
         value: String(body.crm_alert_email || '').trim(),
         category: 'alerts',
         description: 'Email for CRM alerts',
+      },
+      {
+        key: 'crm_alert_message_template',
+        value: template || DEFAULT_CRM_ALERT_TEMPLATE,
+        category: 'alerts',
+        description: 'WhatsApp/email alert message template with {{placeholders}}',
       },
     ];
 

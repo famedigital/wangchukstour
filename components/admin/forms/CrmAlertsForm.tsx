@@ -2,17 +2,23 @@
 
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { Bell, Loader2, MessageSquare, Mail, Save, Send } from 'lucide-react';
+import { Bell, Loader2, MessageSquare, Mail, Save, Send, RotateCcw } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { FormField } from '@/components/ui/form-field';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  CRM_ALERT_PLACEHOLDERS,
+  DEFAULT_CRM_ALERT_TEMPLATE,
+} from '@/lib/notifications/crm-alert-template';
 
 type AlertSettings = {
   crm_alerts_enabled: boolean;
   crm_alert_whatsapp: string;
   crm_alert_email: string;
+  crm_alert_message_template: string;
 };
 
 type Providers = {
@@ -27,7 +33,9 @@ export function CrmAlertsForm() {
     crm_alerts_enabled: true,
     crm_alert_whatsapp: '',
     crm_alert_email: '',
+    crm_alert_message_template: DEFAULT_CRM_ALERT_TEMPLATE,
   });
+  const [defaultTemplate, setDefaultTemplate] = useState(DEFAULT_CRM_ALERT_TEMPLATE);
   const [providers, setProviders] = useState<Providers>({
     twilio: false,
     callmebot: false,
@@ -42,7 +50,16 @@ export function CrmAlertsForm() {
     fetch('/api/admin/alerts')
       .then((r) => r.json())
       .then((data) => {
-        if (data.settings) setSettings(data.settings);
+        if (data.settings) {
+          setSettings({
+            crm_alerts_enabled: data.settings.crm_alerts_enabled !== false,
+            crm_alert_whatsapp: data.settings.crm_alert_whatsapp || '',
+            crm_alert_email: data.settings.crm_alert_email || '',
+            crm_alert_message_template:
+              data.settings.crm_alert_message_template || DEFAULT_CRM_ALERT_TEMPLATE,
+          });
+        }
+        if (data.defaultTemplate) setDefaultTemplate(data.defaultTemplate);
         if (data.providers) setProviders(data.providers);
       })
       .catch(() => toast.error('Failed to load alert settings'))
@@ -158,6 +175,70 @@ export function CrmAlertsForm() {
             placeholder="you@wangchuktour.com"
           />
         </div>
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <Label htmlFor="crm-alert-template" className="text-sm font-medium">
+            Message text
+          </Label>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-8 gap-1.5 text-xs"
+            onClick={() =>
+              setSettings((s) => ({
+                ...s,
+                crm_alert_message_template: defaultTemplate,
+              }))
+            }
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            Reset to default
+          </Button>
+        </div>
+        <Textarea
+          id="crm-alert-template"
+          value={settings.crm_alert_message_template}
+          onChange={(e) =>
+            setSettings((s) => ({ ...s, crm_alert_message_template: e.target.value }))
+          }
+          rows={12}
+          className="font-mono text-sm"
+          placeholder={defaultTemplate}
+        />
+        <p className="text-xs text-muted-foreground">
+          Use placeholders — empty fields (phone, tour, etc.) are omitted automatically.
+        </p>
+        <div className="flex flex-wrap gap-1.5">
+          {CRM_ALERT_PLACEHOLDERS.map((token) => (
+            <button
+              key={token}
+              type="button"
+              className="rounded border border-border bg-muted/40 px-2 py-0.5 font-mono text-[11px] text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+              onClick={() =>
+                setSettings((s) => ({
+                  ...s,
+                  crm_alert_message_template: `${s.crm_alert_message_template}${
+                    s.crm_alert_message_template.endsWith(' ') ||
+                    s.crm_alert_message_template.endsWith('\n') ||
+                    !s.crm_alert_message_template
+                      ? ''
+                      : ' '
+                  }${token}`,
+                }))
+              }
+            >
+              {token}
+            </button>
+          ))}
+        </div>
+        <p className="text-xs text-muted-foreground">
+          <code className="rounded bg-muted px-1">&#123;&#123;admin_url&#125;&#125;</code> uses{' '}
+          <code className="rounded bg-muted px-1">NEXT_PUBLIC_SITE_URL</code> from Vercel (set to
+          your production domain).
+        </p>
       </div>
 
       <div className="rounded-lg border border-border bg-muted/20 p-4 text-sm">
