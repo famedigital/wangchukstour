@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { Separator } from '@/components/ui/separator';
-import { MapPin, MessageCircle, Camera, Video } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import { FooterContact } from '@/components/public/FooterContact';
+import { FooterSocial } from '@/components/public/FooterSocial';
 
 const footerLinks = {
   explore: [
@@ -30,12 +31,6 @@ const footerLinks = {
   ],
 };
 
-const socialLinks = [
-  { name: 'Facebook', href: '#', icon: MessageCircle },
-  { name: 'Instagram', href: '#', icon: Camera },
-  { name: 'YouTube', href: '#', icon: Video },
-];
-
 export function Footer() {
   return (
     <footer className="border-t border-border/20 bg-secondary text-secondary-foreground">
@@ -61,21 +56,7 @@ export function Footer() {
               breathtaking natural beauty.
             </p>
 
-            <div className="flex flex-row flex-wrap items-center gap-2">
-              {socialLinks.map((social) => {
-                const Icon = social.icon;
-                return (
-                  <Link
-                    key={social.name}
-                    href={social.href}
-                    className="inline-flex items-center gap-2 rounded-full border border-secondary-foreground/15 px-4 py-2 text-sm text-secondary-foreground/85 transition-colors hover:border-accent/40 hover:text-accent"
-                  >
-                    <Icon className="h-4 w-4" />
-                    <span className="font-medium">{social.name}</span>
-                  </Link>
-                );
-              })}
-            </div>
+            <FooterSocial />
           </div>
 
           <div className="grid grid-cols-2 gap-8 lg:grid-cols-4">

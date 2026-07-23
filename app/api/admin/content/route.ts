@@ -132,8 +132,53 @@ export async function POST(request: NextRequest) {
     });
 
     if (pageType === 'contact') {
+      // Mirror FB/IG into site_settings so SEO + /api/social stay aligned
+      const social =
+        content.socialMedia && typeof content.socialMedia === 'object'
+          ? (content.socialMedia as Record<string, unknown>)
+          : {};
+      const facebook =
+        typeof social.facebook === 'string' ? social.facebook.trim() : '';
+      const instagram =
+        typeof social.instagram === 'string' ? social.instagram.trim() : '';
+
+      const upsertFlat = async (key: string, value: string, description: string) => {
+        const { data: row } = await supabase
+          .from('site_settings')
+          .select('id')
+          .eq('key', key)
+          .maybeSingle();
+        if (row) {
+          await supabase
+            .from('site_settings')
+            .update({
+              value,
+              category: 'seo',
+              description,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('key', key);
+        } else {
+          await supabase.from('site_settings').insert({
+            key,
+            value,
+            category: 'seo',
+            description,
+            is_public: true,
+          });
+        }
+      };
+
+      if (facebook) {
+        await upsertFlat('social_facebook', facebook, 'Public Facebook profile URL');
+      }
+      if (instagram) {
+        await upsertFlat('social_instagram', instagram, 'Public Instagram profile URL');
+      }
+
       revalidatePath('/contact');
       revalidatePath('/');
+      revalidatePath('/', 'layout');
     } else if (pageType === 'about') {
       revalidatePath('/about');
     }

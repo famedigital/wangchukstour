@@ -31,7 +31,6 @@ interface ContactContent {
     facebook?: string;
     instagram?: string;
     twitter?: string;
-    youtube?: string;
     linkedin?: string;
   };
   formFields: {
@@ -82,7 +81,6 @@ const defaultContent: ContactContent = {
     facebook: 'https://facebook.com/wangchuktours',
     instagram: 'https://instagram.com/wangchuktours',
     twitter: 'https://twitter.com/wangchuktours',
-    youtube: 'https://youtube.com/@wangchuktours'
   },
   formFields: {
     showName: true,
@@ -408,16 +406,6 @@ export function ContactSettingsForm() {
                       twitter: e.target.value
                     })}
                     placeholder="https://twitter.com/..."
-                  />
-
-                  <FormField
-                    label="YouTube"
-                    value={content.socialMedia.youtube || ''}
-                    onChange={(e) => updateSection('socialMedia', {
-                      ...content.socialMedia,
-                      youtube: e.target.value
-                    })}
-                    placeholder="https://youtube.com/@..."
                   />
 
                   <FormField
