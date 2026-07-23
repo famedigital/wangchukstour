@@ -1,10 +1,23 @@
-import { createClient } from '@/utils/supabase/server'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { mergeContactContent, type ContactContent } from '@/lib/content/contact'
+
+function createReadClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseKey =
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error('Missing Supabase environment variables')
+  }
+
+  return createSupabaseClient(supabaseUrl, supabaseKey)
+}
 
 /** Server-side Contact CMS fetch — same source admin Contact Settings edits. */
 export async function getContactPageContent(): Promise<ContactContent> {
   try {
-    const supabase = await createClient()
+    const supabase = createReadClient()
 
     let { data, error } = await supabase
       .from('content_pages')

@@ -3,8 +3,12 @@ import bcrypt from 'bcryptjs';
 import { cookies } from 'next/headers';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
-const JWT_EXPIRES_IN = '15m'; // Access token expires in 15 minutes
-const REFRESH_TOKEN_EXPIRES_IN = '7d'; // Refresh token expires in 7 days
+// Longer access window so admin can edit tours/blogs without mid-save logout.
+// Refresh token still renews the session in the background.
+const JWT_EXPIRES_IN: jwt.SignOptions['expiresIn'] = '12h';
+const REFRESH_TOKEN_EXPIRES_IN: jwt.SignOptions['expiresIn'] = '30d';
+const ACCESS_TOKEN_MAX_AGE_SEC = 12 * 60 * 60; // keep cookie in sync with ~12h JWT
+const REFRESH_TOKEN_MAX_AGE_SEC = 30 * 24 * 60 * 60;
 
 export interface TokenPayload {
   userId: string;
@@ -124,12 +128,12 @@ export async function setAuthCookies(tokens: AuthTokens) {
 
     cookieStore.set('access_token', tokens.accessToken, {
       ...cookieOptions,
-      maxAge: 15 * 60, // 15 minutes
+      maxAge: ACCESS_TOKEN_MAX_AGE_SEC,
     });
 
     cookieStore.set('refresh_token', tokens.refreshToken, {
       ...cookieOptions,
-      maxAge: 7 * 24 * 60 * 60, // 7 days
+      maxAge: REFRESH_TOKEN_MAX_AGE_SEC,
     });
 
     console.log('Auth cookies set successfully');
@@ -220,7 +224,17 @@ export async function refreshAccessToken(): Promise<string | null> {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 15 * 60,
+      maxAge: ACCESS_TOKEN_MAX_AGE_SEC,
+      path: '/',
+      ...(process.env.COOKIE_DOMAIN ? { domain: process.env.COOKIE_DOMAIN } : {}),
+    });
+
+    // Sliding refresh — extend refresh cookie while the admin stays active
+    cookieStore.set('refresh_token', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: REFRESH_TOKEN_MAX_AGE_SEC,
       path: '/',
       ...(process.env.COOKIE_DOMAIN ? { domain: process.env.COOKIE_DOMAIN } : {}),
     });

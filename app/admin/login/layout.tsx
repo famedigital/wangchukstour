@@ -1,14 +1,14 @@
 import type { Metadata, Viewport } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Admin Login | Wangchuk Tours',
-  description: 'Sign in to the Wangchuk Tours & Treks admin dashboard',
-  applicationName: 'Wangchuk Admin',
+  title: 'Admin Login | Wangchuks Tours & Treks',
+  description: 'Sign in to the Wangchuks Tours & Treks admin dashboard',
+  applicationName: 'Wangchuks Admin',
   manifest: '/admin-pwa/manifest.webmanifest',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'Wangchuk Admin',
+    title: 'Wangchuks Admin',
   },
   icons: {
     icon: [

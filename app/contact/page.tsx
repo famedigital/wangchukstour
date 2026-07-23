@@ -16,54 +16,69 @@ import {
   Compass,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getContactPageContent } from '@/lib/content/get-contact';
+import { phoneToTelHref } from '@/lib/content/contact';
 
-const contactInfo = {
-  email: 'info@wangchuktour.com',
-  phone: '+975 17 00 00 00',
-  address: 'Thimphu, Bhutan',
-  officeHours: 'Mon–Fri, 9:00 AM – 6:00 PM',
-  responseTime: 'We reply within 24 hours',
-};
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
-const contactItems = [
-  {
-    icon: Mail,
-    title: 'Email',
-    detail: contactInfo.email,
-    note: contactInfo.responseTime,
-  },
-  {
-    icon: Phone,
-    title: 'Phone',
-    detail: contactInfo.phone,
-    note: contactInfo.officeHours,
-  },
-  {
-    icon: MapPin,
-    title: 'Office',
-    detail: contactInfo.address,
-    note: 'Thimphu, Bhutan',
-  },
-];
+function whatsappHref(whatsapp?: string) {
+  const digits = String(whatsapp || '').replace(/[^\d]/g, '');
+  return digits ? `https://wa.me/${digits}` : 'https://wa.me/97517643416';
+}
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const content = await getContactPageContent();
+  const info = content.contactInfo;
+  const hours = content.officeHours;
+  const officeHoursLabel = hours?.weekdays
+    ? `Mon–Fri, ${hours.weekdays}`
+    : 'Mon–Fri, 9:00 AM – 6:00 PM';
+
+  const contactItems = [
+    {
+      icon: Mail,
+      title: 'Email',
+      detail: info.email,
+      href: `mailto:${info.email}`,
+      note: 'We reply within 24 hours',
+    },
+    {
+      icon: Phone,
+      title: 'Phone',
+      detail: info.phone,
+      href: phoneToTelHref(info.phone),
+      note: officeHoursLabel,
+    },
+    {
+      icon: MapPin,
+      title: 'Office',
+      detail: info.address,
+      href: null as string | null,
+      note: info.address,
+    },
+  ];
+
+  const heroTitle = content.hero?.title || 'Start your Bhutan journey';
+  const heroSubtitle =
+    content.hero?.subtitle ||
+    "Tell us what you're looking for — we'll help plan temples, treks, and festivals with a local team based in Thimphu.";
+
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <Navigation forceSolid />
 
       <main className="safe-bottom-padding flex-1 pt-16 pb-4 xl:pt-[4.5rem] lg:pb-0">
-        {/* Compact intro — form first on mobile */}
         <section className="border-b border-border bg-muted/30">
           <div className="container py-10 md:py-14">
             <p className="mb-2 text-sm font-medium tracking-[0.2em] text-muted-foreground uppercase">
               Contact
             </p>
             <h1 className="font-accent mb-3 text-3xl font-medium tracking-tight md:text-4xl lg:text-5xl">
-              Start your Bhutan journey
+              {heroTitle}
             </h1>
             <p className="max-w-2xl text-base leading-relaxed text-muted-foreground md:text-lg">
-              Tell us what you&apos;re looking for — we&apos;ll help plan temples, treks, and festivals
-              with a local team based in Thimphu.
+              {heroSubtitle}
             </p>
           </div>
         </section>
@@ -71,7 +86,6 @@ export default function ContactPage() {
         <section className="py-10 md:py-16">
           <div className="container">
             <div className="grid gap-10 lg:grid-cols-5 lg:gap-14">
-              {/* Form first on mobile so Book/Inquire lands on the message */}
               <div className="order-1 lg:order-2 lg:col-span-3">
                 <Card
                   id="contact-form"
@@ -105,6 +119,16 @@ export default function ContactPage() {
                   <ul className="space-y-4">
                     {contactItems.map((item) => {
                       const Icon = item.icon;
+                      const detail = item.href ? (
+                        <a
+                          href={item.href}
+                          className="text-foreground transition-colors hover:text-primary"
+                        >
+                          {item.detail}
+                        </a>
+                      ) : (
+                        <p className="text-foreground">{item.detail}</p>
+                      );
                       return (
                         <li key={item.title} className="flex gap-3">
                           <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
@@ -112,7 +136,7 @@ export default function ContactPage() {
                           </div>
                           <div>
                             <p className="text-sm font-medium">{item.title}</p>
-                            <p className="text-foreground">{item.detail}</p>
+                            {detail}
                             <p className="text-sm text-muted-foreground">{item.note}</p>
                           </div>
                         </li>
@@ -189,7 +213,7 @@ export default function ContactPage() {
                 <ArrowRight className="size-4" />
               </Link>
               <a
-                href="https://wa.me/97517643416"
+                href={whatsappHref(info.whatsapp)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={cn(buttonVariants({ variant: 'outline', size: 'lg' }))}

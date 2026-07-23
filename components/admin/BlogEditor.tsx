@@ -246,7 +246,8 @@ export function BlogEditor({ post, postId, isNewPost, onSave, onCancel }: BlogEd
         const url = isNewPost ? '/api/admin/blog' : `/api/admin/blog/${postId}`;
         const method = isNewPost ? 'POST' : 'PUT';
 
-        const response = await fetch(url, {
+        const { authFetch } = await import('@/lib/auth/fetch');
+        const response = await authFetch(url, {
           method,
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(postToSave),

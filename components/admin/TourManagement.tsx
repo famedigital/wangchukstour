@@ -32,6 +32,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { TourForm } from '@/components/admin/TourForm';
 import { formatTourPrice, isTourPriceVisible } from '@/lib/tour-options';
+import { authFetch } from '@/lib/auth/fetch';
 
 interface Tour {
   id: string;
@@ -103,7 +104,7 @@ export function TourManagement() {
       if (filterStatus !== 'all') params.append('status', filterStatus);
       if (searchQuery) params.append('search', searchQuery);
 
-      const response = await fetch(`/api/admin/tours?${params.toString()}`);
+      const response = await authFetch(`/api/admin/tours?${params.toString()}`);
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Failed to fetch tours');
       setTours(data.tours || []);
@@ -116,7 +117,7 @@ export function TourManagement() {
   };
 
   const handleCreate = async (formData: Record<string, unknown>) => {
-    const response = await fetch('/api/admin/tours', {
+    const response = await authFetch('/api/admin/tours', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData),
@@ -131,7 +132,7 @@ export function TourManagement() {
 
   const handleUpdate = async (formData: Record<string, unknown>) => {
     if (!editingTour) return;
-    const response = await fetch(`/api/admin/tours/${editingTour.id}`, {
+    const response = await authFetch(`/api/admin/tours/${editingTour.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData),
@@ -149,7 +150,7 @@ export function TourManagement() {
     setEditLoading(true);
     setShowEditModal(true);
     try {
-      const response = await fetch(`/api/admin/tours/${tour.id}`);
+      const response = await authFetch(`/api/admin/tours/${tour.id}`);
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Failed to load tour');
       setEditingTour(data);
@@ -168,13 +169,13 @@ export function TourManagement() {
       if (deleteTarget === 'bulk') {
         await Promise.all(
           Array.from(selectedTours).map((id) =>
-            fetch(`/api/admin/tours/${id}`, { method: 'DELETE' })
+            authFetch(`/api/admin/tours/${id}`, { method: 'DELETE' })
           )
         );
         setSelectedTours(new Set());
         toast.success('Tours deleted');
       } else if (deleteId) {
-        const response = await fetch(`/api/admin/tours/${deleteId}`, { method: 'DELETE' });
+        const response = await authFetch(`/api/admin/tours/${deleteId}`, { method: 'DELETE' });
         if (!response.ok) throw new Error('Delete failed');
         toast.success('Tour deleted');
       }
