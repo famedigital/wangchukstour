@@ -2,9 +2,14 @@ import { createAdminClient } from '@/utils/supabase/admin'
 import {
   DEFAULT_COMPANY_NAME,
   DEFAULT_COMPANY_TAGLINE,
+  normalizeCompanyName,
 } from '@/lib/brand-defaults'
 
-export { DEFAULT_COMPANY_NAME, DEFAULT_COMPANY_TAGLINE } from '@/lib/brand-defaults'
+export {
+  DEFAULT_COMPANY_NAME,
+  DEFAULT_COMPANY_TAGLINE,
+  normalizeCompanyName,
+} from '@/lib/brand-defaults'
 
 function asCleanName(value: unknown): string | null {
   if (typeof value !== 'string') return null
@@ -47,14 +52,74 @@ export async function getCompanyName(): Promise<string> {
 
     const map = Object.fromEntries((data || []).map((row) => [row.key, row.value]))
 
-    return (
+    const raw =
       asCleanName(map.site_name) ||
       nameFromSeoBlob(map.seo_settings) ||
       DEFAULT_COMPANY_NAME
-    )
+
+    const normalized = normalizeCompanyName(raw)
+
+    // One-time upgrade: rewrite legacy CRM company name so admin + public stay in sync
+    if (raw !== normalized) {
+      void upgradeStoredCompanyName(supabase, map.seo_settings, normalized).catch((err) =>
+        console.error('[getCompanyName] upgrade failed', err)
+      )
+    }
+
+    return normalized
   } catch (err) {
     console.error('[getCompanyName]', err)
     return DEFAULT_COMPANY_NAME
+  }
+}
+
+async function upgradeStoredCompanyName(
+  supabase: ReturnType<typeof createAdminClient>,
+  seoRaw: unknown,
+  companyName: string
+) {
+  const now = new Date().toISOString()
+
+  const { data: existingName } = await supabase
+    .from('site_settings')
+    .select('id')
+    .eq('key', 'site_name')
+    .maybeSingle()
+
+  if (existingName?.id) {
+    await supabase
+      .from('site_settings')
+      .update({ value: companyName, updated_at: now })
+      .eq('key', 'site_name')
+  } else {
+    await supabase.from('site_settings').insert({
+      key: 'site_name',
+      value: companyName,
+      category: 'general',
+      description: 'Company / site name shown across the public site and CRM',
+      is_public: true,
+    })
+  }
+
+  let seoBlob: Record<string, unknown> | null = null
+  if (seoRaw && typeof seoRaw === 'object' && !Array.isArray(seoRaw)) {
+    seoBlob = { ...(seoRaw as Record<string, unknown>), site_name: companyName }
+  } else if (typeof seoRaw === 'string') {
+    try {
+      const parsed = JSON.parse(seoRaw)
+      if (parsed && typeof parsed === 'object') {
+        seoBlob = { ...parsed, site_name: companyName }
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+
+  if (seoBlob) {
+    await supabase
+      .from('site_settings')
+      .update({ value: seoBlob, updated_at: now })
+      .eq('key', 'seo_settings')
   }
 }
 

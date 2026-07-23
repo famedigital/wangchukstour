@@ -1,7 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { DEFAULT_COMPANY_NAME, DEFAULT_COMPANY_TAGLINE } from '@/lib/brand-defaults';
+import {
+  DEFAULT_COMPANY_NAME,
+  DEFAULT_COMPANY_TAGLINE,
+  normalizeCompanyName,
+} from '@/lib/brand-defaults';
 
 type BrandInfo = {
   name: string;
@@ -9,7 +13,8 @@ type BrandInfo = {
 };
 
 /**
- * Client hook — company name from Admin → SEO → Site Name (CRM).
+ * Client hook — company name from Admin → SEO → Company name (CRM).
+ * Starts with the canonical default so legacy CRM values don't flash wrong.
  */
 export function useCompanyBrand(): BrandInfo {
   const [brand, setBrand] = useState<BrandInfo>({
@@ -24,7 +29,7 @@ export function useCompanyBrand(): BrandInfo {
       .then((data) => {
         if (cancelled || !data) return;
         setBrand({
-          name: String(data.name || DEFAULT_COMPANY_NAME).trim() || DEFAULT_COMPANY_NAME,
+          name: normalizeCompanyName(data.name),
           tagline:
             String(data.tagline || DEFAULT_COMPANY_TAGLINE).trim() || DEFAULT_COMPANY_TAGLINE,
         });

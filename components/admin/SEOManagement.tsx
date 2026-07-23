@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Save, Globe, Mail, Phone, MapPin, Check, X, Search, Image as ImageIcon, FileText, Code2, Shield } from 'lucide-react';
+import { normalizeCompanyName } from '@/lib/brand-defaults';
 
 interface SEOSettings {
   // Site Info
@@ -126,7 +127,9 @@ export function SEOManagement() {
         setSettings((prev) => ({
           ...prev,
           ...blob,
-          site_name: data.settings.site_name || blob.site_name || prev.site_name,
+          site_name: normalizeCompanyName(
+            data.settings.site_name || blob.site_name || prev.site_name
+          ),
           site_tagline: data.settings.site_tagline || blob.site_tagline || prev.site_tagline,
           social_facebook:
             data.settings.social_facebook || blob.social_facebook || prev.social_facebook,
