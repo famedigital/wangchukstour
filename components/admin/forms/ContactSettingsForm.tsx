@@ -303,16 +303,20 @@ export function ContactSettingsForm() {
 
               <div className="flex items-start gap-3">
                 <MessageSquare className="h-5 w-5 text-primary mt-1" />
-                <div className="flex-1">
+                <div className="flex-1 space-y-1">
                   <FormField
-                    label="WhatsApp Number (optional)"
+                    label="WhatsApp Number"
                     value={content.contactInfo.whatsapp || ''}
                     onChange={(e) => updateSection('contactInfo', {
                       ...content.contactInfo,
                       whatsapp: e.target.value
                     })}
-                    placeholder="e.g., +975 17 00 00 00"
+                    placeholder="e.g., +97517643416"
                   />
+                  <p className="text-xs text-muted-foreground">
+                    Used by public “WhatsApp us” / mobile WhatsApp buttons. If you enter two numbers
+                    (e.g. with /), the first one is used for the link.
+                  </p>
                 </div>
               </div>
             </div>
