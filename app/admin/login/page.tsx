@@ -57,12 +57,12 @@ export default function AdminLoginPage() {
           <div className="mb-4 inline-flex items-center justify-center">
             <img
               src="https://res.cloudinary.com/hckgrdeh/image/upload/v1782962660/wangchukstlogo_usxclz.png"
-              alt="Wangchuk Tours & Treks"
+              alt="Wangchuks Tours & Treks"
               className="h-20 w-auto object-contain"
             />
           </div>
           <h1 className="font-heading mb-2 text-3xl font-semibold text-foreground">Admin Login</h1>
-          <p className="text-muted-foreground">Wangchuk Tours & Treks</p>
+          <p className="text-muted-foreground">Wangchuks Tours & Treks</p>
         </div>
 
         <Card>

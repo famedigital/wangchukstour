@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
+import { revalidatePath } from 'next/cache';
 import { createClient } from '@/utils/supabase/server';
 import { getCurrentUser } from '@/lib/auth/jwt';
 
@@ -130,6 +130,13 @@ export async function POST(request: NextRequest) {
       ip_address: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || null,
       user_agent: request.headers.get('user-agent') || null,
     });
+
+    if (pageType === 'contact') {
+      revalidatePath('/contact');
+      revalidatePath('/');
+    } else if (pageType === 'about') {
+      revalidatePath('/about');
+    }
 
     return NextResponse.json({
       success: true,

@@ -1,15 +1,19 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { AdminSidebar } from './AdminSidebar';
 import { AdminHeader } from './AdminHeader';
 import { useRouter } from 'next/navigation';
 import type { AdminUser } from '@/lib/auth/rbac';
 import { Button } from '@/components/ui/button';
+import { keepAdminSessionAlive } from '@/lib/auth/fetch';
+import { toast } from 'sonner';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
+
+const KEEPALIVE_MS = 10 * 60 * 1000; // refresh session every 10 minutes while browsing
 
 export function AdminLayout({ children }: AdminLayoutProps) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -19,10 +23,14 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const [authError, setAuthError] = useState<string | null>(null);
   const router = useRouter();
 
+  const redirectToLogin = useCallback(() => {
+    router.push('/admin/login');
+  }, [router]);
+
   useEffect(() => {
     async function checkAuth() {
       try {
-        const response = await fetch('/api/auth/me');
+        const response = await fetch('/api/auth/me', { credentials: 'same-origin' });
         if (response.ok) {
           const data = await response.json();
           setUser(data.user);
@@ -30,7 +38,10 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           return;
         }
 
-        const refreshResponse = await fetch('/api/auth/refresh', { method: 'POST' });
+        const refreshResponse = await fetch('/api/auth/refresh', {
+          method: 'POST',
+          credentials: 'same-origin',
+        });
         if (refreshResponse.ok) {
           const refreshData = await refreshResponse.json();
           setUser(refreshData.user);
@@ -39,17 +50,54 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         }
 
         setAuthError('Authentication failed. Please log in again.');
-        setTimeout(() => router.push('/admin/login'), 1500);
+        setTimeout(redirectToLogin, 1500);
       } catch {
         setAuthError('Connection error. Please try again.');
-        setTimeout(() => router.push('/admin/login'), 2000);
+        setTimeout(redirectToLogin, 2000);
       } finally {
         setLoading(false);
       }
     }
 
     checkAuth();
-  }, [router]);
+  }, [redirectToLogin]);
+
+  // Keep session alive while the admin panel is open (prevents mid-edit logout)
+  useEffect(() => {
+    if (!user) return;
+
+    const tick = () => {
+      void keepAdminSessionAlive();
+    };
+
+    // Warm the session shortly after load, then on an interval + focus/visibility
+    const warm = window.setTimeout(tick, 5_000);
+    const interval = window.setInterval(tick, KEEPALIVE_MS);
+
+    const onFocus = () => tick();
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') tick();
+    };
+
+    window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', onVisibility);
+
+    const onExpired = () => {
+      toast.error('Session expired. Please log in again to save your work.', {
+        duration: 6000,
+      });
+      setTimeout(redirectToLogin, 1200);
+    };
+    window.addEventListener('admin-session-expired', onExpired);
+
+    return () => {
+      window.clearTimeout(warm);
+      window.clearInterval(interval);
+      window.removeEventListener('focus', onFocus);
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('admin-session-expired', onExpired);
+    };
+  }, [user, redirectToLogin]);
 
   const hasPermission = (permission: string): boolean => {
     if (!user) return false;
@@ -75,7 +123,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             <h2 className="mb-2 font-heading text-lg font-semibold text-destructive">Authentication Error</h2>
             <p className="text-sm text-destructive/80">{authError}</p>
           </div>
-          <Button type="button" size="lg" onClick={() => router.push('/admin/login')}>
+          <Button type="button" size="lg" onClick={redirectToLogin}>
             Go to Login
           </Button>
         </div>

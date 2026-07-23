@@ -70,7 +70,7 @@ export default function ForgotPasswordPage() {
         <div className="mb-8 text-center">
           <img
             src="https://res.cloudinary.com/hckgrdeh/image/upload/v1782962660/wangchukstlogo_usxclz.png"
-            alt="Wangchuk Tours & Treks"
+            alt="Wangchuks Tours & Treks"
             className="mx-auto mb-4 h-16 w-auto object-contain"
           />
           <h1 className="font-heading text-2xl font-semibold text-foreground">Account recovery</h1>

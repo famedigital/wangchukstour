@@ -11,6 +11,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { authFetch } from '@/lib/auth/fetch';
 
 interface BlogPost {
   id: string;
@@ -61,7 +62,7 @@ export function BlogManagement() {
       if (filterCategory !== 'all') params.append('category', filterCategory);
       if (searchQuery) params.append('search', searchQuery);
 
-      const response = await fetch(`/api/admin/blog?${params.toString()}`);
+      const response = await authFetch(`/api/admin/blog?${params.toString()}`);
 
       if (!response.ok) {
         throw new Error('Failed to fetch blog posts');
@@ -99,7 +100,7 @@ export function BlogManagement() {
       setDeleting(new Set(selectedPosts));
 
       const deletePromises = Array.from(selectedPosts).map(async (id) => {
-        const response = await fetch(`/api/admin/blog/${id}`, { method: 'DELETE' });
+        const response = await authFetch(`/api/admin/blog/${id}`, { method: 'DELETE' });
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
           throw new Error(errorData.error || `Failed to delete post ${id}`);
@@ -134,7 +135,7 @@ export function BlogManagement() {
       // Add to deleting state
       setDeleting(new Set([id]));
 
-      const response = await fetch(`/api/admin/blog/${id}`, { method: 'DELETE' });
+      const response = await authFetch(`/api/admin/blog/${id}`, { method: 'DELETE' });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -392,7 +393,7 @@ export function BlogManagement() {
             isNewPost={true}
             onSave={async (post) => {
               try {
-                const response = await fetch('/api/admin/blog', {
+                const response = await authFetch('/api/admin/blog', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify(post),
@@ -446,7 +447,7 @@ export function BlogManagement() {
               isNewPost={false}
               onSave={async (post) => {
                 try {
-                  const response = await fetch(`/api/admin/blog/${editingPost.id}`, {
+                  const response = await authFetch(`/api/admin/blog/${editingPost.id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(post),

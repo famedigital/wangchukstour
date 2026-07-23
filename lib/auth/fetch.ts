@@ -13,7 +13,10 @@ async function tryRefreshSession(): Promise<boolean> {
   if (!refreshInFlight) {
     refreshInFlight = (async () => {
       try {
-        const refreshResponse = await fetch('/api/auth/refresh', { method: 'POST' });
+        const refreshResponse = await fetch('/api/auth/refresh', {
+          method: 'POST',
+          credentials: 'same-origin',
+        });
         return refreshResponse.ok;
       } catch {
         return false;
@@ -23,6 +26,11 @@ async function tryRefreshSession(): Promise<boolean> {
     })();
   }
   return refreshInFlight;
+}
+
+/** Proactive keepalive used by AdminLayout while the dashboard is open. */
+export async function keepAdminSessionAlive(): Promise<boolean> {
+  return tryRefreshSession();
 }
 
 export async function authFetch(url: string, options: AuthFetchOptions = {}): Promise<Response> {
@@ -40,6 +48,9 @@ export async function authFetch(url: string, options: AuthFetchOptions = {}): Pr
 
     const refreshed = await tryRefreshSession();
     if (!refreshed) {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('admin-session-expired'));
+      }
       return response;
     }
 
