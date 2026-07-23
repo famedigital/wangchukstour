@@ -59,7 +59,7 @@ export function AboutPageForm() {
           pageType: 'about',
           content,
           metadata: {
-            seoTitle: 'About Us - Wangchuk Tours & Treks',
+            seoTitle: 'About Us - Wangchuks Bhutan Tours & Treks',
             seoDescription: 'Learn about our story, values, and the team behind authentic Bhutanese travel experiences.'
           }
         })

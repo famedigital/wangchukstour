@@ -22,14 +22,18 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Metadata } from 'next';
+import { getCompanyName } from '@/lib/brand';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
-  title: 'About Us | Wangchuks Tours & Treks',
-  description:
-    'Learn about our story, values, milestones, and the Bhutanese team behind authentic Himalayan journeys.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const company = await getCompanyName();
+  return {
+    title: `About Us | ${company}`,
+    description:
+      'Learn about our story, values, milestones, and the Bhutanese team behind authentic Himalayan journeys.',
+  };
+}
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Heart,

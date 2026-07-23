@@ -1,4 +1,4 @@
-# Backend Upgrade Strategy - Wangchuk Tours & Treks
+# Backend Upgrade Strategy - Wangchuks Bhutan Tours & Treks
 
 ## 🎯 **EXECUTIVE SUMMARY**
 

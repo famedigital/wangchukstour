@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { Loader2, MapPin, Calendar, Users, User, Car, Building2 } from 'lucide-react';
 
+import { useCompanyBrand } from '@/hooks/use-company-brand';
+
 type ItineraryDay = {
   day?: string | number;
   title?: string;
@@ -59,6 +61,7 @@ export function SharedItineraryView({
   mode: 'booking' | 'tour';
   token: string;
 }) {
+  const brand = useCompanyBrand();
   const [data, setData] = useState<SharePayload | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -107,11 +110,11 @@ export function SharedItineraryView({
         <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-5">
           <img
             src="https://res.cloudinary.com/hckgrdeh/image/upload/v1782962660/wangchukstlogo_usxclz.png"
-            alt="Wangchuks Tours & Treks"
+            alt={brand.name}
             className="h-10 w-auto"
           />
           <div>
-            <p className="font-heading text-sm font-semibold">Wangchuks Tours & Treks</p>
+            <p className="font-heading text-sm font-semibold">{brand.name}</p>
             <p className="text-xs text-stone-500">
               {isStaff ? 'Operations itinerary (no rates)' : 'Shared itinerary'}
             </p>

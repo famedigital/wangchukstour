@@ -1,3 +1,6 @@
+import { getCompanyName } from '@/lib/brand';
+import { DEFAULT_COMPANY_NAME } from '@/lib/brand-defaults';
+
 type SendEmailInput = {
   to: string;
   subject: string;
@@ -16,10 +19,15 @@ type SendEmailResult = {
  * Falls back to console logging in development so reset links still work locally.
  */
 export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult> {
-  const from =
+  let from =
     process.env.EMAIL_FROM ||
     process.env.RESEND_FROM ||
-    'Wangchuks Tours <onboarding@resend.dev>';
+    '';
+
+  if (!from) {
+    const company = await getCompanyName().catch(() => DEFAULT_COMPANY_NAME);
+    from = `${company} <onboarding@resend.dev>`;
+  }
 
   const apiKey = process.env.RESEND_API_KEY;
 
@@ -57,7 +65,6 @@ export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult>
     }
   }
 
-  // Dev / unset mail provider — log so admins can still recover locally
   console.info('[email:log]', {
     to: input.to,
     subject: input.subject,
@@ -74,27 +81,28 @@ export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult>
   };
 }
 
-export function passwordResetEmail(params: {
+export async function passwordResetEmail(params: {
   name: string;
   resetUrl: string;
 }) {
-  const subject = 'Reset your Wangchuks admin password';
+  const company = await getCompanyName();
+  const subject = `Reset your ${company} admin password`;
   const text = `Hi ${params.name},
 
-We received a request to reset your Wangchuks Tours & Treks admin password.
+We received a request to reset your ${company} admin password.
 
 Open this link within 1 hour to choose a new password:
 ${params.resetUrl}
 
 If you did not request this, you can ignore this email.
 
-— Wangchuks Tours & Treks`;
+— ${company}`;
 
   const html = `
     <div style="font-family:Georgia,serif;max-width:560px;margin:0 auto;color:#1a1a1a">
       <h1 style="color:#9f1239;font-size:22px">Reset your password</h1>
       <p>Hi ${escapeHtml(params.name)},</p>
-      <p>We received a request to reset your Wangchuks Tours &amp; Treks admin password.</p>
+      <p>We received a request to reset your ${escapeHtml(company)} admin password.</p>
       <p style="margin:28px 0">
         <a href="${escapeHtml(params.resetUrl)}"
            style="display:inline-block;background:#9f1239;color:#fff;text-decoration:none;padding:12px 20px;border-radius:8px">
@@ -109,28 +117,29 @@ If you did not request this, you can ignore this email.
   return { subject, text, html };
 }
 
-export function loginEmailReminderEmail(params: {
+export async function loginEmailReminderEmail(params: {
   name: string;
   loginEmail: string;
   loginUrl: string;
 }) {
-  const subject = 'Your Wangchuks admin login email';
+  const company = await getCompanyName();
+  const subject = `Your ${company} admin login email`;
   const text = `Hi ${params.name},
 
-You asked us to remind you of your Wangchuks Tours & Treks admin login email.
+You asked us to remind you of your ${company} admin login email.
 
 Login email: ${params.loginEmail}
 Sign in: ${params.loginUrl}
 
 If you did not request this, you can ignore this email.
 
-— Wangchuks Tours & Treks`;
+— ${company}`;
 
   const html = `
     <div style="font-family:Georgia,serif;max-width:560px;margin:0 auto;color:#1a1a1a">
       <h1 style="color:#9f1239;font-size:22px">Your login email</h1>
       <p>Hi ${escapeHtml(params.name)},</p>
-      <p>You asked for a reminder of your Wangchuks Tours &amp; Treks admin login.</p>
+      <p>You asked for a reminder of your ${escapeHtml(company)} admin login.</p>
       <p style="font-size:18px;margin:24px 0"><strong>${escapeHtml(params.loginEmail)}</strong></p>
       <p>
         <a href="${escapeHtml(params.loginUrl)}"

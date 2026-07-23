@@ -265,7 +265,7 @@ Perched dramatically on a cliff 3,000 feet above the Paro Valley, Taktsang Palph
       thumbnail_url: bhutanImages.hero[0].replace('/upload/', '/upload/w_600,h_400,c_fill/'),
       category: 'Culture',
       tags: ['monastery', 'trekking', 'spirituality', 'paro'],
-      author_name: 'Wangchuk Tours',
+      author_name: 'Wangchuks Bhutan Tours',
       published_date: new Date().toISOString().split('T')[0]
     },
     {
@@ -279,7 +279,7 @@ Bhutan's Tsechu festivals are extraordinary celebrations of faith, culture, and 
       thumbnail_url: bhutanImages.hero[1].replace('/upload/', '/upload/w_600,h_400,c_fill/'),
       category: 'Festivals',
       tags: ['tsechu', 'culture', 'cham dance', 'festivals'],
-      author_name: 'Wangchuk Tours',
+      author_name: 'Wangchuks Bhutan Tours',
       published_date: new Date().toISOString().split('T')[0]
     },
     {
@@ -293,7 +293,7 @@ Bhutan offers distinct experiences throughout the year, each season bringing its
       thumbnail_url: bhutanImages.hero[2].replace('/upload/', '/upload/w_600,h_400,c_fill/'),
       category: 'Travel Tips',
       tags: ['weather', 'planning', 'seasons', 'guide'],
-      author_name: 'Wangchuk Tours',
+      author_name: 'Wangchuks Bhutan Tours',
       published_date: new Date().toISOString().split('T')[0]
     },
     {
@@ -307,7 +307,7 @@ Bhutan's dzongs are among the most remarkable architectural achievements in the 
       thumbnail_url: bhutanImages.hero[4].replace('/upload/', '/upload/w_600,h_400,c_fill/'),
       category: 'Culture',
       tags: ['architecture', 'dzongs', 'history', 'monasteries'],
-      author_name: 'Wangchuk Tours',
+      author_name: 'Wangchuks Bhutan Tours',
       published_date: new Date().toISOString().split('T')[0]
     }
   ];

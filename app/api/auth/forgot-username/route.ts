@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (user) {
-      const mail = loginEmailReminderEmail({
+      const mail = await loginEmailReminderEmail({
         name: user.name || 'Admin',
         loginEmail: user.email,
         loginUrl,

@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { Separator } from '@/components/ui/separator';
-import { MapPin, MessageCircle, Camera, Video } from 'lucide-react';
+import { MapPin, MessageCircle, Camera } from 'lucide-react';
 import { FooterContact } from '@/components/public/FooterContact';
+import { getBrand } from '@/lib/brand';
 
 const footerLinks = {
   explore: [
@@ -33,10 +34,11 @@ const footerLinks = {
 const socialLinks = [
   { name: 'Facebook', href: '#', icon: MessageCircle },
   { name: 'Instagram', href: '#', icon: Camera },
-  { name: 'YouTube', href: '#', icon: Video },
 ];
 
-export function Footer() {
+export async function Footer() {
+  const brand = await getBrand();
+
   return (
     <footer className="border-t border-border/20 bg-secondary text-secondary-foreground">
       <div className="container py-14 md:py-16">
@@ -45,20 +47,18 @@ export function Footer() {
             <Link href="/" className="group mb-5 flex items-center gap-3">
               <img
                 src="https://res.cloudinary.com/hckgrdeh/image/upload/v1782962660/wangchukstlogo_usxclz.png"
-                alt="Wangchuks Tours & Treks"
+                alt={brand.name}
                 className="h-12 w-auto object-contain"
               />
               <div className="flex flex-col">
-                <span className="font-heading text-lg font-semibold">Wangchuks Tours & Treks</span>
-                <span className="text-xs text-secondary-foreground/60">
-                  Discover the Last Shangri-La
-                </span>
+                <span className="font-heading text-lg font-semibold">{brand.name}</span>
+                <span className="text-xs text-secondary-foreground/60">{brand.tagline}</span>
               </div>
             </Link>
             <p className="mb-6 max-w-md text-sm leading-relaxed text-secondary-foreground/75">
-              Experience authentic Bhutan with Wangchuks Tours & Treks. We craft personalized journeys
-              through the Land of the Thunder Dragon, combining cultural immersion with
-              breathtaking natural beauty.
+              Experience authentic Bhutan with {brand.name}. We craft personalized journeys through
+              the Land of the Thunder Dragon, combining cultural immersion with breathtaking
+              natural beauty.
             </p>
 
             <div className="flex flex-row flex-wrap items-center gap-2">
@@ -124,7 +124,7 @@ export function Footer() {
         <div className="flex flex-col items-center justify-between gap-4 lg:flex-row">
           <div className="flex flex-wrap items-center justify-center gap-6 text-xs md:text-sm">
             <p className="text-secondary-foreground/50">
-              © {new Date().getFullYear()} Wangchuks Tours & Treks. All rights reserved.
+              © {new Date().getFullYear()} {brand.name}. All rights reserved.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4">
               <FooterContact />

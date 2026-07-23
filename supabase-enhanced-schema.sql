@@ -1,4 +1,4 @@
--- Enhanced Database Schema for Wangchuk Tours & Treks
+-- Enhanced Database Schema for Wangchuks Bhutan Tours & Treks
 -- This schema supports full backend functionality with world-class best practices
 
 -- Enable extensions
@@ -734,7 +734,7 @@ CREATE POLICY "Admins can read audit logs"
 
 -- Insert default site settings
 INSERT INTO site_settings (key, value, category, description, is_public) VALUES
-  ('site_name', '"Wangchuk Tours & Treks"', 'general', 'Site name', true),
+  ('site_name', '"Wangchuks Bhutan Tours & Treks"', 'general', 'Site name', true),
   ('site_tagline', '"Discover the Last Shangri-La"', 'general', 'Site tagline', true),
   ('site_description', '"Experience authentic Bhutanese culture, breathtaking Himalayan landscapes, and spiritual journeys that will transform your soul."', 'general', 'Site description for SEO', true),
   ('contact_email', '"info@wangchuktour.com"', 'general', 'Main contact email', true),
@@ -743,7 +743,7 @@ INSERT INTO site_settings (key, value, category, description, is_public) VALUES
   ('social_facebook', '"https://facebook.com/wangchuktour"', 'social', 'Facebook page URL', true),
   ('social_instagram', '"https://instagram.com/wangchuktour"', 'social', 'Instagram profile URL', true),
   ('social_youtube', '"https://youtube.com/@wangchuktour"', 'social', 'YouTube channel URL', true),
-  ('seo_title_template', '"{title} | Wangchuk Tours & Treks"', 'seo', 'Title template for pages', false),
+  ('seo_title_template', '"{title} | Wangchuks Bhutan Tours & Treks"', 'seo', 'Title template for pages', false),
   ('seo_description_template', '"{description}"', 'seo', 'Meta description template', false),
   ('booking_deposit_percentage', '20', 'booking', 'Default deposit percentage', false),
   ('booking_confirmation_email', 'true', 'booking', 'Send confirmation email automatically', false),

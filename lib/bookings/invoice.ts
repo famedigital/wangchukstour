@@ -1,5 +1,9 @@
 import type { BookingPayment } from './payments';
 import { sumPayments } from './payments';
+import {
+  DEFAULT_COMPANY_NAME,
+  DEFAULT_COMPANY_TAGLINE,
+} from '@/lib/brand-defaults';
 
 export type InvoiceBooking = {
   booking_number: string;
@@ -20,13 +24,15 @@ export type InvoiceBooking = {
   payments?: BookingPayment[];
 };
 
-const COMPANY = {
-  name: 'Wangchuks Tours & Treks',
-  tagline: 'Discover the Last Shangri-La',
+const COMPANY_DEFAULTS = {
+  name: DEFAULT_COMPANY_NAME,
+  tagline: DEFAULT_COMPANY_TAGLINE,
   email: 'info@wangchuktour.com',
   phone: '+975 17643416',
   address: 'Thimphu, Bhutan',
 };
+
+export type InvoiceCompany = Partial<typeof COMPANY_DEFAULTS>;
 
 function money(n: number) {
   return `$${Number(n || 0).toLocaleString('en-US', {
@@ -46,7 +52,11 @@ function fmtDate(value?: string | null) {
   });
 }
 
-export function buildInvoiceHtml(booking: InvoiceBooking): string {
+export function buildInvoiceHtml(
+  booking: InvoiceBooking,
+  companyOverrides?: InvoiceCompany
+): string {
+  const COMPANY = { ...COMPANY_DEFAULTS, ...companyOverrides };
   const payments = booking.payments || [];
   const total = Number(booking.total_amount || 0);
   const paid = sumPayments(payments);
@@ -286,8 +296,22 @@ function escapeHtml(value: string) {
     .replace(/"/g, '&quot;');
 }
 
-export function openInvoicePrintWindow(booking: InvoiceBooking) {
-  const html = buildInvoiceHtml(booking);
+export async function openInvoicePrintWindow(booking: InvoiceBooking) {
+  let company: InvoiceCompany | undefined;
+  try {
+    const res = await fetch('/api/brand', { cache: 'no-store' });
+    if (res.ok) {
+      const brand = await res.json();
+      company = {
+        name: brand.name || DEFAULT_COMPANY_NAME,
+        tagline: brand.tagline || DEFAULT_COMPANY_TAGLINE,
+      };
+    }
+  } catch {
+    /* use defaults */
+  }
+
+  const html = buildInvoiceHtml(booking, company);
   // Blob URL avoids blank tabs caused by noopener + document.write on about:blank
   const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
   const url = URL.createObjectURL(blob);

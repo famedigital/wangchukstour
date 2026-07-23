@@ -1,6 +1,42 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { createClient } from '@/utils/supabase/server';
 import { getCurrentUser } from '@/lib/auth/jwt';
+
+async function upsertSetting(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  key: string,
+  value: unknown,
+  category: string,
+  description: string,
+  is_public = true
+) {
+  const { data: existing } = await supabase
+    .from('site_settings')
+    .select('id')
+    .eq('key', key)
+    .maybeSingle();
+
+  if (existing) {
+    await supabase
+      .from('site_settings')
+      .update({
+        value,
+        category,
+        description,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('key', key);
+  } else {
+    await supabase.from('site_settings').insert({
+      key,
+      value,
+      category,
+      description,
+      is_public,
+    });
+  }
+}
 
 // GET /api/admin/settings - Get all settings
 export async function GET(request: NextRequest) {
@@ -134,6 +170,50 @@ export async function POST(request: NextRequest) {
         ip_address: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || null,
         user_agent: request.headers.get('user-agent') || null,
       });
+    }
+
+    // Mirror company name / tagline / socials from SEO blob for public brand API
+    if (key === 'seo_settings' && value && typeof value === 'object') {
+      const seo = value as Record<string, unknown>;
+      if (typeof seo.site_name === 'string' && seo.site_name.trim()) {
+        await upsertSetting(
+          supabase,
+          'site_name',
+          seo.site_name.trim(),
+          'general',
+          'Company / site name shown across the public site and CRM'
+        );
+      }
+      if (typeof seo.site_tagline === 'string' && seo.site_tagline.trim()) {
+        await upsertSetting(
+          supabase,
+          'site_tagline',
+          seo.site_tagline.trim(),
+          'general',
+          'Company tagline'
+        );
+      }
+      if (typeof seo.social_facebook === 'string') {
+        await upsertSetting(
+          supabase,
+          'social_facebook',
+          seo.social_facebook.trim(),
+          'seo',
+          'Public Facebook profile URL'
+        );
+      }
+      if (typeof seo.social_instagram === 'string') {
+        await upsertSetting(
+          supabase,
+          'social_instagram',
+          seo.social_instagram.trim(),
+          'seo',
+          'Public Instagram profile URL'
+        );
+      }
+      revalidatePath('/');
+      revalidatePath('/', 'layout');
+      revalidatePath('/contact');
     }
 
     return NextResponse.json(result);

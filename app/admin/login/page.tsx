@@ -9,9 +9,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { AdminPwaRegister } from '@/components/admin/AdminPwaRegister';
+import { useCompanyBrand } from '@/hooks/use-company-brand';
 
 export default function AdminLoginPage() {
   const router = useRouter();
+  const brand = useCompanyBrand();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -57,12 +59,12 @@ export default function AdminLoginPage() {
           <div className="mb-4 inline-flex items-center justify-center">
             <img
               src="https://res.cloudinary.com/hckgrdeh/image/upload/v1782962660/wangchukstlogo_usxclz.png"
-              alt="Wangchuks Tours & Treks"
+              alt={brand.name}
               className="h-20 w-auto object-contain"
             />
           </div>
           <h1 className="font-heading mb-2 text-3xl font-semibold text-foreground">Admin Login</h1>
-          <p className="text-muted-foreground">Wangchuks Tours & Treks</p>
+          <p className="text-muted-foreground">{brand.name}</p>
         </div>
 
         <Card>

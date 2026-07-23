@@ -2,7 +2,7 @@
   "id": "/admin/login",
   "name": "Wangchuk Admin",
   "short_name": "WT Admin",
-  "description": "Admin login and dashboard for Wangchuk Tours & Treks",
+  "description": "Admin login and dashboard for Wangchuks Bhutan Tours & Treks",
   "start_url": "/admin/login",
   "scope": "/admin/",
   "display": "standalone",

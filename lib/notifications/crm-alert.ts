@@ -1,5 +1,7 @@
 import { createAdminClient } from '@/utils/supabase/admin'
 import { sendEmail } from '@/lib/email/send'
+import { getCompanyName } from '@/lib/brand'
+import { DEFAULT_COMPANY_NAME } from '@/lib/brand-defaults'
 
 export type CrmAlertKind = 'booking' | 'inquiry'
 
@@ -25,10 +27,10 @@ function digitsPhone(phone: string): string {
   return phone.replace(/[^\d]/g, '')
 }
 
-function formatAlertText(payload: CrmAlertPayload, adminUrl: string): string {
+function formatAlertText(payload: CrmAlertPayload, adminUrl: string, companyName: string): string {
   const kindLabel = payload.kind === 'booking' ? 'NEW BOOKING' : 'NEW INQUIRY'
   const lines = [
-    `🏔️ Wangchuks CRM — ${kindLabel}`,
+    `🏔️ ${companyName} — ${kindLabel}`,
     '',
     `Name: ${payload.name}`,
     `Email: ${payload.email}`,
@@ -208,12 +210,14 @@ export async function notifyCrmAlert(payload: CrmAlertPayload): Promise<void> {
 
     const siteUrl =
       process.env.NEXT_PUBLIC_SITE_URL ||
+      process.env.NEXT_PUBLIC_APP_URL ||
       process.env.SITE_URL ||
-      'https://wangchukstour.vercel.app'
+      'https://www.wangchuksbhutantours.bt'
     const adminPath =
       payload.kind === 'booking' ? '/admin/bookings' : '/admin/inquiries'
     const adminUrl = `${siteUrl.replace(/\/$/, '')}${adminPath}`
-    const text = formatAlertText(payload, adminUrl)
+    const companyName = await getCompanyName()
+    const text = formatAlertText(payload, adminUrl, companyName)
 
     const jobs: Promise<unknown>[] = []
 
@@ -276,9 +280,15 @@ export async function sendTestCrmAlert(toWhatsApp?: string, toEmail?: string) {
   }
   const siteUrl =
     process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
     process.env.SITE_URL ||
-    'https://wangchukstour.vercel.app'
-  const text = formatAlertText(payload, `${siteUrl.replace(/\/$/, '')}/admin/inquiries`)
+    'https://www.wangchuksbhutantours.bt'
+  const companyName = await getCompanyName()
+  const text = formatAlertText(
+    payload,
+    `${siteUrl.replace(/\/$/, '')}/admin/inquiries`,
+    companyName
+  )
 
   const results: Record<string, unknown> = {}
   const wa = (toWhatsApp || settings.whatsapp || '').trim()
@@ -293,7 +303,7 @@ export async function sendTestCrmAlert(toWhatsApp?: string, toEmail?: string) {
   if (em) {
     results.email = await sendEmail({
       to: em,
-      subject: 'Test CRM alert — Wangchuks',
+      subject: `Test CRM alert — ${companyName || DEFAULT_COMPANY_NAME}`,
       text,
       html: `<pre>${text}</pre>`,
     })

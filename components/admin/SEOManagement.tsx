@@ -65,7 +65,7 @@ interface SEOSettings {
 
 export function SEOManagement() {
   const [settings, setSettings] = useState<SEOSettings>({
-    site_name: 'Wangchuk Tours & Treks',
+    site_name: 'Wangchuks Bhutan Tours & Treks',
     site_tagline: 'Discover the Last Shangri-La',
     site_description: 'Experience authentic Bhutanese culture, breathtaking Himalayan landscapes, and spiritual journeys that will transform your soul.',
     site_url: 'https://wangchuktour.com',
@@ -80,12 +80,12 @@ export function SEOManagement() {
     social_youtube: 'https://youtube.com/@wangchuktour',
     social_twitter: '',
     social_linkedin: '',
-    seo_title_template: '{title} | Wangchuk Tours & Treks',
+    seo_title_template: '{title} | Wangchuks Bhutan Tours & Treks',
     seo_description_template: '{description}',
     seo_keywords: 'Bhutan tours, trekking in Bhutan, cultural tours Bhutan, Bhutan travel, Himalaya tours, Buddhist festivals, Tiger\'s Nest',
     seo_robots: 'index, follow',
     seo_canonical: 'https://wangchuktour.com',
-    og_title: 'Wangchuk Tours & Treks',
+    og_title: 'Wangchuks Bhutan Tours & Treks',
     og_description: 'Experience authentic Bhutanese culture, breathtaking Himalayan landscapes, and spiritual journeys.',
     og_image: '',
     og_type: 'website',
@@ -120,7 +120,20 @@ export function SEOManagement() {
       const response = await fetch('/api/admin/settings?category=seo');
       const data = await response.json();
       if (data.settings) {
-        setSettings({ ...settings, ...data.settings });
+        const blob =
+          data.settings.seo_settings && typeof data.settings.seo_settings === 'object'
+            ? data.settings.seo_settings
+            : data.settings;
+        setSettings((prev) => ({
+          ...prev,
+          ...blob,
+          site_name: data.settings.site_name || blob.site_name || prev.site_name,
+          site_tagline: data.settings.site_tagline || blob.site_tagline || prev.site_tagline,
+          social_facebook:
+            data.settings.social_facebook || blob.social_facebook || prev.social_facebook,
+          social_instagram:
+            data.settings.social_instagram || blob.social_instagram || prev.social_instagram,
+        }));
       }
     } catch (error) {
       console.error('Failed to fetch settings:', error);
@@ -242,13 +255,16 @@ export function SEOManagement() {
 
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium mb-2">Site Name</label>
+                    <label className="block text-sm font-medium mb-2">Company name</label>
                     <input
                       type="text"
                       value={settings.site_name}
                       onChange={(e) => updateSetting('site_name', e.target.value)}
                       className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500"
                     />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Used across the public site, invoices, emails, and CRM alerts
+                    </p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-2">Site Tagline</label>
@@ -361,7 +377,7 @@ export function SEOManagement() {
                       value={settings.seo_title_template}
                       onChange={(e) => updateSetting('seo_title_template', e.target.value)}
                       className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500"
-                      placeholder="{title} | Wangchuk Tours & Treks"
+                      placeholder="{title} | Wangchuks Bhutan Tours & Treks"
                     />
                     <p className="text-xs text-gray-500 mt-1">Use {'{title}'} for page title</p>
                   </div>
@@ -590,7 +606,7 @@ export function SEOManagement() {
                     onChange={(e) => updateSetting('schema_organization', e.target.value)}
                     rows={6}
                     className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 font-mono text-sm"
-                    placeholder='{"@context": "https://schema.org", "@type": "Organization", "name": "Wangchuk Tours & Treks"}'
+                    placeholder='{"@context": "https://schema.org", "@type": "Organization", "name": "Wangchuks Bhutan Tours & Treks"}'
                   />
                   <p className="text-xs text-gray-500 mt-1">JSON-LD format for organization information</p>
                 </div>

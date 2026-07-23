@@ -16,28 +16,35 @@ import { ArrowRight } from 'lucide-react';
 import type { Metadata } from 'next';
 import { cn } from '@/lib/utils';
 import { buildSocialMetadata, SITE_DESCRIPTION, SITE_NAME } from '@/lib/seo';
+import { getCompanyName } from '@/lib/brand';
+import { DEFAULT_COMPANY_NAME } from '@/lib/brand-defaults';
 
-export const metadata: Metadata = {
-  ...buildSocialMetadata({
-    title: `${SITE_NAME} - Discover the Last Shangri-La`,
-    description: SITE_DESCRIPTION,
-    path: '/',
-  }),
-  keywords: [
-    'Bhutan tour',
-    'Bhutan travel',
-    'Bhutan trekking',
-    'Bhutan festival',
-    'Wangchuks Tours & Treks',
-    'Bhutan adventures',
-  ],
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const company = await getCompanyName();
+  const description = SITE_DESCRIPTION.replace(DEFAULT_COMPANY_NAME, company);
+  return {
+    ...buildSocialMetadata({
+      title: `${company} - Discover the Last Shangri-La`,
+      description,
+      path: '/',
+      siteName: company,
+    }),
+    keywords: [
+      'Bhutan tour',
+      'Bhutan travel',
+      'Bhutan trekking',
+      'Bhutan festival',
+      company,
+      'Bhutan adventures',
+    ],
+  };
+}
 
 const fallbackTestimonials = [
   {
     name: 'Sarah & Michael',
     location: 'Sydney, Australia',
-    text: 'The journey to Tiger\'s Nest was transformative. Wangchuks Tours & Treks made every moment magical with their authentic approach and deep knowledge of Bhutan.',
+    text: `The journey to Tiger's Nest was transformative. ${SITE_NAME} made every moment magical with their authentic approach and deep knowledge of Bhutan.`,
     rating: 5,
     image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop',
   },

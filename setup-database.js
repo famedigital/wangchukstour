@@ -23,7 +23,7 @@ if (!supabaseUrl || !supabaseKey) {
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function setupDatabase() {
-  console.log('🔧 Setting up Wangchuk Tours Database...\n');
+  console.log('🔧 Setting up Wangchuks Bhutan Tours Database...\n');
 
   try {
     // Test connection

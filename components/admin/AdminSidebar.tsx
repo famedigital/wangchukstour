@@ -28,6 +28,7 @@ import {
 import type { AdminUser } from '@/lib/auth/rbac';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useCompanyBrand } from '@/hooks/use-company-brand';
 import { authFetch } from '@/lib/auth/fetch';
 
 interface NavItem {
@@ -119,6 +120,7 @@ export function AdminSidebar({
 }: AdminSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const brand = useCompanyBrand();
   const [expandedItems, setExpandedItems] = useState<string[]>(['settings']);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [badges, setBadges] = useState({ pendingBookings: 0, newInquiries: 0 });
@@ -256,13 +258,13 @@ export function AdminSidebar({
             <div className="flex min-w-0 items-center gap-2.5 px-1">
               <img
                 src="https://res.cloudinary.com/hckgrdeh/image/upload/v1782962660/wangchukstlogo_usxclz.png"
-                alt="Wangchuk Tours"
+                alt={brand.name}
                 className="h-9 w-auto object-contain shrink-0"
               />
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-foreground">Admin</p>
                 <p className="truncate text-xs text-muted-foreground">
-                  {user?.name || 'Wangchuk Tours'}
+                  {user?.name || brand.name}
                 </p>
               </div>
             </div>
