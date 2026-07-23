@@ -21,7 +21,6 @@ interface SEOSettings {
   // Social Media
   social_facebook: string;
   social_instagram: string;
-  social_youtube: string;
   social_twitter: string;
   social_linkedin: string;
 
@@ -77,7 +76,6 @@ export function SEOManagement() {
     contact_timezone: 'Asia/Thimphu',
     social_facebook: 'https://facebook.com/wangchuktour',
     social_instagram: 'https://instagram.com/wangchuktour',
-    social_youtube: 'https://youtube.com/@wangchuktour',
     social_twitter: '',
     social_linkedin: '',
     seo_title_template: '{title} | Wangchuk Tours & Treks',
@@ -120,7 +118,24 @@ export function SEOManagement() {
       const response = await fetch('/api/admin/settings?category=seo');
       const data = await response.json();
       if (data.settings) {
-        setSettings({ ...settings, ...data.settings });
+        // SEO form saves the whole object under key `seo_settings`
+        const blob =
+          data.settings.seo_settings && typeof data.settings.seo_settings === 'object'
+            ? data.settings.seo_settings
+            : data.settings;
+        setSettings((prev) => ({
+          ...prev,
+          ...blob,
+          // Prefer flat mirrored keys when present
+          social_facebook:
+            data.settings.social_facebook ||
+            blob.social_facebook ||
+            prev.social_facebook,
+          social_instagram:
+            data.settings.social_instagram ||
+            blob.social_instagram ||
+            prev.social_instagram,
+        }));
       }
     } catch (error) {
       console.error('Failed to fetch settings:', error);
@@ -454,19 +469,6 @@ export function SEOManagement() {
                       onChange={(e) => updateSetting('social_instagram', e.target.value)}
                       className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500"
                       placeholder="https://instagram.com/wangchuktour"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2 flex items-center gap-2">
-                      <Globe className="w-4 h-4 text-red-600" />
-                      YouTube URL
-                    </label>
-                    <input
-                      type="url"
-                      value={settings.social_youtube}
-                      onChange={(e) => updateSetting('social_youtube', e.target.value)}
-                      className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500"
-                      placeholder="https://youtube.com/@wangchuktour"
                     />
                   </div>
                   <div>

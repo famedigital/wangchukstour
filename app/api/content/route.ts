@@ -3,6 +3,8 @@ import { createClient } from '@/utils/supabase/server';
 import { mergeAboutContent } from '@/lib/content/about';
 import { CONTACT_DEFAULTS, mergeContactContent } from '@/lib/content/contact';
 
+export const dynamic = 'force-dynamic';
+
 // GET /api/content - Public endpoint to fetch active page content
 export async function GET(request: NextRequest) {
   try {
@@ -55,10 +57,17 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    return NextResponse.json({
-      content: normalizePublicContent(pageType, data.content),
-      metadata: data.metadata || {},
-    });
+    return NextResponse.json(
+      {
+        content: normalizePublicContent(pageType, data.content),
+        metadata: data.metadata || {},
+      },
+      {
+        headers: {
+          'Cache-Control': 'no-store, max-age=0',
+        },
+      }
+    );
   } catch (error) {
     console.error('Error fetching public content:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

@@ -1,6 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { createClient } from '@/utils/supabase/server';
 import { getCurrentUser } from '@/lib/auth/jwt';
+
+async function upsertSetting(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  key: string,
+  value: unknown,
+  category: string,
+  description: string
+) {
+  const { data: existing } = await supabase
+    .from('site_settings')
+    .select('id')
+    .eq('key', key)
+    .maybeSingle();
+
+  if (existing) {
+    await supabase
+      .from('site_settings')
+      .update({
+        value,
+        category,
+        description,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('key', key);
+  } else {
+    await supabase.from('site_settings').insert({
+      key,
+      value,
+      category,
+      description,
+      is_public: true,
+    });
+  }
+}
 
 // GET /api/admin/settings - Get all settings
 export async function GET(request: NextRequest) {
@@ -134,6 +169,71 @@ export async function POST(request: NextRequest) {
         ip_address: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || null,
         user_agent: request.headers.get('user-agent') || null,
       });
+    }
+
+    // When SEO blob is saved, also mirror Facebook/Instagram as flat public keys
+    // so the site footer can read them without unwrapping the blob.
+    if (key === 'seo_settings' && value && typeof value === 'object') {
+      const seo = value as Record<string, unknown>;
+      if (typeof seo.social_facebook === 'string') {
+        await upsertSetting(
+          supabase,
+          'social_facebook',
+          seo.social_facebook.trim(),
+          'seo',
+          'Public Facebook profile URL'
+        );
+      }
+      if (typeof seo.social_instagram === 'string') {
+        await upsertSetting(
+          supabase,
+          'social_instagram',
+          seo.social_instagram.trim(),
+          'seo',
+          'Public Instagram profile URL'
+        );
+      }
+
+      // Keep Contact CMS socialMedia in sync (footer primary source)
+      const { data: contactPage } = await supabase
+        .from('content_pages')
+        .select('id, content')
+        .eq('page_type', 'contact')
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (contactPage?.id) {
+        const content =
+          contactPage.content && typeof contactPage.content === 'object'
+            ? { ...(contactPage.content as Record<string, unknown>) }
+            : {};
+        const prevSocial =
+          content.socialMedia && typeof content.socialMedia === 'object'
+            ? { ...(content.socialMedia as Record<string, unknown>) }
+            : {};
+        delete prevSocial.youtube;
+        const socialMedia = {
+          ...prevSocial,
+          ...(typeof seo.social_facebook === 'string'
+            ? { facebook: seo.social_facebook.trim() }
+            : {}),
+          ...(typeof seo.social_instagram === 'string'
+            ? { instagram: seo.social_instagram.trim() }
+            : {}),
+        };
+        await supabase
+          .from('content_pages')
+          .update({
+            content: { ...content, socialMedia },
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', contactPage.id);
+      }
+
+      revalidatePath('/');
+      revalidatePath('/contact');
+      revalidatePath('/', 'layout');
     }
 
     return NextResponse.json(result);
