@@ -17,15 +17,10 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getContactPageContent } from '@/lib/content/get-contact';
-import { phoneToTelHref } from '@/lib/content/contact';
+import { phoneToTelHref, whatsappToHref } from '@/lib/content/contact';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
-
-function whatsappHref(whatsapp?: string) {
-  const digits = String(whatsapp || '').replace(/[^\d]/g, '');
-  return digits ? `https://wa.me/${digits}` : 'https://wa.me/97517643416';
-}
 
 export default async function ContactPage() {
   const content = await getContactPageContent();
@@ -34,6 +29,7 @@ export default async function ContactPage() {
   const officeHoursLabel = hours?.weekdays
     ? `Mon–Fri, ${hours.weekdays}`
     : 'Mon–Fri, 9:00 AM – 6:00 PM';
+  const waHref = whatsappToHref(info.whatsapp);
 
   const contactItems = [
     {
@@ -213,7 +209,7 @@ export default async function ContactPage() {
                 <ArrowRight className="size-4" />
               </Link>
               <a
-                href={whatsappHref(info.whatsapp)}
+                href={waHref}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={cn(buttonVariants({ variant: 'outline', size: 'lg' }))}

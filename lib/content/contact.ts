@@ -64,6 +64,9 @@ export function mergeContactContent(raw: unknown): ContactContent {
       address:
         String(info.address || CONTACT_INFO_DEFAULTS.address).trim() ||
         CONTACT_INFO_DEFAULTS.address,
+      whatsapp:
+        String(info.whatsapp || CONTACT_INFO_DEFAULTS.whatsapp || '').trim() ||
+        CONTACT_INFO_DEFAULTS.whatsapp,
     },
   }
 }
@@ -72,4 +75,31 @@ export function mergeContactContent(raw: unknown): ContactContent {
 export function phoneToTelHref(phone: string): string {
   const cleaned = phone.replace(/[^\d+]/g, '')
   return cleaned ? `tel:${cleaned}` : 'tel:'
+}
+
+/**
+ * First WhatsApp number from CRM Contact Settings.
+ * Supports values like "+97517643416 / +97517645738".
+ */
+export function parsePrimaryWhatsApp(whatsapp?: string | null): string {
+  const raw = String(whatsapp || '').trim()
+  if (!raw) return ''
+
+  const parts = raw.split(/[/|,;]+|\bor\b/i)
+  for (const part of parts) {
+    const digits = part.replace(/[^\d]/g, '')
+    // E.164-ish: country code + local, typically 8–15 digits
+    if (digits.length >= 8 && digits.length <= 15) return digits
+  }
+
+  const fallback = raw.replace(/[^\d]/g, '')
+  return fallback.length >= 8 && fallback.length <= 15 ? fallback : ''
+}
+
+/** Build https://wa.me/... from CRM WhatsApp field. */
+export function whatsappToHref(whatsapp?: string | null): string {
+  const digits =
+    parsePrimaryWhatsApp(whatsapp) ||
+    parsePrimaryWhatsApp(CONTACT_INFO_DEFAULTS.whatsapp)
+  return `https://wa.me/${digits}`
 }

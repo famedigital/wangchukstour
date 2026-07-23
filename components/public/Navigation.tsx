@@ -7,6 +7,7 @@ import { Home, Compass, Users, Book, MessageCircle, ChevronDown } from 'lucide-r
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useCompanyBrand } from '@/hooks/use-company-brand';
+import { useWhatsAppHref } from '@/hooks/use-whatsapp-link';
 
 const baseNavLinks = [
   { name: 'Home', href: '/', icon: Home },
@@ -20,6 +21,7 @@ type TourCategory = { name: string; slug: string };
 export function Navigation({ forceSolid = false }: { forceSolid?: boolean }) {
   const pathname = usePathname();
   const brand = useCompanyBrand();
+  const whatsappHref = useWhatsAppHref();
   const [scrolled, setScrolled] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [tourCategories, setTourCategories] = useState<TourCategory[]>([]);
@@ -231,7 +233,7 @@ export function Navigation({ forceSolid = false }: { forceSolid?: boolean }) {
             </span>
           </Link>
           <a
-            href="https://wa.me/97517643416"
+            href={whatsappHref}
             target="_blank"
             rel="noopener noreferrer"
             className="flex min-w-0 flex-1 flex-col items-center justify-center px-1 py-2.5"
