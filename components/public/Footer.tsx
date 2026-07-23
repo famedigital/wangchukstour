@@ -1,9 +1,11 @@
+'use client';
+
 import Link from 'next/link';
 import { Separator } from '@/components/ui/separator';
 import { MapPin } from 'lucide-react';
 import { FooterContact } from '@/components/public/FooterContact';
 import { FooterSocial } from '@/components/public/FooterSocial';
-import { getBrand } from '@/lib/brand';
+import { useCompanyBrand } from '@/hooks/use-company-brand';
 
 const footerLinks = {
   explore: [
@@ -32,8 +34,8 @@ const footerLinks = {
   ],
 };
 
-export async function Footer() {
-  const brand = await getBrand();
+export function Footer() {
+  const brand = useCompanyBrand();
 
   return (
     <footer className="border-t border-border/20 bg-secondary text-secondary-foreground">

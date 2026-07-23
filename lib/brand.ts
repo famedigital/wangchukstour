@@ -1,4 +1,4 @@
-import { createClient } from '@/utils/supabase/server'
+import { createAdminClient } from '@/utils/supabase/admin'
 import {
   DEFAULT_COMPANY_NAME,
   DEFAULT_COMPANY_TAGLINE,
@@ -31,12 +31,15 @@ function nameFromSeoBlob(raw: unknown): string | null {
 
 /**
  * Company / brand name from CRM:
- * Admin → SEO & Site Settings → Site Name
+ * Admin → SEO & Site Settings → Company name
  * (seo_settings.site_name, mirrored to flat site_name)
+ *
+ * Uses service-role admin client (no next/headers) so this is safe from
+ * App Route / Server Component code without pulling cookies into clients.
  */
 export async function getCompanyName(): Promise<string> {
   try {
-    const supabase = await createClient()
+    const supabase = createAdminClient()
     const { data } = await supabase
       .from('site_settings')
       .select('key, value')
@@ -57,7 +60,7 @@ export async function getCompanyName(): Promise<string> {
 
 export async function getCompanyTagline(): Promise<string> {
   try {
-    const supabase = await createClient()
+    const supabase = createAdminClient()
     const { data } = await supabase
       .from('site_settings')
       .select('key, value')
