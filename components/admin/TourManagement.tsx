@@ -10,6 +10,7 @@ import {
   Clock,
   TrendingUp,
   MapPin,
+  Users,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -31,6 +32,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { TourForm } from '@/components/admin/TourForm';
+import { TourClientsPanel } from '@/components/admin/TourClientsPanel';
 import { formatTourPrice, isTourPriceVisible } from '@/lib/tour-options';
 import { authFetch } from '@/lib/auth/fetch';
 
@@ -68,6 +70,7 @@ export function TourManagement() {
   const [filterStatus, setFilterStatus] = useState('all');
   const [deleteTarget, setDeleteTarget] = useState<'single' | 'bulk' | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [clientsTour, setClientsTour] = useState<Tour | null>(null);
   const [categories, setCategories] = useState<TourCategory[]>([
     { slug: 'international', name: 'International Tour' },
     { slug: 'regional', name: 'Regional Tour' },
@@ -377,6 +380,15 @@ export function TourManagement() {
                   <Button
                     variant="ghost"
                     size="sm"
+                    className="flex-1"
+                    onClick={() => setClientsTour(tour)}
+                  >
+                    <Users className="size-4" />
+                    Clients
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     className="text-destructive hover:bg-destructive/10 hover:text-destructive"
                     onClick={() => {
                       setDeleteId(tour.id);
@@ -416,6 +428,17 @@ export function TourManagement() {
               onCancel={() => setShowCreateModal(false)}
             />
           </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!clientsTour} onOpenChange={(open) => !open && setClientsTour(null)}>
+        <DialogContent className="max-h-[90vh] w-[calc(100vw-1rem)] max-w-3xl overflow-y-auto sm:w-full">
+          <DialogHeader>
+            <DialogTitle>Tour clients</DialogTitle>
+          </DialogHeader>
+          {clientsTour ? (
+            <TourClientsPanel tourId={clientsTour.id} tourTitle={clientsTour.title} />
+          ) : null}
         </DialogContent>
       </Dialog>
 

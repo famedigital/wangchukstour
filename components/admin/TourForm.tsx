@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Upload, Plus, Trash2, ChevronRight, Calendar, MapPin, Users, DollarSign, Clock, TrendingUp, Star, Loader2, Eye, Check } from 'lucide-react';
+import { X, Upload, Plus, Trash2, ChevronRight, Calendar, MapPin, Users, DollarSign, Clock, TrendingUp, Star, Loader2, Eye, Check, Link2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -82,6 +82,7 @@ function StatusSwitches({
         <Label htmlFor="tour-active" className="cursor-pointer font-normal">
           Active
         </Label>
+        <span className="hidden text-xs text-muted-foreground sm:inline">(in admin)</span>
       </div>
       <div className="flex items-center gap-2">
         <Switch
@@ -100,7 +101,7 @@ function StatusSwitches({
           onCheckedChange={(v) => updateField('is_published', v)}
         />
         <Label htmlFor="tour-published" className="cursor-pointer font-normal">
-          Published
+          Published to public
         </Label>
       </div>
       <div className="flex items-center gap-2">
@@ -174,6 +175,7 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
   });
 
   const [loading, setLoading] = useState(false);
+  const [sharingNaked, setSharingNaked] = useState(false);
   const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
   const [mediaPickerTarget, setMediaPickerTarget] = useState<{
     field: string;
@@ -428,8 +430,45 @@ export function TourForm({ tour, onSubmit, onCancel }: TourFormProps) {
 
       {/* Main Form Content */}
       <div className="min-w-0 flex-1">
-        <div className="mb-4">
+        <div className="mb-4 space-y-3">
           <StatusSwitches formData={formData} updateField={updateField} />
+          {tour?.id ? (
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={sharingNaked}
+                onClick={async () => {
+                  setSharingNaked(true);
+                  try {
+                    const res = await fetch(`/api/admin/tours/${tour.id}/naked-share`, {
+                      method: 'POST',
+                    });
+                    const json = await res.json();
+                    if (!res.ok) throw new Error(json.error || 'Failed to create share link');
+                    const absolute = `${window.location.origin}${json.path || json.url}`;
+                    await navigator.clipboard.writeText(absolute);
+                    toast.success('Naked itinerary link copied (no rates)');
+                  } catch (err) {
+                    toast.error(err instanceof Error ? err.message : 'Share link failed');
+                  } finally {
+                    setSharingNaked(false);
+                  }
+                }}
+              >
+                {sharingNaked ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Link2 className="h-4 w-4" />
+                )}
+                Copy naked itinerary link
+              </Button>
+              <p className="text-xs text-muted-foreground">
+                Share day-by-day plan with a client — prices hidden. Save the tour first if itinerary changed.
+              </p>
+            </div>
+          ) : null}
         </div>
         <Card className="mb-6">
           <div className="border-b px-4 py-4">

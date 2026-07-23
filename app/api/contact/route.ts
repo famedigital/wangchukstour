@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/utils/supabase/admin';
 import { z } from 'zod';
+import { upsertMasterClient } from '@/lib/clients/upsert';
+import { notifyCrmAlert } from '@/lib/notifications/crm-alert';
 
 const contactSchema = z.object({
   name: z.string().min(1),
@@ -27,7 +29,14 @@ export async function POST(request: NextRequest) {
 
     const groupSizeNum = groupSize ? parseInt(groupSize, 10) : null;
 
-    const { error } = await supabase.from('inquiries').insert({
+    const master = await upsertMasterClient({
+      name,
+      email,
+      phone: phone || null,
+      source: 'inquiry',
+    });
+
+    const inquiryInsert: Record<string, unknown> = {
       name,
       email: email.toLowerCase(),
       phone: phone || null,
@@ -38,9 +47,23 @@ export async function POST(request: NextRequest) {
       inquiry_type: 'contact_form',
       subject: tourTitle ? `Inquiry: ${tourTitle}` : 'Website contact form',
       tour_interest: tourTitle || tourSlug || null,
-    });
+    };
+    if (master?.id) inquiryInsert.client_id = master.id;
+
+    const { error } = await supabase.from('inquiries').insert(inquiryInsert);
 
     if (error) throw error;
+
+    void notifyCrmAlert({
+      kind: 'inquiry',
+      name,
+      email,
+      phone: phone || null,
+      message,
+      tourTitle: tourTitle || tourSlug || null,
+      travelDates: travelDates || null,
+      groupSize: groupSize || null,
+    });
 
     return NextResponse.json({ message: 'Inquiry submitted successfully' });
   } catch (error) {

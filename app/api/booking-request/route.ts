@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/utils/supabase/admin';
 import { z } from 'zod';
+import { upsertMasterClient } from '@/lib/clients/upsert';
+import { notifyCrmAlert } from '@/lib/notifications/crm-alert';
 
 const schema = z.object({
   name: z.string().min(1),
@@ -27,47 +29,64 @@ export async function POST(request: NextRequest) {
     let tourId: string | null = null;
     let resolvedTitle = tourTitle || null;
     let tourPrice = 0;
+    let tourItinerary: unknown = null;
 
     if (tourSlug) {
       const { data: tour } = await supabase
         .from('tours')
-        .select('id, title, price')
+        .select('id, title, price, itinerary')
         .eq('slug', tourSlug)
+        .eq('is_active', true)
+        .eq('is_published', true)
         .maybeSingle();
       if (tour) {
         tourId = tour.id;
         resolvedTitle = tour.title;
         tourPrice = Number(tour.price) || 0;
+        tourItinerary = tour.itinerary;
       }
     }
+
+    const master = await upsertMasterClient({
+      name,
+      email,
+      phone: phone || null,
+      source: 'booking',
+    });
 
     const adults = groupSize ? parseInt(groupSize, 10) : 1;
     const travelerCount = Number.isFinite(adults) && adults > 0 ? adults : 1;
     const totalAmount =
       tourPrice > 0 ? Math.round(tourPrice * travelerCount * 100) / 100 : null;
 
+    const bookingInsert: Record<string, unknown> = {
+      tour_id: tourId,
+      tour_title: resolvedTitle,
+      client_id: master?.id || null,
+      client_name: name,
+      client_email: email.toLowerCase(),
+      client_phone: phone || null,
+      number_of_adults: travelerCount,
+      number_of_children: 0,
+      travel_date: null,
+      preferred_dates: travelDates ? { note: travelDates } : null,
+      custom_requests: message,
+      total_amount: totalAmount,
+      status: 'pending',
+      payment_status: 'pending',
+    };
+
+    if (Array.isArray(tourItinerary) && tourItinerary.length > 0) {
+      bookingInsert.itinerary_override = tourItinerary;
+    }
+
     const { data: booking, error: bookingError } = await supabase
       .from('bookings')
-      .insert({
-        tour_id: tourId,
-        tour_title: resolvedTitle,
-        client_name: name,
-        client_email: email.toLowerCase(),
-        client_phone: phone || null,
-        number_of_adults: travelerCount,
-        number_of_children: 0,
-        travel_date: null,
-        preferred_dates: travelDates ? { note: travelDates } : null,
-        custom_requests: message,
-        total_amount: totalAmount,
-        status: 'pending',
-        payment_status: 'pending',
-      })
-      .select('id, booking_number')
+      .insert(bookingInsert)
+      .select('id, booking_number, client_id')
       .single();
 
-    // Always log as inquiry too for the inquiries inbox
-    await supabase.from('inquiries').insert({
+    const inquiryInsert: Record<string, unknown> = {
       name,
       email: email.toLowerCase(),
       phone: phone || null,
@@ -78,20 +97,37 @@ export async function POST(request: NextRequest) {
       inquiry_type: 'booking_request',
       subject: resolvedTitle ? `Booking: ${resolvedTitle}` : 'Booking request',
       tour_interest: resolvedTitle || tourSlug || null,
+    };
+    if (master?.id) inquiryInsert.client_id = master.id;
+
+    await supabase.from('inquiries').insert(inquiryInsert);
+
+    // Phone/email alert — do not block the customer response
+    void notifyCrmAlert({
+      kind: 'booking',
+      name,
+      email,
+      phone: phone || null,
+      message,
+      tourTitle: resolvedTitle,
+      travelDates: travelDates || null,
+      groupSize: travelerCount,
+      bookingNumber: booking?.booking_number || null,
     });
 
     if (bookingError) {
       console.error('Booking insert error (inquiry still saved):', bookingError);
-      // Inquiry saved — still success for the user
       return NextResponse.json({
         message: 'Request received. Our team will follow up shortly.',
         bookingCreated: false,
+        clientId: master?.id || null,
       });
     }
 
     return NextResponse.json({
       message: 'Booking request submitted',
       booking,
+      clientId: master?.id || booking?.client_id || null,
       bookingCreated: true,
     });
   } catch (error) {
