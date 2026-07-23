@@ -39,7 +39,7 @@ export const ABOUT_DEFAULTS: AboutContent = {
   story: {
     title: 'Our Story',
     content:
-      'Wangchuk Tours & Treks is your gateway to experiencing the authentic beauty of Bhutan — temples, trails, and communities, guided by people who call this place home.',
+      'Wangchuks Bhutan Tours & Treks is your gateway to experiencing the authentic beauty of Bhutan — temples, trails, and communities, guided by people who call this place home.',
     founded: '2010',
   },
   values: [

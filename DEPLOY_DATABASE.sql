@@ -473,7 +473,7 @@ ON CONFLICT (email) DO NOTHING;
 
 -- Insert default site settings
 INSERT INTO site_settings (key, value, category, description, is_public) VALUES
-  ('site_name', '"Wangchuk Tours & Treks"', 'general', 'Site name', true),
+  ('site_name', '"Wangchuks Bhutan Tours & Treks"', 'general', 'Site name', true),
   ('site_tagline', '"Discover the Last Shangri-La"', 'general', 'Site tagline', true),
   ('site_description', '"Experience authentic Bhutanese culture, breathtaking Himalayan landscapes, and spiritual journeys that will transform your soul."', 'general', 'Site description for SEO', true),
   ('contact_email', '"info@wangchuktour.com"', 'general', 'Main contact email', true),

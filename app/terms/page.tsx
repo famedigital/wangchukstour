@@ -2,8 +2,11 @@ import { Navigation } from '@/components/public/Navigation';
 import { Footer } from '@/components/public/Footer';
 import { MagneticButton } from '@/components/ui/magnetic-button';
 import Link from 'next/link';
+import { getCompanyName } from '@/lib/brand';
 
-export default function TermsPage() {
+export default async function TermsPage() {
+  const company = await getCompanyName();
+
   return (
     <div className="flex min-h-screen flex-col bg-white">
       <Navigation />
@@ -33,7 +36,7 @@ export default function TermsPage() {
                   <div>
                     <h2 className="font-heading text-2xl font-bold mb-4 text-gray-900">Introduction</h2>
                     <p className="text-gray-700 leading-relaxed">
-                      Welcome to Wangchuks Tours & Treks. By using our services and booking our tours,
+                      Welcome to {company}. By using our services and booking our tours,
                       you agree to these Terms & Conditions. Please read them carefully before making a booking.
                     </p>
                   </div>
@@ -75,7 +78,7 @@ export default function TermsPage() {
                   <div>
                     <h2 className="font-heading text-2xl font-bold mb-4 text-gray-900">Limitation of Liability</h2>
                     <p className="text-gray-700 leading-relaxed">
-                      Wangchuks Tours & Treks acts as an intermediary for travel services. We cannot be held
+                      {company} acts as an intermediary for travel services. We cannot be held
                       responsible for circumstances beyond our control including weather conditions, political
                       unrest, or airline disruptions. We recommend comprehensive travel insurance.
                     </p>

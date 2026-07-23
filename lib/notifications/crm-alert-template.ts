@@ -1,6 +1,8 @@
 /** Client-safe CRM alert template helpers (no server imports). */
 
-export const DEFAULT_CRM_ALERT_TEMPLATE = `🏔️ Wangchuks CRM — {{kind}}
+import { DEFAULT_COMPANY_NAME } from '@/lib/brand-defaults'
+
+export const DEFAULT_CRM_ALERT_TEMPLATE = `🏔️ {{company}} — {{kind}}
 
 Name: {{name}}
 Email: {{email}}
@@ -14,6 +16,7 @@ Message: {{message}}
 Open CRM: {{admin_url}}`
 
 export const CRM_ALERT_PLACEHOLDERS = [
+  '{{company}}',
   '{{kind}}',
   '{{name}}',
   '{{email}}',
@@ -42,10 +45,12 @@ export type CrmAlertTemplatePayload = {
 function buildVars(
   payload: CrmAlertTemplatePayload,
   adminUrl: string,
-  siteUrl: string
+  siteUrl: string,
+  companyName: string
 ): Record<string, string> {
   const kindLabel = payload.kind === 'booking' ? 'NEW BOOKING' : 'NEW INQUIRY'
   return {
+    company: companyName || DEFAULT_COMPANY_NAME,
     kind: kindLabel,
     name: payload.name || '',
     email: payload.email || '',
@@ -71,10 +76,16 @@ export function formatAlertText(
   payload: CrmAlertTemplatePayload,
   adminUrl: string,
   template?: string | null,
-  siteUrl?: string
+  siteUrl?: string,
+  companyName?: string
 ): string {
   const base = (siteUrl || '').replace(/\/$/, '')
-  const vars = buildVars(payload, adminUrl, base)
+  const vars = buildVars(
+    payload,
+    adminUrl,
+    base,
+    companyName || DEFAULT_COMPANY_NAME
+  )
   const raw = (template && template.trim()) || DEFAULT_CRM_ALERT_TEMPLATE
 
   const rendered = raw.replace(/\{\{\s*([a-z_]+)\s*\}\}/gi, (_m, key: string) => {

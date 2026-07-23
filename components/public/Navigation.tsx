@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { Home, Compass, Users, Book, MessageCircle, ChevronDown } from 'lucide-react';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useCompanyBrand } from '@/hooks/use-company-brand';
 
 const baseNavLinks = [
   { name: 'Home', href: '/', icon: Home },
@@ -18,6 +19,7 @@ type TourCategory = { name: string; slug: string };
 
 export function Navigation({ forceSolid = false }: { forceSolid?: boolean }) {
   const pathname = usePathname();
+  const brand = useCompanyBrand();
   const [scrolled, setScrolled] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [tourCategories, setTourCategories] = useState<TourCategory[]>([]);
@@ -73,7 +75,7 @@ export function Navigation({ forceSolid = false }: { forceSolid?: boolean }) {
           <Link href="/" className="group flex items-center gap-3">
             <img
               src="https://res.cloudinary.com/hckgrdeh/image/upload/v1782962660/wangchukstlogo_usxclz.png"
-              alt="Wangchuks Tours & Treks"
+              alt={brand.name}
               className="h-11 w-auto object-contain transition-opacity duration-300 group-hover:opacity-90 xl:h-12"
             />
           </Link>

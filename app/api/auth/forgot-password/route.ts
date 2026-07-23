@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
         .eq('id', user.id);
 
       const resetUrl = `${baseUrl}/admin/reset-password?token=${token}`;
-      const mail = passwordResetEmail({
+      const mail = await passwordResetEmail({
         name: user.name || 'Admin',
         resetUrl,
       });

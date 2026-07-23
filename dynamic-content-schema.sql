@@ -66,7 +66,7 @@ INSERT INTO content_pages (page_type, content, metadata) VALUES (
     },
     "story": {
       "title": "Our Story",
-      "content": "Wangchuk Tours & Treks is a Bhutanese-owned and operated tour company dedicated to showing travelers the authentic beauty of the Land of the Thunder Dragon. Founded with a passion for sharing our rich cultural heritage and pristine natural environment, we specialize in creating personalized journeys that go beyond typical tourist trails.",
+      "content": "Wangchuks Bhutan Tours & Treks is a Bhutanese-owned and operated tour company dedicated to showing travelers the authentic beauty of the Land of the Thunder Dragon. Founded with a passion for sharing our rich cultural heritage and pristine natural environment, we specialize in creating personalized journeys that go beyond typical tourist trails.",
       "founded": "2010"
     },
     "values": [
@@ -97,7 +97,7 @@ INSERT INTO content_pages (page_type, content, metadata) VALUES (
       {
         "year": "2010",
         "title": "Company Founded",
-        "description": "Wangchuk Tours & Treks was established with a vision to share Bhutan''s beauty with the world."
+        "description": "Wangchuks Bhutan Tours & Treks was established with a vision to share Bhutan''s beauty with the world."
       },
       {
         "year": "2015",
@@ -125,7 +125,7 @@ INSERT INTO content_pages (page_type, content, metadata) VALUES (
       }
     ]
   }',
-  '{"seoTitle": "About Us - Wangchuk Tours & Treks", "seoDescription": "Learn about our story, values, and the team behind authentic Bhutanese travel experiences."}'
+  '{"seoTitle": "About Us - Wangchuks Bhutan Tours & Treks", "seoDescription": "Learn about our story, values, and the team behind authentic Bhutanese travel experiences."}'
 ) ON CONFLICT (page_type) DO NOTHING;
 
 -- 5. INITIAL FAQ CONTENT
@@ -175,11 +175,11 @@ INSERT INTO content_pages (page_type, content, metadata) VALUES (
     },
     "autoReply": {
       "enabled": true,
-      "subject": "Thank you for contacting Wangchuk Tours!",
+      "subject": "Thank you for contacting Wangchuks Bhutan Tours!",
       "message": "We have received your inquiry and will respond within 24 hours. In the meantime, explore our tour packages for inspiration!"
     }
   }',
-  '{"seoTitle": "Contact Us - Wangchuk Tours & Treks", "seoDescription": "Get in touch with our team for personalized Bhutan travel planning and inquiries."}'
+  '{"seoTitle": "Contact Us - Wangchuks Bhutan Tours & Treks", "seoDescription": "Get in touch with our team for personalized Bhutan travel planning and inquiries."}'
 ) ON CONFLICT (page_type) DO NOTHING;
 
 -- 7. CREATE INDEXES FOR PERFORMANCE

@@ -8,10 +8,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { useCompanyBrand } from '@/hooks/use-company-brand';
 
 type Mode = 'password' | 'username';
 
 export default function ForgotPasswordPage() {
+  const brand = useCompanyBrand();
   const [mode, setMode] = useState<Mode>('password');
   const [email, setEmail] = useState('');
   const [identifier, setIdentifier] = useState('');
@@ -70,7 +72,7 @@ export default function ForgotPasswordPage() {
         <div className="mb-8 text-center">
           <img
             src="https://res.cloudinary.com/hckgrdeh/image/upload/v1782962660/wangchukstlogo_usxclz.png"
-            alt="Wangchuks Tours & Treks"
+            alt={brand.name}
             className="mx-auto mb-4 h-16 w-auto object-contain"
           />
           <h1 className="font-heading text-2xl font-semibold text-foreground">Account recovery</h1>

@@ -93,7 +93,7 @@ const defaultContent: ContactContent = {
   },
   autoReply: {
     enabled: true,
-    subject: 'Thank you for contacting Wangchuk Tours!',
+    subject: 'Thank you for contacting Wangchuks Bhutan Tours!',
     message: 'We have received your inquiry and will respond within 24 hours. In the meantime, explore our tour packages for inspiration!'
   }
 };
@@ -134,7 +134,7 @@ export function ContactSettingsForm() {
           pageType: 'contact',
           content,
           metadata: {
-            seoTitle: 'Contact Us - Wangchuk Tours & Treks',
+            seoTitle: 'Contact Us - Wangchuks Bhutan Tours & Treks',
             seoDescription: 'Get in touch with our team for personalized Bhutan travel planning and inquiries.'
           }
         })

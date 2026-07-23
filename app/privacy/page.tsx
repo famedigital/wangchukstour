@@ -2,8 +2,11 @@ import { Navigation } from '@/components/public/Navigation';
 import { Footer } from '@/components/public/Footer';
 import { MagneticButton } from '@/components/ui/magnetic-button';
 import Link from 'next/link';
+import { getCompanyName } from '@/lib/brand';
 
-export default function PrivacyPage() {
+export default async function PrivacyPage() {
+  const company = await getCompanyName();
+
   return (
     <div className="flex min-h-screen flex-col bg-white">
       <Navigation />
@@ -33,7 +36,7 @@ export default function PrivacyPage() {
                   <div>
                     <h2 className="font-heading text-2xl font-bold mb-4 text-foreground">Information We Collect</h2>
                     <p className="text-gray-700 leading-relaxed">
-                      Wangchuks Tours & Treks collects personal information to provide and improve our services.
+                      {company} collects personal information to provide and improve our services.
                       This includes:
                     </p>
                     <ul className="mt-3 space-y-2 text-foreground/80">

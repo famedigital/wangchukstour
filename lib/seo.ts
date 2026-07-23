@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
+import { DEFAULT_COMPANY_NAME } from '@/lib/brand-defaults';
 
-export const SITE_NAME = 'Wangchuks Tours & Treks';
+/** Fallback brand — prefer getCompanyName() from CRM at runtime */
+export const SITE_NAME = DEFAULT_COMPANY_NAME;
 export const SITE_DESCRIPTION =
-  'Experience authentic Bhutan with Wangchuks Tours & Treks. Cultural journeys, trekking adventures, and festival tours in the Land of the Thunder Dragon.';
+  `Experience authentic Bhutan with ${DEFAULT_COMPANY_NAME}. Cultural journeys, trekking adventures, and festival tours in the Land of the Thunder Dragon.`;
 
 /** Canonical site origin used for absolute OG/Twitter image URLs */
 export function getSiteUrl(): string {
@@ -16,7 +18,7 @@ export function getSiteUrl(): string {
     return withProtocol.replace(/\/$/, '');
   }
 
-  return 'https://wangchuk-tour.vercel.app';
+  return 'https://www.wangchuksbhutantours.bt';
 }
 
 /** Default social share image (1200×630) — scenic Bhutan shot */
@@ -40,7 +42,6 @@ export function toOgImageUrl(url?: string | null): string {
 
   if (cloudinaryMatch) {
     const [, prefix, rest] = cloudinaryMatch;
-    // Drop any existing transforms; keep version folder + public id
     const pathOnly = rest.replace(/^((?:[^/]+,)+\w+\/)*/, '');
     return `${prefix}c_fill,w_1200,h_630,g_auto,f_jpg,q_auto/${pathOnly}`;
   }
@@ -54,12 +55,14 @@ export function buildSocialMetadata({
   path = '/',
   image,
   type = 'website',
+  siteName = SITE_NAME,
 }: {
   title: string;
   description: string;
   path?: string;
   image?: string | null;
   type?: 'website' | 'article';
+  siteName?: string;
 }): Metadata {
   const siteUrl = getSiteUrl();
   const ogImage = toOgImageUrl(image);
@@ -72,7 +75,7 @@ export function buildSocialMetadata({
       title,
       description,
       url,
-      siteName: SITE_NAME,
+      siteName,
       locale: 'en_US',
       type,
       images: [

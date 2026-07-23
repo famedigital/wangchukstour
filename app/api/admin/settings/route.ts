@@ -8,7 +8,8 @@ async function upsertSetting(
   key: string,
   value: unknown,
   category: string,
-  description: string
+  description: string,
+  is_public = true
 ) {
   const { data: existing } = await supabase
     .from('site_settings')
@@ -32,7 +33,7 @@ async function upsertSetting(
       value,
       category,
       description,
-      is_public: true,
+      is_public,
     });
   }
 }
@@ -171,10 +172,27 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // When SEO blob is saved, also mirror Facebook/Instagram as flat public keys
-    // so the site footer can read them without unwrapping the blob.
+    // Mirror company name / tagline / socials from SEO blob for public brand + footer
     if (key === 'seo_settings' && value && typeof value === 'object') {
       const seo = value as Record<string, unknown>;
+      if (typeof seo.site_name === 'string' && seo.site_name.trim()) {
+        await upsertSetting(
+          supabase,
+          'site_name',
+          seo.site_name.trim(),
+          'general',
+          'Company / site name shown across the public site and CRM'
+        );
+      }
+      if (typeof seo.site_tagline === 'string' && seo.site_tagline.trim()) {
+        await upsertSetting(
+          supabase,
+          'site_tagline',
+          seo.site_tagline.trim(),
+          'general',
+          'Company tagline'
+        );
+      }
       if (typeof seo.social_facebook === 'string') {
         await upsertSetting(
           supabase,

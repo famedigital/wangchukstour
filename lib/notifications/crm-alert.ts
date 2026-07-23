@@ -1,5 +1,7 @@
 import { createAdminClient } from '@/utils/supabase/admin'
 import { sendEmail } from '@/lib/email/send'
+import { getCompanyName } from '@/lib/brand'
+import { DEFAULT_COMPANY_NAME } from '@/lib/brand-defaults'
 import {
   DEFAULT_CRM_ALERT_TEMPLATE,
   formatAlertText,
@@ -209,7 +211,14 @@ export async function notifyCrmAlert(payload: CrmAlertPayload): Promise<void> {
     const adminPath =
       payload.kind === 'booking' ? '/admin/bookings' : '/admin/inquiries'
     const adminUrl = `${siteUrl}${adminPath}`
-    const text = formatAlertText(payload, adminUrl, settings.messageTemplate, siteUrl)
+    const companyName = await getCompanyName()
+    const text = formatAlertText(
+      payload,
+      adminUrl,
+      settings.messageTemplate,
+      siteUrl,
+      companyName
+    )
 
     const jobs: Promise<unknown>[] = []
 
@@ -271,11 +280,13 @@ export async function sendTestCrmAlert(toWhatsApp?: string, toEmail?: string) {
     tourTitle: 'Test Tour',
   }
   const siteUrl = getSiteUrl()
+  const companyName = await getCompanyName()
   const text = formatAlertText(
     payload,
     `${siteUrl}/admin/inquiries`,
     settings.messageTemplate,
-    siteUrl
+    siteUrl,
+    companyName
   )
 
   const results: Record<string, unknown> = {}
@@ -291,7 +302,7 @@ export async function sendTestCrmAlert(toWhatsApp?: string, toEmail?: string) {
   if (em) {
     results.email = await sendEmail({
       to: em,
-      subject: 'Test CRM alert — Wangchuks',
+      subject: `Test CRM alert — ${companyName || DEFAULT_COMPANY_NAME}`,
       text,
       html: `<pre>${text}</pre>`,
     })

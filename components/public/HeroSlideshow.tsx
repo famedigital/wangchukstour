@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useCompanyBrand } from '@/hooks/use-company-brand';
 
 interface HeroSlide {
   id: string;
@@ -35,11 +36,13 @@ function HeroContent({
   tagline,
   ctaText,
   ctaLink,
+  brandName,
 }: {
   headline: string;
   tagline: string;
   ctaText: string;
   ctaLink: string;
+  brandName: string;
 }) {
   return (
     <div className="max-w-2xl space-y-6">
@@ -50,7 +53,7 @@ function HeroContent({
         className="space-y-2"
       >
         <p className="text-sm font-medium uppercase tracking-[0.2em] text-white/70">
-          Wangchuks Tours & Treks
+          {brandName}
         </p>
         <h1 className="font-accent text-4xl font-medium tracking-tight text-white sm:text-5xl md:text-6xl lg:text-[3.5rem] lg:leading-[1.1]">
           {headline}
@@ -103,6 +106,7 @@ export function HeroSlideshow({
   autoPlay = true,
   interval = 6000,
 }: HeroSlideshowProps) {
+  const brand = useCompanyBrand();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [hasMounted, setHasMounted] = useState(false);
 
@@ -135,6 +139,7 @@ export function HeroSlideshow({
               tagline="The Last Shangri-La awaits — curated journeys through the Himalayas."
               ctaText="Explore Tours"
               ctaLink="/tours"
+              brandName={brand.name}
             />
           </div>
         </div>
@@ -181,6 +186,7 @@ export function HeroSlideshow({
                 tagline={currentSlide.subtitle || currentSlide.description}
                 ctaText={currentSlide.cta_text || 'Explore Tours'}
                 ctaLink={currentSlide.cta_link || '/tours'}
+                brandName={brand.name}
               />
             </motion.div>
           </AnimatePresence>

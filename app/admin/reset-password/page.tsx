@@ -8,8 +8,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
+import { useCompanyBrand } from '@/hooks/use-company-brand';
 
 function ResetPasswordForm() {
+  const brand = useCompanyBrand();
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token') || '';
@@ -103,7 +105,7 @@ function ResetPasswordForm() {
         <div className="mb-8 text-center">
           <img
             src="https://res.cloudinary.com/hckgrdeh/image/upload/v1782962660/wangchukstlogo_usxclz.png"
-            alt="Wangchuks Tours & Treks"
+            alt={brand.name}
             className="mx-auto mb-4 h-16 w-auto object-contain"
           />
           <h1 className="font-heading text-2xl font-semibold text-foreground">Set new password</h1>

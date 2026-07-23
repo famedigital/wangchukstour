@@ -217,14 +217,14 @@ export function AdminDocumentation() {
         <div className="flex flex-wrap items-center gap-2">
           <Badge>CMS guide</Badge>
           <Badge variant="outline">Client ownership</Badge>
-          <Badge variant="secondary">Wangchuks Tours &amp; Treks</Badge>
+          <Badge variant="secondary">Wangchuks Bhutan Tours &amp; Treks</Badge>
         </div>
         <h1 className="font-heading text-3xl font-semibold tracking-tight">
           Documentation &amp; operations manual
         </h1>
         <p className="max-w-3xl text-muted-foreground">
           How to run the admin CMS day to day, what technology powers the site, why the brand colors
-          were chosen, and how ownership is structured so Wangchuks Tours &amp; Treks can keep
+          were chosen, and how ownership is structured so Wangchuks Bhutan Tours &amp; Treks can keep
           everything if the working relationship with Innovates ends.
         </p>
       </div>
@@ -350,7 +350,7 @@ export function AdminDocumentation() {
               </CardHeader>
               <CardContent className="text-sm text-muted-foreground">
                 Supabase is connected through the <strong className="text-foreground">client&apos;s Google account</strong>.
-                Credentials and project ownership stay with Wangchuks Tours &amp; Treks — not locked to
+                Credentials and project ownership stay with Wangchuks Bhutan Tours &amp; Treks — not locked to
                 Innovates.
               </CardContent>
             </Card>
@@ -588,12 +588,12 @@ export function AdminDocumentation() {
             <CardContent className="space-y-3 p-6 text-sm leading-relaxed">
               <p className="text-base font-medium text-foreground">
                 All website content, media, accounts, and technology for this project belong to
-                Wangchuks Tours &amp; Treks (the client).
+                Wangchuks Bhutan Tours &amp; Treks (the client).
               </p>
               <p className="text-muted-foreground">
                 Supabase, Cloudinary, Vercel, GitHub, domain registration at{' '}
                 <strong className="text-foreground">www.bt.bt</strong>, and related Google-linked
-                access were set up for the client. If Wangchuks Tours &amp; Treks later chooses not
+                access were set up for the client. If Wangchuks Bhutan Tours &amp; Treks later chooses not
                 to continue with Innovates, they can keep the site, data, images, domain, and
                 hosting — and hand the tech stack to any future developer or agency without
                 losing ownership.
@@ -659,7 +659,7 @@ export function AdminDocumentation() {
       </Tabs>
 
       <p className="text-center text-xs text-muted-foreground">
-        Last updated for the admin documentation module · Wangchuks Tours &amp; Treks CMS
+        Last updated for the admin documentation module · Wangchuks Bhutan Tours &amp; Treks CMS
       </p>
     </div>
   );

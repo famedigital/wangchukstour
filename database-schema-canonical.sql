@@ -122,15 +122,15 @@ INSERT INTO blog_posts (
   status,
   published_at
 ) VALUES (
-  'Welcome to Wangchuk Tours',
+  'Welcome to Wangchuks Bhutan Tours',
   'welcome-to-wangchuk-tours',
-  '<h2>Welcome to Wangchuk Tours</h2><p>This is your first blog post. You can edit or delete it, or start a new post.</p>',
+  '<h2>Welcome to Wangchuks Bhutan Tours</h2><p>This is your first blog post. You can edit or delete it, or start a new post.</p>',
   'Welcome to our new blog - explore the beautiful Kingdom of Bhutan with us.',
-  'Wangchuk Tours Team',
+  'Wangchuks Bhutan Tours Team',
   'Your trusted travel partner for Bhutan adventures',
   'Announcements',
   ARRAY['travel', 'bhutan', 'welcome'],
-  'Welcome to Wangchuk Tours - your premier travel partner for exploring the Kingdom of Bhutan.',
+  'Welcome to Wangchuks Bhutan Tours - your premier travel partner for exploring the Kingdom of Bhutan.',
   'published',
   NOW()
 );
