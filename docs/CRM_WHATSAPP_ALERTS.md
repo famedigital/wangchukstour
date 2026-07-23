@@ -9,7 +9,14 @@ Get a WhatsApp (and/or email) ping when someone books or inquires — without op
 1. Turn **Enable alerts** on  
 2. Enter your WhatsApp number (`+97517643416`)  
 3. Optional: alert email  
-4. **Save** → **Send test alert**
+4. Edit **Message text** (placeholders like `{{name}}`, `{{admin_url}}`)  
+5. **Save** → **Send test alert**
+
+### Message placeholders
+
+`{{kind}}` `{{name}}` `{{email}}` `{{phone}}` `{{tour}}` `{{dates}}` `{{group}}` `{{booking_number}}` `{{message}}` `{{admin_url}}` `{{site_url}}`
+
+`{{admin_url}}` uses `NEXT_PUBLIC_SITE_URL` (set this to your production domain in Vercel).
 
 ## WhatsApp providers (pick one — set in Vercel env)
 
@@ -65,5 +72,5 @@ Alerts never block the customer form — if WhatsApp fails, the lead is still sa
 CRM_ALERTS_ENABLED=true
 CRM_ALERT_WHATSAPP=+97517643416
 CRM_ALERT_EMAIL=you@email.com
-NEXT_PUBLIC_SITE_URL=https://wangchukstour.vercel.app
+NEXT_PUBLIC_SITE_URL=https://www.wangchuksbhutantours.bt
 ```

@@ -1,48 +1,38 @@
 import { createAdminClient } from '@/utils/supabase/admin'
 import { sendEmail } from '@/lib/email/send'
+import {
+  DEFAULT_CRM_ALERT_TEMPLATE,
+  formatAlertText,
+  type CrmAlertTemplatePayload,
+} from '@/lib/notifications/crm-alert-template'
 
 export type CrmAlertKind = 'booking' | 'inquiry'
+export type CrmAlertPayload = CrmAlertTemplatePayload
 
-export type CrmAlertPayload = {
-  kind: CrmAlertKind
-  name: string
-  email: string
-  phone?: string | null
-  message?: string | null
-  tourTitle?: string | null
-  travelDates?: string | null
-  groupSize?: string | number | null
-  bookingNumber?: string | null
-}
+export {
+  DEFAULT_CRM_ALERT_TEMPLATE,
+  CRM_ALERT_PLACEHOLDERS,
+  formatAlertText,
+} from '@/lib/notifications/crm-alert-template'
 
 type AlertSettings = {
   enabled: boolean
   whatsapp: string
   email: string
+  messageTemplate: string
 }
 
 function digitsPhone(phone: string): string {
   return phone.replace(/[^\d]/g, '')
 }
 
-function formatAlertText(payload: CrmAlertPayload, adminUrl: string): string {
-  const kindLabel = payload.kind === 'booking' ? 'NEW BOOKING' : 'NEW INQUIRY'
-  const lines = [
-    `🏔️ Wangchuks CRM — ${kindLabel}`,
-    '',
-    `Name: ${payload.name}`,
-    `Email: ${payload.email}`,
-    payload.phone ? `Phone: ${payload.phone}` : null,
-    payload.tourTitle ? `Tour: ${payload.tourTitle}` : null,
-    payload.travelDates ? `Dates: ${payload.travelDates}` : null,
-    payload.groupSize ? `Group: ${payload.groupSize}` : null,
-    payload.bookingNumber ? `Booking #: ${payload.bookingNumber}` : null,
-    payload.message ? `Message: ${payload.message.slice(0, 400)}` : null,
-    '',
-    `Open CRM: ${adminUrl}`,
-  ].filter(Boolean)
-
-  return lines.join('\n')
+function getSiteUrl(): string {
+  return (
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    process.env.SITE_URL ||
+    'https://www.wangchuksbhutantours.bt'
+  ).replace(/\/$/, '')
 }
 
 async function readAlertSettings(): Promise<AlertSettings> {
@@ -51,6 +41,7 @@ async function readAlertSettings(): Promise<AlertSettings> {
     enabled: enabledEnv == null ? true : enabledEnv !== 'false' && enabledEnv !== '0',
     whatsapp: process.env.CRM_ALERT_WHATSAPP || '',
     email: process.env.CRM_ALERT_EMAIL || process.env.EMAIL_FROM?.match(/<([^>]+)>/)?.[1] || '',
+    messageTemplate: DEFAULT_CRM_ALERT_TEMPLATE,
   }
 
   try {
@@ -62,6 +53,7 @@ async function readAlertSettings(): Promise<AlertSettings> {
         'crm_alerts_enabled',
         'crm_alert_whatsapp',
         'crm_alert_email',
+        'crm_alert_message_template',
       ])
 
     if (!data?.length) return defaults
@@ -76,10 +68,17 @@ async function readAlertSettings(): Promise<AlertSettings> {
           enabledRaw === 1 ||
           enabledRaw === '1'
 
+    const templateRaw = map.crm_alert_message_template
+    const messageTemplate =
+      typeof templateRaw === 'string' && templateRaw.trim()
+        ? templateRaw
+        : defaults.messageTemplate
+
     return {
       enabled,
       whatsapp: String(map.crm_alert_whatsapp || defaults.whatsapp || '').trim(),
       email: String(map.crm_alert_email || defaults.email || '').trim(),
+      messageTemplate,
     }
   } catch {
     return defaults
@@ -206,14 +205,11 @@ export async function notifyCrmAlert(payload: CrmAlertPayload): Promise<void> {
       return
     }
 
-    const siteUrl =
-      process.env.NEXT_PUBLIC_SITE_URL ||
-      process.env.SITE_URL ||
-      'https://wangchukstour.vercel.app'
+    const siteUrl = getSiteUrl()
     const adminPath =
       payload.kind === 'booking' ? '/admin/bookings' : '/admin/inquiries'
-    const adminUrl = `${siteUrl.replace(/\/$/, '')}${adminPath}`
-    const text = formatAlertText(payload, adminUrl)
+    const adminUrl = `${siteUrl}${adminPath}`
+    const text = formatAlertText(payload, adminUrl, settings.messageTemplate, siteUrl)
 
     const jobs: Promise<unknown>[] = []
 
@@ -274,11 +270,13 @@ export async function sendTestCrmAlert(toWhatsApp?: string, toEmail?: string) {
     message: 'This is a test CRM alert from Wangchuks admin.',
     tourTitle: 'Test Tour',
   }
-  const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    process.env.SITE_URL ||
-    'https://wangchukstour.vercel.app'
-  const text = formatAlertText(payload, `${siteUrl.replace(/\/$/, '')}/admin/inquiries`)
+  const siteUrl = getSiteUrl()
+  const text = formatAlertText(
+    payload,
+    `${siteUrl}/admin/inquiries`,
+    settings.messageTemplate,
+    siteUrl
+  )
 
   const results: Record<string, unknown> = {}
   const wa = (toWhatsApp || settings.whatsapp || '').trim()
