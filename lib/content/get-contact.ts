@@ -1,23 +1,12 @@
-import { createClient as createSupabaseClient } from '@supabase/supabase-js'
+import { createClient } from '@/utils/supabase/server'
 import { mergeContactContent, type ContactContent } from '@/lib/content/contact'
-
-function createReadClient() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseKey =
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-  if (!supabaseUrl || !supabaseKey) {
-    throw new Error('Missing Supabase environment variables')
-  }
-
-  return createSupabaseClient(supabaseUrl, supabaseKey)
-}
 
 /** Server-side Contact CMS fetch — same source admin Contact Settings edits. */
 export async function getContactPageContent(): Promise<ContactContent> {
   try {
-    const supabase = createReadClient()
+    // Use service-role server client (same as /api/content). Anon key is blocked by RLS
+    // on content_pages and would silently fall back to hardcoded defaults.
+    const supabase = await createClient()
 
     let { data, error } = await supabase
       .from('content_pages')
