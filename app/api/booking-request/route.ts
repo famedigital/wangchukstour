@@ -3,6 +3,7 @@ import { createAdminClient } from '@/utils/supabase/admin';
 import { z } from 'zod';
 import { upsertMasterClient } from '@/lib/clients/upsert';
 import { notifyCrmAlert } from '@/lib/notifications/crm-alert';
+import { sendContactAutoReply } from '@/lib/notifications/contact-auto-reply';
 
 const schema = z.object({
   name: z.string().min(1),
@@ -114,6 +115,9 @@ export async function POST(request: NextRequest) {
       groupSize: travelerCount,
       bookingNumber: booking?.booking_number || null,
     });
+
+    // Guest confirmation from Admin → Contact → Auto-Reply (non-blocking)
+    void sendContactAutoReply({ to: email, name });
 
     if (bookingError) {
       console.error('Booking insert error (inquiry still saved):', bookingError);
