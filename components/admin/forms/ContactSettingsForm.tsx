@@ -497,8 +497,8 @@ export function ContactSettingsForm() {
             <div className="mb-6">
               <h3 className="font-heading text-xl font-bold mb-2">Auto-Reply Message</h3>
               <p className="text-muted-foreground text-sm">
-                Confirmation email sent to guests after contact or booking requests. Requires{' '}
-                <code className="text-xs">RESEND_API_KEY</code> in Vercel.
+                Confirmation email sent to guests after contact or booking requests. Use free Gmail
+                SMTP (<code className="text-xs">SMTP_*</code>) or optional Resend in Vercel.
               </p>
             </div>
 
