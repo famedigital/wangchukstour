@@ -3,6 +3,7 @@ import { createAdminClient } from '@/utils/supabase/admin';
 import { z } from 'zod';
 import { upsertMasterClient } from '@/lib/clients/upsert';
 import { notifyCrmAlert } from '@/lib/notifications/crm-alert';
+import { sendContactAutoReply } from '@/lib/notifications/contact-auto-reply';
 
 const contactSchema = z.object({
   name: z.string().min(1),
@@ -64,6 +65,9 @@ export async function POST(request: NextRequest) {
       travelDates: travelDates || null,
       groupSize: groupSize || null,
     });
+
+    // Guest confirmation from Admin → Contact → Auto-Reply (non-blocking)
+    void sendContactAutoReply({ to: email, name });
 
     return NextResponse.json({ message: 'Inquiry submitted successfully' });
   } catch (error) {
